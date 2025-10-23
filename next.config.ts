@@ -2,7 +2,17 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // Using remotePatterns (Next.js 15 best practice)
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+    ],
+    // Legacy domains config (deprecated but kept for compatibility)
     domains: ["images.unsplash.com"],
+    formats: ['image/webp'],
   },
   async headers() {
     return [
