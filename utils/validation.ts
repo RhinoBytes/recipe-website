@@ -1,11 +1,40 @@
 /**
  * Email validation utility
+ * Uses a simple but safe validation approach that avoids ReDoS vulnerabilities
  * @param email - Email address to validate
  * @returns true if email is valid, false otherwise
  */
 export function isValidEmail(email: string): boolean {
-  const emailRegex = /^\S+@\S+\.\S+$/;
-  return emailRegex.test(email);
+  // Safe email validation without regex to avoid ReDoS
+  if (!email || typeof email !== 'string') return false;
+  
+  const trimmed = email.trim();
+  const atIndex = trimmed.indexOf('@');
+  
+  // Must have exactly one @ symbol
+  if (atIndex === -1 || atIndex !== trimmed.lastIndexOf('@')) {
+    return false;
+  }
+  
+  // Check basic structure: something@something.something
+  const localPart = trimmed.slice(0, atIndex);
+  const domainPart = trimmed.slice(atIndex + 1);
+  
+  if (localPart.length === 0 || domainPart.length < 3) {
+    return false;
+  }
+  
+  const dotIndex = domainPart.indexOf('.');
+  if (dotIndex === -1 || dotIndex === 0 || dotIndex === domainPart.length - 1) {
+    return false;
+  }
+  
+  // No spaces allowed
+  if (trimmed.includes(' ')) {
+    return false;
+  }
+  
+  return true;
 }
 
 /**

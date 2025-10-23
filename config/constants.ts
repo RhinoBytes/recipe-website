@@ -9,7 +9,7 @@ export const PASSWORD_MIN_LENGTH = 8;
 export const JWT_EXPIRES_IN = "7d";
 
 // Validation
-export const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // API Routes
 export const API_ROUTES = {
