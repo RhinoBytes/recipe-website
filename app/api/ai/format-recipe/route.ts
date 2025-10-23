@@ -84,14 +84,15 @@ function parseRecipeText(text: string): FormattedRecipe {
   
   // Extract ingredients (lines with measurements)
   const ingredients: RecipeIngredient[] = [];
-  const ingredientPattern = /^[\d\/\.\s]*(cup|tbsp|tsp|oz|lb|g|kg|ml|l|clove|piece)s?\s+(.+)$/i;
+  // Simplified regex to avoid ReDoS - match unit words more strictly with bounded repetitions
+  const ingredientPattern = /^[\d./]{0,10}\s{0,5}(cup|tbsp|tsp|oz|lb|g|kg|ml|l|clove|piece)s?\s{1,3}(.+)$/i;
   
   let displayOrder = 0;
   for (const line of lines) {
     const match = line.match(ingredientPattern);
     if (match) {
       const [, unit, name] = match;
-      const amountMatch = line.match(/^([\d\/\.]+)/);
+      const amountMatch = line.match(/^([\d./]+)/);
       const amount = amountMatch ? parseFloat(amountMatch[1]) : null;
       
       ingredients.push({
@@ -116,16 +117,16 @@ function parseRecipeText(text: string): FormattedRecipe {
   
   // Extract instructions (numbered or step-by-step lines)
   const instructionLines = lines.filter(line => 
-    line.match(/^\d+\.\s/) || 
+    /^\d+\.\s/.test(line) || 
     line.toLowerCase().includes('step') ||
     (line.length > 30 && !ingredientPattern.test(line))
   );
   const instructions = instructionLines.join('\n') || "No instructions provided";
   
-  // Default values
-  const servings = extractNumber(text, /(\d+)\s*servings?/i) || 4;
-  const prepTimeMinutes = extractNumber(text, /prep.*?(\d+)\s*min/i) || 15;
-  const cookTimeMinutes = extractNumber(text, /cook.*?(\d+)\s*min/i) || 30;
+  // Default values - simplified regex to avoid ReDoS
+  const servings = extractNumber(text, /(\d{1,3})\s*servings?/i) || 4;
+  const prepTimeMinutes = extractNumber(text, /prep[^0-9]{0,20}(\d{1,4})\s*min/i) || 15;
+  const cookTimeMinutes = extractNumber(text, /cook[^0-9]{0,20}(\d{1,4})\s*min/i) || 30;
   
   return {
     title,

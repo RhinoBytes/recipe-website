@@ -62,7 +62,7 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
               My Profile
             </Link>
             <Link
-              href="/create"
+              href="/recipes/new"
               onClick={() => setDropdownOpen(false)}
               className="flex items-center gap-3 px-4 py-3 text-amber-700 font-medium hover:bg-orange-50 transition-colors"
             >
