@@ -3,24 +3,7 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth as useAuthHook } from '@/hooks/useAuth';
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-  avatarUrl?: string | null;
-  bio?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  isAuthenticated: boolean;
-  logout: () => Promise<void>;
-}
+import type { AuthContextType } from '@/types';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 

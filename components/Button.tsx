@@ -3,10 +3,7 @@
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-
-function cn(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
+import { cn } from "@/utils/validation";
 
 type BaseProps = {
   variant?: "primary" | "secondary" | "outline";

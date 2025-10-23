@@ -1,17 +1,22 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import AuthForm from "@/components/AuthForm";
+"use client";
 
-export default async function AuthPage() {
-  // Server-side check: if cookie exists, redirect to home immediately
-  const token = (await cookies()).get("cookbook_token")?.value;
-  if (token) {
-    redirect("/");
-  }
+import ProtectedPage from "@/components/ProtectedPage";
 
+export default function NewRecipePage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-      <AuthForm />
-    </div>
+    <ProtectedPage>
+      <div className="min-h-screen bg-gray-50 px-4 py-12">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold mb-8 text-gray-900">Create New Recipe</h1>
+          {/* TODO: Add recipe creation form */}
+          <div className="bg-white rounded-lg shadow p-8">
+            <p className="text-gray-500">Recipe creation form coming soon...</p>
+            <p className="text-sm text-gray-400 mt-2">
+              This page will allow authenticated users to create and submit new recipes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </ProtectedPage>
   );
 } 

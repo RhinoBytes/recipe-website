@@ -2,13 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "../Button";
 import { Star } from "lucide-react";
-
-interface FeaturedRecipe {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-}
+import type { FeaturedRecipe } from "@/types";
 
 interface FeaturedRecipeProps {
   featured: FeaturedRecipe;

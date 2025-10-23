@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Button from "./Button";
+import { validateAuthForm } from "@/utils/validation";
 
 type Mode = "login" | "register";
 
@@ -35,22 +36,7 @@ export default function AuthForm() {
   }, [router]);
 
   function validate() {
-    const errors: Record<string, string> = {};
-    
-    // Email validation
-    if (!email) {
-      errors.email = "Email is required.";
-    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-      errors.email = "Please enter a valid email address.";
-    }
-    
-    // Password validation - matching server requirements
-    if (!password) {
-      errors.password = "Password is required.";
-    } else if (password.length < 8) {
-      errors.password = "Password must be at least 8 characters.";
-    }
-    
+    const errors = validateAuthForm(email, password);
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   }

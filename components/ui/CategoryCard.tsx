@@ -1,11 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-
-interface Category {
-  slug: string;
-  name: string;
-  image: string;
-}
+import type { Category } from "@/types";
 
 interface CategoryCardProps {
   category: Category;

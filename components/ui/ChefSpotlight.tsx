@@ -2,14 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "../Button";
 import { User, Utensils } from "lucide-react";
-
-interface Chef {
-  id: string;
-  name: string;
-  title: string;
-  avatar: string;
-  quote: string;
-}
+import type { Chef } from "@/types";
 
 interface ChefSpotlightProps {
   chef: Chef;

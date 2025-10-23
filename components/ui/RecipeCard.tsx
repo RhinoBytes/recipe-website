@@ -1,18 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Clock, Star } from "lucide-react";
-
-interface Recipe {
-  id: string;
-  title: string;
-  image: string;
-  time: number;
-  rating: number;
-  author: {
-    name: string;
-    avatar: string;
-  };
-}
+import type { Recipe } from "@/types";
 
 interface RecipeCardProps {
   recipe: Recipe;

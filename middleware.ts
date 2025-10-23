@@ -15,7 +15,7 @@ export function middleware(request: NextRequest) {
 
   if (isProtectedRoute) {
     // Check for auth cookie
-    const authCookie = request.cookies.get("auth-token");
+    const authCookie = request.cookies.get("auth_token");
 
     // If no auth cookie found, redirect to login
     if (!authCookie) {

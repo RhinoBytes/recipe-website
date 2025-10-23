@@ -4,7 +4,7 @@ import AuthForm from "@/components/AuthForm";
 
 export default async function AuthPage() {
   // Server-side check: if cookie exists, redirect to home immediately
-  const token = (await cookies()).get("cookbook_token")?.value;
+  const token = (await cookies()).get("auth_token")?.value;
   if (token) {
     redirect("/");
   }
