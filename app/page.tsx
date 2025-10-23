@@ -37,7 +37,7 @@ export default function HomePage() {
     </p>
     <div className="flex gap-4 flex-wrap justify-center">
             <Button
-              as={Link}
+              as="link"
               href="/recipes/popular"
               variant="primary"
               size="lg"
@@ -46,7 +46,7 @@ export default function HomePage() {
               <Flame size={22} /> Start Cooking
             </Button>
             <Button
-              as={Link}
+              as="link"
               href="/recipes"
               variant="primary"
               size="lg"

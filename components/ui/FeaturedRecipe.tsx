@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Image from "next/image";
 import Button from "../Button";
 import { Star } from "lucide-react";
@@ -27,7 +26,7 @@ export default function FeaturedRecipe({ featured }: FeaturedRecipeProps) {
             {featured.title}
           </h3>
           <p className="text-gray-600 mb-8">{featured.description}</p>
-          <Button as={Link} href={`/recipes/${featured.id}`} variant="primary" size="md">
+          <Button as="link" href={`/recipes/${featured.id}`} variant="primary" size="md">
             <Star size={20} /> View Featured Recipe
           </Button>
         </div>
