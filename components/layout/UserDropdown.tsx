@@ -13,9 +13,6 @@ interface UserDropdownProps {
 export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRef }: UserDropdownProps) {
   const { user, isAuthenticated, loading, logout } = useAuth();
   
-  // Add this for debugging
-  console.log("Auth state:", { isAuthenticated, loading, user });
-  
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
     await logout();

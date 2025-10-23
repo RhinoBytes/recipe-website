@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Button from "./Button";
+import { validateAuthForm } from "@/utils/validation";
 
 type Mode = "login" | "register";
 
@@ -35,22 +36,7 @@ export default function AuthForm() {
   }, [router]);
 
   function validate() {
-    const errors: Record<string, string> = {};
-    
-    // Email validation
-    if (!email) {
-      errors.email = "Email is required.";
-    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
-      errors.email = "Please enter a valid email address.";
-    }
-    
-    // Password validation - matching server requirements
-    if (!password) {
-      errors.password = "Password is required.";
-    } else if (password.length < 8) {
-      errors.password = "Password must be at least 8 characters.";
-    }
-    
+    const errors = validateAuthForm(email, password);
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   }
@@ -84,7 +70,7 @@ export default function AuthForm() {
       } else {
         setFormError(data.error || "Authentication failed. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setFormError("Network error. Please try again.");
     } finally {
       setLoading(false);
@@ -186,7 +172,7 @@ export default function AuthForm() {
           {formError && <div className="text-sm text-red-600 mb-4">{formError}</div>}
 
           <div className="mb-2">
-            <Button type="submit" size="lg" className="w-full" loading={loading as any}>
+            <Button type="submit" size="lg" className="w-full" loading={loading}>
               {mode === "login" ? "Sign In" : "Create Account"}
             </Button>
           </div>
@@ -194,7 +180,7 @@ export default function AuthForm() {
           <div className="text-center text-sm text-gray-500">
             {mode === "login" ? (
               <>
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <button type="button" className="text-[#d4735a] font-medium underline" onClick={() => setMode("register")}>
                   Sign up
                 </button>

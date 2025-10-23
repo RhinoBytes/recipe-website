@@ -13,10 +13,7 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen }: MobileMenuProps) {
-  const { user, isAuthenticated, loading, logout } = useAuth();
-  
-  // Add this for debugging
-  console.log("Mobile menu auth state:", { isAuthenticated, loading, user });
+  const { isAuthenticated, loading, logout } = useAuth();
   
   if (!mobileMenuOpen) return null;
 
@@ -53,11 +50,6 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
           </li>
         ))}
       </ul>
-
-      {/* Auth status indicator for debugging */}
-      <div className="text-xs text-gray-500">
-        Status: {loading ? "Loading..." : isAuthenticated ? "Logged in" : "Not logged in"}
-      </div>
 
       {/* auth Links */}
       <div className="border-t border-orange-200 pt-4 space-y-2">

@@ -2,8 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "../Button";
 import { User, Utensils } from "lucide-react";
+import type { Chef } from "@/types";
 
-export default function ChefSpotlight({ chef }) {
+interface ChefSpotlightProps {
+  chef: Chef;
+}
+
+export default function ChefSpotlight({ chef }: ChefSpotlightProps) {
   return (
     <section className="py-16">
       <div className="max-w-2xl mx-auto">

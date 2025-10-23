@@ -6,11 +6,6 @@ import {
   Menu,
   X,
   Search,
-  User,
-  ChevronDown,
-  LogIn,
-  UserPlus,
-  Plus,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth'; // Import your auth hook
 import UserDropdown from './UserDropdown';
@@ -28,7 +23,7 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef<HTMLElement | null>(null);
-  const { isAuthenticated } = useAuth(); // You can use auth state here if needed
+  useAuth(); // Keep auth initialized for the app
 
   // Handle scroll shadow + blur
   useEffect(() => {
@@ -39,8 +34,8 @@ export default function Navbar() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
     };

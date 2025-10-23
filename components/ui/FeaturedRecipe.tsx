@@ -2,8 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "../Button";
 import { Star } from "lucide-react";
+import type { FeaturedRecipe } from "@/types";
 
-export default function FeaturedRecipe({ featured }) {
+interface FeaturedRecipeProps {
+  featured: FeaturedRecipe;
+}
+
+export default function FeaturedRecipe({ featured }: FeaturedRecipeProps) {
   return (
     <section className="bg-gradient-to-br from-[#fef9f7] to-[#fdf1ea] py-16">
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">

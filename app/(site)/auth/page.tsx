@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AuthForm from "@/components/AuthForm";
+import { AUTH_COOKIE_NAME } from "@/config/constants";
 
 export default async function AuthPage() {
   // Server-side check: if cookie exists, redirect to home immediately
-  const token = (await cookies()).get("cookbook_token")?.value;
+  const token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
   if (token) {
     redirect("/");
   }
