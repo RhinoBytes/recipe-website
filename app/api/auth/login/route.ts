@@ -1,11 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPassword, createToken, setAuthCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sanitizeInput } from "@/utils/validation";
 
+/**
+ * POST /api/auth/login
+ * Authenticate user and create session
+ * 
+ * @param request - NextRequest containing email and password in body
+ * @returns NextResponse with user data or error
+ * 
+ * @example
+ * POST /api/auth/login
+ * {
+ *   "email": "user@example.com",
+ *   "password": "securepassword123"
+ * }
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    let { email, password } = body;
+
+    // Sanitize email input
+    email = sanitizeInput(email || "");
+    password = password || "";
 
     // Validate input
     if (!email || !password) {

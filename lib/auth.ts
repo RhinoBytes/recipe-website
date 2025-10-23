@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { AUTH_COOKIE_NAME, AUTH_COOKIE_MAX_AGE, JWT_EXPIRES_IN } from "@/config/constants";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this";
 const SALT_ROUNDS = 10;
@@ -27,7 +28,7 @@ export async function verifyPassword(
 
 // Create JWT token
 export function createToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
 // Verify JWT token
@@ -42,11 +43,11 @@ export function verifyToken(token: string): JWTPayload | null {
 // Set auth cookie
 export async function setAuthCookie(token: string) {
   const cookieStore = await cookies();
-  cookieStore.set("auth_token", token, {
+  cookieStore.set(AUTH_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: AUTH_COOKIE_MAX_AGE,
     path: "/",
   });
 }
@@ -54,7 +55,7 @@ export async function setAuthCookie(token: string) {
 // Get current user from cookie
 export async function getCurrentUser(): Promise<JWTPayload | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
+  const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
 
   if (!token) return null;
 
@@ -64,5 +65,5 @@ export async function getCurrentUser(): Promise<JWTPayload | null> {
 // Remove auth cookie
 export async function removeAuthCookie() {
   const cookieStore = await cookies();
-  cookieStore.delete("auth_token");
+  cookieStore.delete(AUTH_COOKIE_NAME);
 }

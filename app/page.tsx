@@ -70,8 +70,8 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-6">
-            {popularRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+            {popularRecipes.map((recipe, index) => (
+              <RecipeCard key={recipe.id} recipe={recipe} priority={index < 3} />
             ))}
           </div>
           <div className="text-center">

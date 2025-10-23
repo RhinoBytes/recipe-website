@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+/**
+ * GET /api/auth
+ * Get current authenticated user
+ * 
+ * @returns NextResponse with authenticated status and user data
+ * 
+ * @example
+ * GET /api/auth
+ * Response: { authenticated: true, user: {...} }
+ */
 export async function GET() {
   try {
     const currentUser = await getCurrentUser();

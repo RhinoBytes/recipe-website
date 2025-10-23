@@ -5,9 +5,10 @@ import type { Recipe } from "@/types";
 
 interface RecipeCardProps {
   recipe: Recipe;
+  priority?: boolean;
 }
 
-export default function RecipeCard({ recipe }: RecipeCardProps) {
+export default function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
   return (
     <Link
       href={`/recipes/${recipe.id}`}
@@ -20,7 +21,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           fill
           className="object-cover"
           sizes="(max-width: 640px) 100vw, 300px"
-          priority={false}
+          priority={priority}
         />
       </div>
       <div className="p-6">

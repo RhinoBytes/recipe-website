@@ -4,6 +4,7 @@
 import { useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { PageLoader } from "@/components/ui/LoadingSpinner";
 
 interface ProtectedPageProps {
   children: ReactNode;
@@ -15,12 +16,12 @@ export default function ProtectedPage({ children }: ProtectedPageProps) {
   
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push("/login");
+      router.push("/auth");
     }
   }, [isAuthenticated, loading, router]);
   
   if (loading) {
-    return <div>Loading...</div>;
+    return <PageLoader text="Verifying authentication..." />;
   }
   
   if (!isAuthenticated) {

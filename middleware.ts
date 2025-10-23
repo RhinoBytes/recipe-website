@@ -1,9 +1,7 @@
 // middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
-// Define which routes should be protected
-const PROTECTED_ROUTES = ["/new-recipe", "/dashboard"];
+import { PROTECTED_ROUTES, AUTH_COOKIE_NAME } from "@/config/constants";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -15,7 +13,7 @@ export function middleware(request: NextRequest) {
 
   if (isProtectedRoute) {
     // Check for auth cookie
-    const authCookie = request.cookies.get("auth_token");
+    const authCookie = request.cookies.get(AUTH_COOKIE_NAME);
 
     // If no auth cookie found, redirect to login
     if (!authCookie) {
