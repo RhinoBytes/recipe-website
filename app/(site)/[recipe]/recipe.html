@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Honey Garlic Glazed Salmon - CookBook</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/recipe.css" />
+    <link href="styles/styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles/nav.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+        <nav class="nav">
+          <a href="index.html" class="logo">
+            <i class="fas fa-utensils"></i>
+            Cookbook
+          </a>
+
+          <button class="nav-toggle" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input
+              type="text"
+              class="search-bar"
+              placeholder="Search recipes, ingredients, or chefs..."
+            />
+          </div>
+
+          <ul class="nav-links">
+            <li><a href="search.html">Browse</a></li>
+            <li><a href="search.html">Categories</a></li>
+            <li><a href="search.html">Popular</a></li>
+          </ul>
+
+          <div class="user-actions">
+            <!-- Desktop dropdown -->
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle">
+                <i class="fas fa-user"></i> Login
+                <i class="fas fa-caret-down"></i>
+              </button>
+              <div class="dropdown-menu">
+                <a href="login.html" class="dropdown-item"
+                  ><i class="fas fa-sign-in-alt"></i> Sign In</a
+                >
+                <a href="login.html" class="dropdown-item"
+                  ><i class="fas fa-user-plus"></i> Register</a
+                >
+                <div class="dropdown-divider"></div>
+                <a href="newRecipe.html" class="dropdown-item highlight"
+                  ><i class="fas fa-plus"></i> Create Recipe</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile auth links (will be toggled with nav) -->
+          <div class="mobile-auth-links">
+            <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            <a href="login.html"><i class="fas fa-user-plus"></i> Register</a>
+            <a href="newRecipe.html"
+              ><i class="fas fa-plus"></i> Create Recipe</a
+            >
+          </div>
+        </nav>
+      </div>
+    </header>
+    <script src="scripts/nav.js">
+      // Mobile nav toggle
+    </script>
+    <div class="recipe-header">
+      <div class="container">
+        <h1 class="recipe-title">Honey Garlic Glazed Salmon</h1>
+        <p class="recipe-description">
+          Perfectly flaky salmon with a sweet and savory glaze that's ready in
+          just 20 minutes. This restaurant-quality dish will become your go-to
+          weeknight dinner.
+        </p>
+        <div class="recipe-author">
+          <img
+            src="https://media.istockphoto.com/id/1166149111/vector/chef-in-a-cooking-hat-vector-outline-icon-food-concept-for-graphic-design-logo-web-site.jpg?s=612x612&w=0&k=20&c=ars2r_Y6s5OSSLHymV6MAvhxokUDqxSaxDK36ibhjgk="
+            alt="Chef Sarah"
+            class="author-avatar"
+          />
+          <div>
+            <div><strong>Chef Sarah Martinez</strong></div>
+            <div style="opacity: 0.8">Published March 15, 2024</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="recipe-main">
+        <!-- Main Recipe Content -->
+        <div class="recipe-content">
+          <img
+            src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&h=400&fit=crop"
+            alt="Honey Garlic Glazed Salmon"
+            class="recipe-hero-image"
+            style="
+              width: 100%;
+              height: 400px;
+              object-fit: cover;
+              border-radius: 12px;
+              box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+              margin-bottom: 2rem;
+            "
+          />
+
+          <!-- Recipe Metadata -->
+          <div class="metadata-grid">
+            <div class="metadata-card">
+              <div class="metadata-icon"><i class="fas fa-clock"></i></div>
+              <div class="metadata-value">10 min</div>
+              <div class="metadata-label">Prep Time</div>
+            </div>
+            <div class="metadata-card">
+              <div class="metadata-icon"><i class="fas fa-fire"></i></div>
+              <div class="metadata-value">15 min</div>
+              <div class="metadata-label">Cook Time</div>
+            </div>
+            <div class="metadata-card">
+              <div class="metadata-icon"><i class="fas fa-users"></i></div>
+              <div class="metadata-value">4</div>
+              <div class="metadata-label">Servings</div>
+            </div>
+            <div class="metadata-card">
+              <div class="metadata-icon"><i class="fas fa-chart-line"></i></div>
+              <div class="metadata-value">Easy</div>
+              <div class="metadata-label">Difficulty</div>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="recipe-tags">
+            <span class="tag">Seafood</span>
+            <span class="tag">Gluten-Free</span>
+            <span class="tag">High-Protein</span>
+            <span class="tag">Quick & Easy</span>
+            <span class="tag">Date Night</span>
+          </div>
+
+          <!-- Ingredients -->
+          <h2 class="section-header">
+            <i class="fas fa-list-ul"></i> Ingredients
+          </h2>
+
+          <div class="ingredients-controls">
+            <label>Scale Recipe:</label>
+            <div class="scale-controls">
+              <button class="scale-btn" onclick="scaleRecipe(0.5)">½x</button>
+              <button
+                class="scale-btn scale-btn--active"
+                onclick="scaleRecipe(1)"
+              >
+                1x
+              </button>
+              <button class="scale-btn" onclick="scaleRecipe(2)">2x</button>
+              <button class="scale-btn" onclick="scaleRecipe(3)">3x</button>
+            </div>
+          </div>
+
+          <div class="ingredients-list">
+            <div class="ingredient-group">
+              <h4>For the Salmon:</h4>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text"
+                  ><span class="amount">4</span> salmon fillets (6 oz
+                  each)</span
+                >
+              </div>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text"
+                  ><span class="amount">2</span> tbsp olive oil</span
+                >
+              </div>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text">Salt and pepper to taste</span>
+              </div>
+            </div>
+
+            <div class="ingredient-group">
+              <h4>For the Honey Garlic Glaze:</h4>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text"
+                  ><span class="amount">1/3</span> cup honey</span
+                >
+              </div>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text"
+                  ><span class="amount">4</span> cloves garlic, minced</span
+                >
+              </div>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text"
+                  ><span class="amount">3</span> tbsp soy sauce</span
+                >
+              </div>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text"
+                  ><span class="amount">2</span> tbsp butter</span
+                >
+              </div>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text"
+                  ><span class="amount">1</span> tbsp lemon juice</span
+                >
+              </div>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text"
+                  ><span class="amount">1</span> tsp fresh ginger, grated</span
+                >
+              </div>
+            </div>
+
+            <div class="ingredient-group">
+              <h4>For Garnish:</h4>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text">Fresh parsley, chopped</span>
+              </div>
+              <div class="ingredient-item">
+                <input
+                  type="checkbox"
+                  class="ingredient-checkbox"
+                  onchange="toggleIngredient(this)"
+                />
+                <span class="ingredient-text">Sesame seeds</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instructions -->
+          <h2 class="section-header">
+            <i class="fas fa-tasks"></i> Instructions
+          </h2>
+
+          <div class="instructions-list">
+            <div class="instruction-step">
+              <div class="instruction-text">
+                <strong>Prep the salmon:</strong> Pat salmon fillets dry with
+                paper towels and season both sides generously with salt and
+                pepper. Let sit at room temperature for 5 minutes while
+                preparing the glaze.
+              </div>
+            </div>
+
+            <div class="instruction-step">
+              <div class="instruction-text">
+                <strong>Make the glaze:</strong> In a small bowl, whisk together
+                honey, minced garlic, soy sauce, lemon juice, and grated ginger.
+                Set aside.
+              </div>
+            </div>
+
+            <div class="instruction-step">
+              <div class="instruction-text">
+                <strong>Sear the salmon:</strong> Heat olive oil in a large
+                oven-safe skillet over medium-high heat. Place salmon fillets
+                skin-side up and sear for 4-5 minutes until golden brown. Don't
+                move them during this time.
+              </div>
+            </div>
+
+            <div class="instruction-step">
+              <div class="instruction-text">
+                <strong>Flip and glaze:</strong> Carefully flip salmon fillets
+                and cook for 2 minutes. Pour the honey garlic mixture over the
+                salmon and add butter to the pan.
+              </div>
+            </div>
+
+            <div class="instruction-step">
+              <div class="instruction-text">
+                <strong>Finish cooking:</strong> Continue cooking for 3-4
+                minutes, spooning the glaze over the salmon frequently, until
+                fish flakes easily with a fork and internal temperature reaches
+                145°F.
+              </div>
+            </div>
+
+            <div class="instruction-step">
+              <div class="instruction-text">
+                <strong>Serve:</strong> Transfer salmon to serving plates, spoon
+                remaining glaze over top, and garnish with fresh parsley and
+                sesame seeds. Serve immediately with your favorite sides.
+              </div>
+            </div>
+          </div>
+
+          <!-- Chef's Notes -->
+          <div class="chef-notes">
+            <h3><i class="fas fa-lightbulb"></i> Chef's Tips & Notes</h3>
+            <ul class="mt-md">
+              <li>
+                <strong>Skin-on or skinless:</strong> Both work great! Skin-on
+                helps prevent sticking and adds extra flavor.
+              </li>
+              <li>
+                <strong>Don't overcook:</strong> Salmon continues cooking after
+                removing from heat. Slightly underdone is better than overdone.
+              </li>
+              <li>
+                <strong>Make-ahead:</strong> Glaze can be prepared up to 3 days
+                in advance and stored in the refrigerator.
+              </li>
+              <li>
+                <strong>Substitutions:</strong> Maple syrup can replace honey
+                for a different flavor profile.
+              </li>
+              <li>
+                <strong>Storage:</strong> Leftovers keep for 3 days in the
+                fridge. Reheat gently to avoid drying out.
+              </li>
+            </ul>
+          </div>
+
+          <!-- Reviews Section -->
+          <h2 class="section-header">
+            <i class="fas fa-comments"></i> Reviews & Comments
+          </h2>
+
+          <div class="review-item">
+            <div class="review-header">
+              <div class="reviewer-info">
+                <div class="reviewer-avatar">M</div>
+                <div>
+                  <div><strong>Maria Rodriguez</strong></div>
+                  <div class="stars">★★★★★</div>
+                </div>
+              </div>
+              <span class="text-muted text-sm">2 days ago</span>
+            </div>
+            <p>
+              "This recipe is absolutely perfect! The glaze is incredible and
+              the salmon came out so tender. My family loved it and asked me to
+              make it again next week. Definitely a keeper!"
+            </p>
+          </div>
+
+          <div class="review-item">
+            <div class="review-header">
+              <div class="reviewer-info">
+                <div class="reviewer-avatar">J</div>
+                <div>
+                  <div><strong>James Wilson</strong></div>
+                  <div class="stars">★★★★★</div>
+                </div>
+              </div>
+              <span class="text-muted text-sm">1 week ago</span>
+            </div>
+            <p>
+              "Made this for date night and it was restaurant quality! The
+              timing was spot on and the instructions were so clear. Used maple
+              syrup instead of honey and it was delicious."
+            </p>
+          </div>
+
+          <!-- Related Recipes -->
+          <h2 class="section-header">
+            <i class="fas fa-heart"></i> You Might Also Like
+          </h2>
+          <div class="related-grid">
+            <div class="related-recipe">
+              <img
+                src="https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=200&h=120&fit=crop"
+                alt="Lemon Herb Chicken"
+                class="related-image"
+              />
+              <div class="related-content">
+                <div class="related-title">Lemon Herb Chicken</div>
+                <div class="related-meta">25 min • Easy • ★★★★★</div>
+              </div>
+            </div>
+            <div class="related-recipe">
+              <img
+                src="https://images.unsplash.com/photo-1518843875459-f738682238a6?w=200&h=120&fit=crop"
+                alt="Garlic Butter Shrimp"
+                class="related-image"
+              />
+              <div class="related-content">
+                <div class="related-title">Garlic Butter Shrimp</div>
+                <div class="related-meta">15 min • Easy • ★★★★☆</div>
+              </div>
+            </div>
+            <div class="related-recipe">
+              <img
+                src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=200&h=120&fit=crop"
+                alt="Teriyaki Salmon Bowl"
+                class="related-image"
+              />
+              <div class="related-content">
+                <div class="related-title">Teriyaki Salmon Bowl</div>
+                <div class="related-meta">30 min • Medium • ★★★★★</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <!-- Recipe Actions -->
+          <div class="recipe-actions">
+            <button class="btn">
+              <i class="fas fa-heart"></i> Save Recipe
+            </button>
+            <button class="btn btn--secondary">
+              <i class="fas fa-share"></i> Share
+            </button>
+            <button class="btn btn--secondary">
+              <i class="fas fa-print"></i> Print
+            </button>
+            <button class="btn">
+              <i class="fas fa-shopping-cart"></i> Add to List
+            </button>
+          </div>
+
+          <!-- Rating -->
+          <div class="rating-section">
+            <div class="stars">★★★★★</div>
+            <div class="rating-text">4.9 out of 5 (127 reviews)</div>
+            <button class="btn mt-md" style="width: 100%">
+              <i class="fas fa-camera"></i> Rate This Recipe
+            </button>
+          </div>
+
+          <!-- Nutrition Info -->
+          <h3 class="mb-md">
+            <i class="fas fa-chart-pie"></i> Nutrition Per Serving
+          </h3>
+          <div class="nutrition-grid">
+            <div class="nutrition-item">
+              <div class="nutrition-value">385</div>
+              <div class="nutrition-label">Calories</div>
+            </div>
+            <div class="nutrition-item">
+              <div class="nutrition-value">32g</div>
+              <div class="nutrition-label">Protein</div>
+            </div>
+            <div class="nutrition-item">
+              <div class="nutrition-value">18g</div>
+              <div class="nutrition-label">Fat</div>
+            </div>
+            <div class="nutrition-item">
+              <div class="nutrition-value">15g</div>
+              <div class="nutrition-label">Carbs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentScale = 1;
+
+      function scaleRecipe(scale) {
+        // Update active button
+        document
+          .querySelectorAll(".scale-btn")
+          .forEach((btn) => btn.classList.remove("scale-btn--active"));
+        event.target.classList.add("scale-btn--active");
+
+        const ratio = scale / currentScale;
+        currentScale = scale;
+
+        // Update all amounts
+        document.querySelectorAll(".amount").forEach((amount) => {
+          const currentValue = parseFloat(amount.textContent);
+          if (!isNaN(currentValue)) {
+            const newValue = currentValue * ratio;
+
+            // Handle fractions nicely
+            if (newValue < 1) {
+              if (newValue === 0.5) {
+                amount.textContent = "1/2";
+              } else if (newValue === 0.33) {
+                amount.textContent = "1/3";
+              } else if (newValue === 0.25) {
+                amount.textContent = "1/4";
+              } else {
+                amount.textContent = newValue.toFixed(2);
+              }
+            } else {
+              amount.textContent =
+                newValue % 1 === 0 ? newValue.toString() : newValue.toFixed(1);
+            }
+          }
+        });
+      }
+
+      function toggleIngredient(checkbox) {
+        const text = checkbox.nextElementSibling;
+        if (checkbox.checked) {
+          text.classList.add("ingredient-text--checked");
+        } else {
+          text.classList.remove("ingredient-text--checked");
+        }
+      }
+
+      // Add smooth scrolling for better UX
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.querySelector(this.getAttribute("href")).scrollIntoView({
+            behavior: "smooth",
+          });
+        });
+      });
+
+      // Add click handlers for action buttons
+      document.querySelectorAll(".btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const action = this.textContent.trim();
+          // Simulate button actions with visual feedback
+          this.style.transform = "scale(0.95)";
+          setTimeout(() => {
+            this.style.transform = "";
+          }, 150);
+        });
+      });
+    </script>
+  </body>
+</html>
