@@ -2,7 +2,23 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, Star } from "lucide-react";
 
-export default function RecipeCard({ recipe }) {
+interface Recipe {
+  id: string;
+  title: string;
+  image: string;
+  time: number;
+  rating: number;
+  author: {
+    name: string;
+    avatar: string;
+  };
+}
+
+interface RecipeCardProps {
+  recipe: Recipe;
+}
+
+export default function RecipeCard({ recipe }: RecipeCardProps) {
   return (
     <Link
       href={`/recipes/${recipe.id}`}

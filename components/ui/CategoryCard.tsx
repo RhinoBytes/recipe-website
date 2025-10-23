@@ -1,7 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function CategoryCard({ category }) {
+interface Category {
+  slug: string;
+  name: string;
+  image: string;
+}
+
+interface CategoryCardProps {
+  category: Category;
+}
+
+export default function CategoryCard({ category }: CategoryCardProps) {
   return (
     <Link
       href={`/categories/${category.slug}`}

@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
     await setAuthCookie(token);
 
     // Return user data (without password)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, ...userWithoutPassword } = user;
 
     return NextResponse.json({

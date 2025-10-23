@@ -1,11 +1,15 @@
 // components/ProtectedPage.js
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function ProtectedPage({ children }) {
+interface ProtectedPageProps {
+  children: ReactNode;
+}
+
+export default function ProtectedPage({ children }: ProtectedPageProps) {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
   

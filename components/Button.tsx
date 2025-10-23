@@ -65,7 +65,7 @@ export default function Button(props: ButtonProps) {
     const { href, ...linkRest } = rest as Omit<ButtonAsLink, "as">;
     return (
       // Next Link in Next 13+ accepts className and passes anchor props
-      <Link href={href} className={finalClass} {...(linkRest as any)}>
+      <Link href={href} className={finalClass} {...linkRest}>
         {loading && <Loader2 className="animate-spin w-5 h-5" />}
         {children}
       </Link>

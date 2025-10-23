@@ -84,7 +84,7 @@ export default function AuthForm() {
       } else {
         setFormError(data.error || "Authentication failed. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setFormError("Network error. Please try again.");
     } finally {
       setLoading(false);
@@ -186,7 +186,7 @@ export default function AuthForm() {
           {formError && <div className="text-sm text-red-600 mb-4">{formError}</div>}
 
           <div className="mb-2">
-            <Button type="submit" size="lg" className="w-full" loading={loading as any}>
+            <Button type="submit" size="lg" className="w-full" loading={loading}>
               {mode === "login" ? "Sign In" : "Create Account"}
             </Button>
           </div>
@@ -194,7 +194,7 @@ export default function AuthForm() {
           <div className="text-center text-sm text-gray-500">
             {mode === "login" ? (
               <>
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <button type="button" className="text-[#d4735a] font-medium underline" onClick={() => setMode("register")}>
                   Sign up
                 </button>
