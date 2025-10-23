@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth'; // Make sure this path is correct!
 interface UserDropdownProps {
   dropdownOpen: boolean;
   setDropdownOpen: (open: boolean) => void;
-  dropdownRef?: React.RefObject<HTMLElement>;
+  dropdownRef?: React.RefObject<HTMLDivElement>;
 }
 
 export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRef }: UserDropdownProps) {

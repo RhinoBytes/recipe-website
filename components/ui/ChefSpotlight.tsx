@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Image from "next/image";
 import Button from "../Button";
 import { User, Utensils } from "lucide-react";
@@ -30,10 +29,10 @@ export default function ChefSpotlight({ chef }: ChefSpotlightProps) {
           </div>
           <p className="text-gray-700 mb-6">{chef.quote}</p>
           <div className="flex gap-3">
-            <Button as={Link} href={`/chefs/${chef.id}`} variant="secondary" size="md">
+            <Button as="link" href={`/chefs/${chef.id}`} variant="secondary" size="md">
               <User size={18} /> View Profile
             </Button>
-            <Button as={Link} href={`/chefs/${chef.id}/recipes`} variant="primary" size="md">
+            <Button as="link" href={`/chefs/${chef.id}/recipes`} variant="primary" size="md">
               <Utensils size={18} /> See Recipes
             </Button>
           </div>
