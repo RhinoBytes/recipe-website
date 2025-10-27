@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedPage from "@/components/ProtectedPage";
-import { Plus, Trash2, Loader2, Sparkles } from "lucide-react";
+import { Plus, Trash2, Loader2, Sparkles, Upload } from "lucide-react";
 import Button from "@/components/Button";
 import AIRecipeModal from "@/components/ui/AIRecipeModal";
 import { FormattedRecipeResponse, RecipeIngredient } from "@/types/recipe";
@@ -22,6 +22,7 @@ interface Ingredient {
 interface RecipeStep {
   stepNumber: number;
   instruction: string;
+  groupName: string | null;
   isOptional: boolean;
 }
 
@@ -60,7 +61,7 @@ export default function NewRecipePage() {
   const [formData, setFormData] = useState<RecipeFormData>({
     title: "",
     description: "",
-    steps: [{ stepNumber: 1, instruction: "", isOptional: false }],
+    steps: [{ stepNumber: 1, instruction: "", groupName: null, isOptional: false }],
     servings: 4,
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
@@ -78,6 +79,7 @@ export default function NewRecipePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState("");
 
@@ -108,14 +110,28 @@ export default function NewRecipePage() {
   }, []);
 
   const handleAIFormattedRecipe = (formatted: FormattedRecipeResponse) => {
-    // Convert AI instructions (string) to steps if provided
-    const stepsFromInstructions = formatted.instructions
-      ? formatted.instructions.split('\n').filter(s => s.trim()).map((instruction, idx) => ({
-          stepNumber: idx + 1,
-          instruction: instruction.trim(),
-          isOptional: false,
-        }))
-      : [{ stepNumber: 1, instruction: "", isOptional: false }];
+    // Prefer steps array from AI if available, otherwise fall back to instructions string
+    let finalSteps: RecipeStep[];
+    if (formatted.steps && formatted.steps.length > 0) {
+      // AI provided structured steps
+      finalSteps = formatted.steps.map((step, idx) => ({
+        stepNumber: step.stepNumber || idx + 1,
+        instruction: step.instruction,
+        groupName: step.groupName || null,
+        isOptional: step.isOptional || false,
+      }));
+    } else if (formatted.instructions) {
+      // Fall back to parsing instructions string
+      finalSteps = formatted.instructions.split('\n').filter(s => s.trim()).map((instruction, idx) => ({
+        stepNumber: idx + 1,
+        instruction: instruction.trim(),
+        groupName: null,
+        isOptional: false,
+      }));
+    } else {
+      // Default empty step
+      finalSteps = [{ stepNumber: 1, instruction: "", groupName: null, isOptional: false }];
+    }
 
     // Convert difficulty string to enum
     let difficultyEnum: Difficulty = Difficulty.MEDIUM;
@@ -130,7 +146,7 @@ export default function NewRecipePage() {
     setFormData({
       title: formatted.title || "",
       description: formatted.description || "",
-      steps: stepsFromInstructions,
+      steps: finalSteps,
       servings: formatted.servings || 4,
       prepTimeMinutes: formatted.prepTimeMinutes || 15,
       cookTimeMinutes: formatted.cookTimeMinutes || 30,
@@ -138,7 +154,7 @@ export default function NewRecipePage() {
       imageUrl: formatted.imageUrl || "",
       sourceUrl: "",
       sourceText: "",
-      cuisineName: "",
+      cuisineName: formatted.cuisineName || "",
       ingredients: formatted.ingredients && formatted.ingredients.length > 0
         ? formatted.ingredients.map((ing: RecipeIngredient, idx: number) => ({
             amount: ing.amount != null ? String(ing.amount) : null,
@@ -155,6 +171,36 @@ export default function NewRecipePage() {
       allergens: formatted.allergens || [],
       status: RecipeStatus.PUBLISHED,
     });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setError(null);
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("image", file);
+
+      const response = await fetch("/api/upload/image", {
+        method: "POST",
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to upload image");
+      }
+
+      const data = await response.json();
+      setFormData((prev) => ({ ...prev, imageUrl: data.imageUrl }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload image");
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -212,7 +258,7 @@ export default function NewRecipePage() {
       ...formData,
       steps: [
         ...formData.steps,
-        { stepNumber: formData.steps.length + 1, instruction: "", isOptional: false },
+        { stepNumber: formData.steps.length + 1, instruction: "", groupName: null, isOptional: false },
       ],
     });
   };
@@ -224,7 +270,7 @@ export default function NewRecipePage() {
     setFormData({ ...formData, steps: newSteps });
   };
 
-  const updateStep = (index: number, field: keyof RecipeStep, value: string | boolean) => {
+  const updateStep = (index: number, field: keyof RecipeStep, value: string | boolean | null) => {
     const newSteps = [...formData.steps];
     newSteps[index] = { ...newSteps[index], [field]: value };
     setFormData({ ...formData, steps: newSteps });
@@ -390,15 +436,48 @@ export default function NewRecipePage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Image URL
+                      Recipe Image
                     </label>
-                    <input
-                      type="url"
-                      value={formData.imageUrl}
-                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                      placeholder="https://..."
-                    />
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="url"
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          placeholder="Enter image URL or upload a file below"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="flex-1 cursor-pointer">
+                          <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-colors">
+                            <Upload size={18} />
+                            <span className="text-sm text-gray-600">
+                              {uploadingImage ? "Uploading..." : "Upload Image"}
+                            </span>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            disabled={uploadingImage}
+                          />
+                        </label>
+                      </div>
+                      {formData.imageUrl && (
+                        <div className="mt-2">
+                          <img
+                            src={formData.imageUrl}
+                            alt="Recipe preview"
+                            className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/images/recipes/default.jpg";
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div>
@@ -579,7 +658,14 @@ export default function NewRecipePage() {
                           </button>
                         )}
                       </div>
-                      <div className="mt-2 ml-11">
+                      <div className="mt-2 ml-11 space-y-2">
+                        <input
+                          type="text"
+                          value={step.groupName || ""}
+                          onChange={(e) => updateStep(index, "groupName", e.target.value || null)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                          placeholder="Group name (e.g., For the cake, For the frosting)"
+                        />
                         <label className="flex items-center gap-2 text-sm">
                           <input
                             type="checkbox"

@@ -360,22 +360,43 @@ export default async function RecipePage({ params }: RecipePageProps) {
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Instructions</h2>
           {recipe.steps && recipe.steps.length > 0 ? (
-            <div className="space-y-4">
-              {recipe.steps.map((step) => (
-                <div key={step.id} className="flex gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center font-semibold">
-                    {step.stepNumber}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-gray-700">{step.instruction}</p>
-                    {step.isOptional && (
-                      <span className="text-sm text-gray-500 italic mt-1 block">
-                        (Optional)
-                      </span>
+            <div>
+              {/* Group steps by groupName */}
+              {(() => {
+                const grouped = recipe.steps.reduce((acc, step) => {
+                  const group = step.groupName || 'Main';
+                  if (!acc[group]) acc[group] = [];
+                  acc[group].push(step);
+                  return acc;
+                }, {} as Record<string, typeof recipe.steps>);
+
+                return Object.entries(grouped).map(([groupName, steps]) => (
+                  <div key={groupName} className="mb-6 last:mb-0">
+                    {Object.keys(grouped).length > 1 && (
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                        {groupName}
+                      </h3>
                     )}
+                    <div className="space-y-4">
+                      {steps.map((step) => (
+                        <div key={step.id} className="flex gap-4">
+                          <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center font-semibold">
+                            {step.stepNumber}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-gray-700">{step.instruction}</p>
+                            {step.isOptional && (
+                              <span className="text-sm text-gray-500 italic mt-1 block">
+                                (Optional)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
           ) : (
             <p className="text-gray-500">No instructions provided.</p>

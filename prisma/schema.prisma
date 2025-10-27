@@ -121,6 +121,7 @@ model RecipeStep {
   recipeId    String
   stepNumber  Int
   instruction String
+  groupName   String?
   isOptional  Boolean @default(false)
 
   recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
