@@ -1,59 +1,110 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import OpenAI from "openai";
+import { z } from "zod";
 
-/**
- * Recipe Formatting API with OpenAI Integration
- * 
- * This endpoint intelligently formats recipes using OpenAI's GPT-4 when an API key is available.
- * If no OpenAI API key is configured (OPENAI_API_KEY env var), it falls back to a simple
- * text parsing implementation that extracts basic recipe information.
- * 
- * To enable OpenAI integration:
- * 1. Sign up for an OpenAI API key at https://platform.openai.com/
- * 2. Set the OPENAI_API_KEY environment variable
- * 3. The endpoint will automatically use GPT-4 for better recipe parsing
- */
+/** Zod Schemas with preprocessing to handle AI quirks */
+const RecipeIngredientSchema = z.object({
+  amount: z.preprocess(
+    (val) => (val == null ? null : Number(val)),
+    z.number().nullable()
+  ),
+  unit: z.preprocess(
+    (val) => (val == null ? null : String(val)),
+    z.string().nullable()
+  ),
+  name: z.string().min(1).max(200),
+  displayOrder: z.preprocess(
+    (val, ctx) => (val == null ? 0 : Number(val)),
+    z.number().int().min(0)
+  ),
+});
 
-interface RecipeIngredient {
-  amount: number | null;
-  unit: string | null;
-  name: string;
-  displayOrder: number;
-}
+const RecipeSchema = z.object({
+  title: z.preprocess(
+    (val) => String(val ?? "Untitled Recipe"),
+    z.string().min(1).max(200)
+  ),
+  description: z.preprocess(
+    (val) => String(val ?? "No description"),
+    z.string().max(2000)
+  ),
+  instructions: z.preprocess(
+    (val) => (Array.isArray(val) ? val.join("\n") : String(val ?? "")),
+    z.string().min(1)
+  ),
+  servings: z.preprocess(
+    (val) => Number(val ?? 1),
+    z.number().int().min(1).max(100)
+  ),
+  prepTimeMinutes: z.preprocess(
+    (val) => Number(val ?? 0),
+    z.number().int().min(0).max(1440)
+  ),
+  cookTimeMinutes: z.preprocess(
+    (val) => Number(val ?? 0),
+    z.number().int().min(0).max(1440)
+  ),
+  calories: z.preprocess(
+    (val) => (val == null ? 0 : Number(val)),
+    z.number().int().min(0)
+  ),
+  proteinG: z.preprocess(
+    (val) => (val == null ? 0 : Number(val)),
+    z.number().min(0)
+  ),
+  fatG: z.preprocess(
+    (val) => (val == null ? 0 : Number(val)),
+    z.number().min(0)
+  ),
+  carbsG: z.preprocess(
+    (val) => (val == null ? 0 : Number(val)),
+    z.number().min(0)
+  ),
+  ingredients: z.array(RecipeIngredientSchema).min(1),
+  tags: z
+    .preprocess(
+      (val) => (Array.isArray(val) ? val.map(String) : []),
+      z.array(z.string().max(50))
+    )
+    .optional(),
+  categories: z
+    .preprocess(
+      (val) => (Array.isArray(val) ? val.map(String) : []),
+      z.array(z.string().max(50))
+    )
+    .optional(),
+  allergens: z
+    .preprocess(
+      (val) => (Array.isArray(val) ? val.map(String) : []),
+      z.array(z.string().max(50))
+    )
+    .optional(),
+  imageUrl: z.string().url().optional(),
+});
 
-interface FormattedRecipe {
-  title: string;
-  description: string;
-  instructions: string;
-  servings: number;
-  prepTimeMinutes: number;
-  cookTimeMinutes: number;
-  imageUrl?: string;
-  calories?: number;
-  proteinG?: number;
-  fatG?: number;
-  carbsG?: number;
-  ingredients: RecipeIngredient[];
-  tags: string[];
-  categories: string[];
-  allergens: string[];
-}
+const RequestBodySchema = z
+  .object({
+    text: z.string().max(10000).optional(),
+    data: z.object({}).catchall(z.any()).optional(),
+  })
+  .refine((data) => data.text || data.data, {
+    message: "Either 'text' or 'data' must be provided",
+  });
 
-// Initialize OpenAI client (will be null if no API key)
-const openai = process.env.OPENAI_API_KEY 
+type FormattedRecipe = z.infer<typeof RecipeSchema>;
+
+const openai = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 
 /**
  * POST /api/ai/format-recipe
- * Accepts raw text or structured data and returns a formatted recipe object
- * Uses OpenAI if available, falls back to mock implementation
  */
 export async function POST(request: Request) {
   try {
+    // Authentication
     const currentUser = await getCurrentUser();
-    
     if (!currentUser) {
       return NextResponse.json(
         { error: "Authentication required" },
@@ -61,77 +112,65 @@ export async function POST(request: Request) {
       );
     }
 
+    // Validate request
     const body = await request.json();
-    const { text, data } = body;
-
-    let formattedRecipe: FormattedRecipe;
-
-    if (text) {
-      // Parse raw text into structured recipe using AI if available
-      if (openai) {
-        formattedRecipe = await parseRecipeWithOpenAI(text);
-      } else {
-        formattedRecipe = parseRecipeText(text);
-      }
-    } else if (data) {
-      // Validate and complete existing recipe data
-      if (openai && !data.calories) {
-        formattedRecipe = await validateAndCompleteRecipeWithAI(data);
-      } else {
-        formattedRecipe = validateAndCompleteRecipe(data);
-      }
-    } else {
+    const validation = RequestBodySchema.safeParse(body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: "Either 'text' or 'data' must be provided" },
+        { error: "Invalid request body", details: validation.error?.issues },
         { status: 400 }
       );
     }
 
-    // Add nutrition data if missing (and not using AI)
-    if (!formattedRecipe.calories && !openai) {
-      formattedRecipe = addNutritionData(formattedRecipe);
+    const { text, data } = validation.data;
+
+    if (!openai) {
+      return NextResponse.json(
+        { error: "AI service not configured. Set OPENAI_API_KEY" },
+        { status: 503 }
+      );
     }
 
-    return NextResponse.json(formattedRecipe);
+    let formattedRecipe: FormattedRecipe;
+
+    if (text) {
+      formattedRecipe = await parseRecipeWithOpenAI(text);
+    } else if (data) {
+      formattedRecipe = await completeRecipeWithAI(data);
+    }
+
+    return NextResponse.json({ recipe: formattedRecipe, source: "ai" });
   } catch (error) {
-    console.error("AI format-recipe error:", error);
+    console.error("Recipe formatting error:", error);
     return NextResponse.json(
-      { error: "Failed to format recipe" },
+      {
+        error: "Failed to format recipe",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
 }
 
-/**
- * Parse recipe text using OpenAI
- */
-async function parseRecipeWithOpenAI(text: string): Promise<FormattedRecipe> {
-  if (!openai) {
-    throw new Error("OpenAI client not initialized");
-  }
-
-  const prompt = `Parse the following recipe text and return a JSON object with this exact structure:
-{
-  "title": "Recipe Title",
-  "description": "Brief description",
-  "instructions": "Step by step instructions",
-  "servings": 4,
-  "prepTimeMinutes": 15,
-  "cookTimeMinutes": 30,
-  "calories": 350,
-  "proteinG": 25,
-  "fatG": 15,
-  "carbsG": 40,
-  "ingredients": [
-    {"amount": 2, "unit": "cups", "name": "flour", "displayOrder": 0}
-  ],
-  "tags": ["Quick", "Easy"],
-  "categories": ["Dinner", "Main Course"],
-  "allergens": ["Gluten", "Dairy"]
+function parseJSONSafe(text: string) {
+  // Remove ```json or ``` wrappers and trim
+  const cleaned = text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+  return JSON.parse(cleaned);
 }
 
-Extract as much information as possible. For nutrition values, provide reasonable estimates based on the ingredients.
+/** Parse raw text into structured recipe */
+async function parseRecipeWithOpenAI(text: string): Promise<FormattedRecipe> {
+  if (!openai) throw new Error("OpenAI client not initialized");
 
+  const prompt = `Parse this recipe text into JSON with fields:
+title, description, instructions, servings, prepTimeMinutes, cookTimeMinutes,
+calories, proteinG, fatG, carbsG, ingredients (amount, unit, name, displayOrder),
+tags, categories, allergens.
+Ensure instructions is a string, servings and nutrition are numbers,
+ingredients have amount/unit as number/string, displayOrder starting from 0.
 Recipe text:
 ${text}`;
 
@@ -140,223 +179,47 @@ ${text}`;
     messages: [
       {
         role: "system",
-        content: "You are a helpful recipe parser. Always respond with valid JSON only, no additional text.",
+        content:
+          "You are a recipe parser and nutritionist. Respond with valid JSON only.",
       },
-      {
-        role: "user",
-        content: prompt,
-      },
+      { role: "user", content: prompt },
     ],
-    response_format: { type: "json_object" },
+    temperature: 0.3,
   });
 
   const result = completion.choices[0].message.content;
-  if (!result) {
-    throw new Error("No response from OpenAI");
-  }
+  if (!result) throw new Error("Empty response from OpenAI");
 
-  const parsed = JSON.parse(result);
-  
-  // Ensure ingredients have displayOrder
-  if (parsed.ingredients && Array.isArray(parsed.ingredients)) {
-    parsed.ingredients = parsed.ingredients.map((ing: RecipeIngredient, index: number) => ({
-      ...ing,
-      displayOrder: ing.displayOrder ?? index,
-    }));
-  }
-
-  return parsed as FormattedRecipe;
+  const parsed = parseJSONSafe(result);
+  return RecipeSchema.parse(parsed); // preprocess ensures everything matches API
 }
 
-/**
- * Validate and complete recipe with OpenAI (adds nutrition data)
- */
-async function validateAndCompleteRecipeWithAI(data: Partial<FormattedRecipe>): Promise<FormattedRecipe> {
-  if (!openai) {
-    throw new Error("OpenAI client not initialized");
-  }
+/** Complete partial recipe data */
+async function completeRecipeWithAI(
+  data: Partial<FormattedRecipe>
+): Promise<FormattedRecipe> {
+  if (!openai) throw new Error("OpenAI client not initialized");
 
-  const prompt = `Given this partial recipe data, add accurate nutrition information (calories, protein, fat, carbs) based on the ingredients and servings. Return the complete recipe as JSON:
-
+  const prompt = `Complete this partial recipe with missing fields and nutrition info based on ingredients:
 ${JSON.stringify(data, null, 2)}
-
-Return the same structure with added nutrition fields.`;
+Return JSON with all fields from RecipeSchema. Ensure instructions is a string, servings and nutrition are numbers, ingredients have amount/unit as number/string.`;
 
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
-        content: "You are a nutrition expert. Calculate accurate nutrition values based on recipe ingredients. Always respond with valid JSON only.",
+        content:
+          "You are a nutrition expert and recipe validator. Respond with valid JSON only.",
       },
-      {
-        role: "user",
-        content: prompt,
-      },
+      { role: "user", content: prompt },
     ],
-    response_format: { type: "json_object" },
+    temperature: 0.3,
   });
 
   const result = completion.choices[0].message.content;
-  if (!result) {
-    throw new Error("No response from OpenAI");
-  }
+  if (!result) throw new Error("Empty response from OpenAI");
 
-  const parsed = JSON.parse(result);
-  return validateAndCompleteRecipe(parsed);
-}
-
-function parseRecipeText(text: string): FormattedRecipe {
-  // Simple parser - extracts title, ingredients, and instructions
-  const lines = text.split('\n').filter(line => line.trim());
-  
-  const title = lines[0]?.trim() || "Untitled Recipe";
-  const description = lines[1]?.trim() || "A delicious recipe";
-  
-  // Extract ingredients (lines with measurements)
-  const ingredients: RecipeIngredient[] = [];
-  // Simplified regex to avoid ReDoS - match unit words more strictly with bounded repetitions
-  const ingredientPattern = /^[\d./]{0,10}\s{0,5}(cup|tbsp|tsp|oz|lb|g|kg|ml|l|clove|piece)s?\s{1,3}(.+)$/i;
-  
-  let displayOrder = 0;
-  for (const line of lines) {
-    const match = line.match(ingredientPattern);
-    if (match) {
-      const [, unit, name] = match;
-      const amountMatch = line.match(/^([\d./]+)/);
-      const amount = amountMatch ? parseFloat(amountMatch[1]) : null;
-      
-      ingredients.push({
-        amount,
-        unit: unit || null,
-        name: name.trim(),
-        displayOrder: displayOrder++
-      });
-    } else if (line.match(/^-\s*(.+)/) || line.match(/^\d+\.\s*(.+)/)) {
-      // Bullet or numbered ingredient without measurement
-      const ingredientName = line.replace(/^[-\d\.]+\s*/, '').trim();
-      if (ingredientName && !ingredientName.toLowerCase().includes('instructions')) {
-        ingredients.push({
-          amount: null,
-          unit: null,
-          name: ingredientName,
-          displayOrder: displayOrder++
-        });
-      }
-    }
-  }
-  
-  // Extract instructions (numbered or step-by-step lines)
-  const instructionLines = lines.filter(line => 
-    /^\d+\.\s/.test(line) || 
-    line.toLowerCase().includes('step') ||
-    (line.length > 30 && !ingredientPattern.test(line))
-  );
-  const instructions = instructionLines.join('\n') || "No instructions provided";
-  
-  // Default values - simplified regex to avoid ReDoS
-  const servings = extractNumber(text, /(\d{1,3})\s*servings?/i) || 4;
-  const prepTimeMinutes = extractNumber(text, /prep[^0-9]{0,20}(\d{1,4})\s*min/i) || 15;
-  const cookTimeMinutes = extractNumber(text, /cook[^0-9]{0,20}(\d{1,4})\s*min/i) || 30;
-  
-  return {
-    title,
-    description,
-    instructions,
-    servings,
-    prepTimeMinutes,
-    cookTimeMinutes,
-    ingredients: ingredients.length > 0 ? ingredients : [
-      { amount: null, unit: null, name: "Ingredient 1", displayOrder: 0 }
-    ],
-    tags: extractTags(text),
-    categories: [],
-    allergens: extractAllergens(text)
-  };
-}
-
-function validateAndCompleteRecipe(data: Partial<FormattedRecipe>): FormattedRecipe {
-  // Validate and fill in missing fields
-  return {
-    title: data.title || "Untitled Recipe",
-    description: data.description || "A delicious recipe",
-    instructions: data.instructions || "No instructions provided",
-    servings: data.servings || 4,
-    prepTimeMinutes: data.prepTimeMinutes || 15,
-    cookTimeMinutes: data.cookTimeMinutes || 30,
-    imageUrl: data.imageUrl,
-    ingredients: data.ingredients || [],
-    tags: data.tags || [],
-    categories: data.categories || [],
-    allergens: data.allergens || [],
-    calories: data.calories,
-    proteinG: data.proteinG,
-    fatG: data.fatG,
-    carbsG: data.carbsG
-  };
-}
-
-function addNutritionData(recipe: FormattedRecipe): FormattedRecipe {
-  // Simple nutrition estimation based on ingredients count and servings
-  const ingredientCount = recipe.ingredients.length;
-  const baseCalories = 150 * ingredientCount;
-  
-  return {
-    ...recipe,
-    calories: Math.round(baseCalories / recipe.servings),
-    proteinG: Math.round((ingredientCount * 8) / recipe.servings),
-    fatG: Math.round((ingredientCount * 5) / recipe.servings),
-    carbsG: Math.round((ingredientCount * 12) / recipe.servings)
-  };
-}
-
-function extractNumber(text: string, pattern: RegExp): number | null {
-  const match = text.match(pattern);
-  return match ? parseInt(match[1], 10) : null;
-}
-
-function extractTags(text: string): string[] {
-  const tags: string[] = [];
-  const lowerText = text.toLowerCase();
-  
-  if (lowerText.includes('chicken') || lowerText.includes('beef') || lowerText.includes('pork')) {
-    tags.push('Meat');
-  }
-  if (lowerText.includes('fish') || lowerText.includes('salmon') || lowerText.includes('seafood')) {
-    tags.push('Seafood');
-  }
-  if (lowerText.includes('vegetarian') || lowerText.includes('vegan')) {
-    tags.push('Vegetarian');
-  }
-  if (lowerText.includes('gluten-free') || lowerText.includes('gluten free')) {
-    tags.push('Gluten-Free');
-  }
-  if (lowerText.includes('quick') || lowerText.includes('easy')) {
-    tags.push('Quick & Easy');
-  }
-  
-  return tags;
-}
-
-function extractAllergens(text: string): string[] {
-  const allergens: string[] = [];
-  const lowerText = text.toLowerCase();
-  
-  if (lowerText.includes('milk') || lowerText.includes('dairy') || lowerText.includes('cheese') || lowerText.includes('butter')) {
-    allergens.push('Dairy');
-  }
-  if (lowerText.includes('egg')) {
-    allergens.push('Eggs');
-  }
-  if (lowerText.includes('peanut') || lowerText.includes('nut')) {
-    allergens.push('Nuts');
-  }
-  if (lowerText.includes('shellfish') || lowerText.includes('shrimp')) {
-    allergens.push('Shellfish');
-  }
-  if (lowerText.includes('wheat') || lowerText.includes('flour')) {
-    allergens.push('Wheat');
-  }
-  
-  return allergens;
+  const parsed = parseJSONSafe(result);
+  return RecipeSchema.parse(parsed); // preprocess fixes AI inconsistencies
 }
