@@ -6,6 +6,7 @@ import ProtectedPage from "@/components/ProtectedPage";
 import { Plus, Trash2, Loader2, Sparkles } from "lucide-react";
 import Button from "@/components/Button";
 import AIRecipeModal from "@/components/ui/AIRecipeModal";
+import { FormattedRecipeResponse, RecipeIngredient } from "@/types/recipe";
 
 interface Ingredient {
   amount: number | null;
@@ -27,26 +28,6 @@ interface RecipeFormData {
   tags: string[];
   categories: string[];
   allergens: string[];
-}
-
-interface FormattedRecipeResponse {
-  title?: string;
-  description?: string;
-  instructions?: string;
-  servings?: number;
-  prepTimeMinutes?: number;
-  cookTimeMinutes?: number;
-  difficulty?: string;
-  imageUrl?: string;
-  ingredients?: Array<{
-    amount: number | null;
-    unit: string | null;
-    name: string;
-    displayOrder?: number;
-  }>;
-  tags?: string[];
-  categories?: string[];
-  allergens?: string[];
 }
 
 interface Category {
@@ -120,7 +101,7 @@ export default function NewRecipePage() {
       difficulty: formatted.difficulty || "Medium",
       imageUrl: formatted.imageUrl || "",
       ingredients: formatted.ingredients && formatted.ingredients.length > 0
-        ? formatted.ingredients.map((ing: { amount: number | null; unit: string | null; name: string }, idx: number) => ({
+        ? formatted.ingredients.map((ing: RecipeIngredient, idx: number) => ({
             amount: ing.amount,
             unit: ing.unit,
             name: ing.name,

@@ -4,26 +4,7 @@ import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/Button";
 import { Sparkles, Loader2 } from "lucide-react";
-
-interface FormattedRecipeResponse {
-  title?: string;
-  description?: string;
-  instructions?: string;
-  servings?: number;
-  prepTimeMinutes?: number;
-  cookTimeMinutes?: number;
-  difficulty?: string;
-  imageUrl?: string;
-  ingredients?: Array<{
-    amount: number | null;
-    unit: string | null;
-    name: string;
-    displayOrder?: number;
-  }>;
-  tags?: string[];
-  categories?: string[];
-  allergens?: string[];
-}
+import { FormattedRecipeResponse } from "@/types/recipe";
 
 interface AIRecipeModalProps {
   isOpen: boolean;
