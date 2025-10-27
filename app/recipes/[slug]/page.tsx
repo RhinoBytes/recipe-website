@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Clock, Flame, Users, Tag, AlertCircle } from "lucide-react";
 import RecipeActions from "@/components/RecipeActions";
 import FavoriteButton from "@/components/FavoriteButton";
+import RecipeReviews from "@/components/RecipeReviews";
 
 interface RecipePageProps {
   params: Promise<{ slug: string }>;
@@ -275,6 +276,12 @@ export default async function RecipePage({ params }: RecipePageProps) {
             </div>
           </div>
         </div>
+
+        {/* Reviews & Ratings */}
+        <RecipeReviews 
+          recipeSlug={slug} 
+          isAuthor={isAuthor} 
+        />
       </div>
     </div>
   );
