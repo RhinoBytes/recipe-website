@@ -1,18 +1,138 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
-export async function GET() {
-  const recipes = await prisma.recipe.findMany({
-    where: { isPublished: true },
-    include: {
-      author: true,
-      tags: true,
-      categories: true,
-    },
-  });
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const query = searchParams.get("q") || "";
+    const category = searchParams.get("category") || "";
+    const tag = searchParams.get("tag") || "";
+    const page = parseInt(searchParams.get("page") || "1");
+    const perPage = parseInt(searchParams.get("perPage") || "12");
+    const skip = (page - 1) * perPage;
 
-  return Response.json(recipes);
+    // Build where clause with filters
+    const where: Prisma.RecipeWhereInput = { isPublished: true };
+
+    // Text search on title, description, and instructions
+    if (query) {
+      where.OR = [
+        { title: { contains: query, mode: "insensitive" } },
+        { description: { contains: query, mode: "insensitive" } },
+        { instructions: { contains: query, mode: "insensitive" } },
+      ];
+    }
+
+    // Filter by category
+    if (category) {
+      where.categories = {
+        some: {
+          category: {
+            name: { equals: category, mode: "insensitive" },
+          },
+        },
+      };
+    }
+
+    // Filter by tag
+    if (tag) {
+      where.tags = {
+        some: {
+          tag: {
+            name: { equals: tag, mode: "insensitive" },
+          },
+        },
+      };
+    }
+
+    // Get total count for pagination
+    const totalCount = await prisma.recipe.count({ where });
+
+    // Get recipes with pagination
+    const recipes = await prisma.recipe.findMany({
+      where,
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        reviews: {
+          select: {
+            rating: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: perPage,
+    });
+
+    // Format recipes for display with ratings
+    const formattedRecipes = recipes.map((recipe) => {
+      const totalRating = recipe.reviews.reduce(
+        (sum, review) => sum + review.rating,
+        0
+      );
+      const averageRating =
+        recipe.reviews.length > 0
+          ? Math.round(totalRating / recipe.reviews.length)
+          : 0;
+
+      return {
+        id: recipe.id,
+        slug: recipe.slug,
+        title: recipe.title,
+        description: recipe.description,
+        image: recipe.imageUrl || "/images/recipes/default.jpg",
+        time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
+        prepTimeMinutes: recipe.prepTimeMinutes,
+        cookTimeMinutes: recipe.cookTimeMinutes,
+        rating: averageRating,
+        reviewCount: recipe.reviews.length,
+        author: {
+          id: recipe.author.id,
+          name: recipe.author.username,
+          avatar: recipe.author.avatarUrl || recipe.author.username.charAt(0),
+        },
+        tags: recipe.tags.map((rt) => rt.tag.name),
+        categories: recipe.categories.map((rc) => rc.category.name),
+        createdAt: recipe.createdAt,
+      };
+    });
+
+    return NextResponse.json({
+      recipes: formattedRecipes,
+      pagination: {
+        page,
+        perPage,
+        totalCount,
+        totalPages: Math.ceil(totalCount / perPage),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching recipes:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch recipes" },
+      { status: 500 }
+    );
+  }
 }
 
 /**
