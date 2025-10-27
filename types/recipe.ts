@@ -16,8 +16,17 @@ export interface FormattedRecipeResponse {
   cookTimeMinutes?: number;
   difficulty?: string;
   imageUrl?: string;
+  cuisineName?: string;
   ingredients?: RecipeIngredient[];
+  steps?: RecipeStep[];
   tags?: string[];
   categories?: string[];
   allergens?: string[];
+}
+
+export interface RecipeStep {
+  stepNumber: number;
+  instruction: string;
+  groupName?: string | null;
+  isOptional?: boolean;
 }

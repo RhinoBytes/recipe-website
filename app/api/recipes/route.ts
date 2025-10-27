@@ -255,10 +255,11 @@ export async function POST(request: Request) {
       // Create steps
       if (steps && Array.isArray(steps) && steps.length > 0) {
         await tx.recipeStep.createMany({
-          data: steps.map((step: { stepNumber: number; instruction: string; isOptional?: boolean }) => ({
+          data: steps.map((step: { stepNumber: number; instruction: string; groupName?: string | null; isOptional?: boolean }) => ({
             recipeId: newRecipe.id,
             stepNumber: step.stepNumber,
             instruction: step.instruction,
+            groupName: step.groupName || null,
             isOptional: step.isOptional || false,
           })),
         });
@@ -407,6 +408,7 @@ export async function POST(request: Request) {
         steps: fullRecipe.steps.map(step => ({
           stepNumber: step.stepNumber,
           instruction: step.instruction,
+          groupName: step.groupName,
           isOptional: step.isOptional,
         })),
         tags: fullRecipe.tags.map(rt => rt.tag.name),

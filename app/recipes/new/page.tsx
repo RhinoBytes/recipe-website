@@ -22,6 +22,7 @@ interface Ingredient {
 interface RecipeStep {
   stepNumber: number;
   instruction: string;
+  groupName: string | null;
   isOptional: boolean;
 }
 
@@ -60,7 +61,7 @@ export default function NewRecipePage() {
   const [formData, setFormData] = useState<RecipeFormData>({
     title: "",
     description: "",
-    steps: [{ stepNumber: 1, instruction: "", isOptional: false }],
+    steps: [{ stepNumber: 1, instruction: "", groupName: null, isOptional: false }],
     servings: 4,
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
@@ -108,14 +109,28 @@ export default function NewRecipePage() {
   }, []);
 
   const handleAIFormattedRecipe = (formatted: FormattedRecipeResponse) => {
-    // Convert AI instructions (string) to steps if provided
-    const stepsFromInstructions = formatted.instructions
-      ? formatted.instructions.split('\n').filter(s => s.trim()).map((instruction, idx) => ({
-          stepNumber: idx + 1,
-          instruction: instruction.trim(),
-          isOptional: false,
-        }))
-      : [{ stepNumber: 1, instruction: "", isOptional: false }];
+    // Prefer steps array from AI if available, otherwise fall back to instructions string
+    let finalSteps: RecipeStep[];
+    if (formatted.steps && formatted.steps.length > 0) {
+      // AI provided structured steps
+      finalSteps = formatted.steps.map((step, idx) => ({
+        stepNumber: step.stepNumber || idx + 1,
+        instruction: step.instruction,
+        groupName: step.groupName || null,
+        isOptional: step.isOptional || false,
+      }));
+    } else if (formatted.instructions) {
+      // Fall back to parsing instructions string
+      finalSteps = formatted.instructions.split('\n').filter(s => s.trim()).map((instruction, idx) => ({
+        stepNumber: idx + 1,
+        instruction: instruction.trim(),
+        groupName: null,
+        isOptional: false,
+      }));
+    } else {
+      // Default empty step
+      finalSteps = [{ stepNumber: 1, instruction: "", groupName: null, isOptional: false }];
+    }
 
     // Convert difficulty string to enum
     let difficultyEnum: Difficulty = Difficulty.MEDIUM;
@@ -130,7 +145,7 @@ export default function NewRecipePage() {
     setFormData({
       title: formatted.title || "",
       description: formatted.description || "",
-      steps: stepsFromInstructions,
+      steps: finalSteps,
       servings: formatted.servings || 4,
       prepTimeMinutes: formatted.prepTimeMinutes || 15,
       cookTimeMinutes: formatted.cookTimeMinutes || 30,
@@ -138,7 +153,7 @@ export default function NewRecipePage() {
       imageUrl: formatted.imageUrl || "",
       sourceUrl: "",
       sourceText: "",
-      cuisineName: "",
+      cuisineName: formatted.cuisineName || "",
       ingredients: formatted.ingredients && formatted.ingredients.length > 0
         ? formatted.ingredients.map((ing: RecipeIngredient, idx: number) => ({
             amount: ing.amount != null ? String(ing.amount) : null,
@@ -212,7 +227,7 @@ export default function NewRecipePage() {
       ...formData,
       steps: [
         ...formData.steps,
-        { stepNumber: formData.steps.length + 1, instruction: "", isOptional: false },
+        { stepNumber: formData.steps.length + 1, instruction: "", groupName: null, isOptional: false },
       ],
     });
   };
@@ -224,7 +239,7 @@ export default function NewRecipePage() {
     setFormData({ ...formData, steps: newSteps });
   };
 
-  const updateStep = (index: number, field: keyof RecipeStep, value: string | boolean) => {
+  const updateStep = (index: number, field: keyof RecipeStep, value: string | boolean | null) => {
     const newSteps = [...formData.steps];
     newSteps[index] = { ...newSteps[index], [field]: value };
     setFormData({ ...formData, steps: newSteps });
@@ -579,7 +594,14 @@ export default function NewRecipePage() {
                           </button>
                         )}
                       </div>
-                      <div className="mt-2 ml-11">
+                      <div className="mt-2 ml-11 space-y-2">
+                        <input
+                          type="text"
+                          value={step.groupName || ""}
+                          onChange={(e) => updateStep(index, "groupName", e.target.value || null)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                          placeholder="Group name (e.g., For the cake, For the frosting)"
+                        />
                         <label className="flex items-center gap-2 text-sm">
                           <input
                             type="checkbox"

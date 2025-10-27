@@ -39,6 +39,7 @@ const RecipeStepSchema = z.object({
     z.number().int().min(1)
   ),
   instruction: z.string().min(1),
+  groupName: z.string().nullable().optional(),
   isOptional: z.boolean().optional(),
 });
 
@@ -202,22 +203,29 @@ function parseJSONSafe(text: string) {
 async function parseRecipeWithOpenAI(text: string): Promise<FormattedRecipe> {
   if (!openai) throw new Error("OpenAI client not initialized");
 
-  const prompt = `Parse this recipe text into JSON with fields:
+  const prompt = `Parse this recipe text into JSON with ALL of these fields:
 title, description, servings, prepTimeMinutes, cookTimeMinutes,
 calories, proteinG, fatG, carbsG, cuisineName,
 difficulty (must be one of: EASY, MEDIUM, HARD),
-steps (array of objects with stepNumber, instruction, isOptional),
+steps (array of objects with stepNumber, instruction, groupName, isOptional),
 ingredients (array with amount as string like "1/2" or "2-3", unit as one of the MeasurementUnit enums like CUP/TBSP/TSP/etc, name, notes, groupName, isOptional, displayOrder),
 tags, categories, allergens.
 
 MeasurementUnit options: CUP, TBSP, TSP, FL_OZ, ML, L, PINT, QUART, GALLON, OZ, LB, G, KG, MG, PIECE, WHOLE, SLICE, CLOVE, PINCH, DASH, HANDFUL, TO_TASTE, AS_NEEDED
 
-Ensure:
-- difficulty is EASY, MEDIUM, or HARD
-- steps is an array with stepNumber (1, 2, 3...), instruction (string), isOptional (boolean)
-- ingredients have amount as string (support fractions like "1/2"), unit as valid MeasurementUnit or null
-- servings and nutrition are numbers
-- displayOrder starts from 0
+CRITICAL REQUIREMENTS:
+- ALWAYS extract and include ALL cooking instructions/steps from the recipe text
+- steps MUST be an array with stepNumber (1, 2, 3...), instruction (string), groupName (string or null), isOptional (boolean)
+- If recipe has grouped steps (e.g., "For the cake:", "For the frosting:"), set groupName accordingly
+- If not grouped, leave groupName as null
+- ingredients should have groupName set if they're in groups (e.g., "Cake Ingredients", "Frosting Ingredients")
+- If cuisineName is not in the recipe, intelligently determine it from the recipe content (e.g., "pasta carbonara" = "Italian", "pad thai" = "Thai")
+- If tags are not provided, generate relevant tags based on recipe characteristics (e.g., "quick", "vegetarian", "dessert", "dinner")
+- If categories are not provided, determine appropriate categories (e.g., "Main Dish", "Dessert", "Appetizer", "Side Dish")
+- If allergens are not explicitly mentioned, identify them from ingredients (e.g., eggs, dairy, nuts, gluten, soy, shellfish, fish)
+- difficulty should be EASY, MEDIUM, or HARD based on complexity
+- servings and nutrition should be reasonable estimates if not provided
+- displayOrder for ingredients starts from 0
 
 Recipe text:
 ${text}`;
@@ -228,7 +236,7 @@ ${text}`;
       {
         role: "system",
         content:
-          "You are a recipe parser and nutritionist. Respond with valid JSON only. Use exact enum values for difficulty and units.",
+          "You are a recipe parser, nutritionist, and culinary expert. Extract ALL recipe information including instructions. Generate missing cuisine, tags, categories, and allergens based on the recipe content. Respond with valid JSON only. Use exact enum values for difficulty and units.",
       },
       { role: "user", content: prompt },
     ],
@@ -253,8 +261,12 @@ ${JSON.stringify(data, null, 2)}
 
 Return JSON with all required fields. Ensure:
 - difficulty is one of: EASY, MEDIUM, HARD
-- steps is an array with stepNumber, instruction, isOptional
-- ingredients have amount as string, unit as valid MeasurementUnit enum or null
+- steps is an array with stepNumber, instruction, groupName, isOptional
+- ingredients have amount as string, unit as valid MeasurementUnit enum or null, and groupName if applicable
+- If cuisineName is missing, intelligently determine it from the recipe content
+- If tags are missing, generate relevant tags based on recipe characteristics
+- If categories are missing, determine appropriate categories
+- If allergens are missing, identify them from ingredients
 - servings and nutrition are numbers`;
 
   const completion = await openai.chat.completions.create({
@@ -263,7 +275,7 @@ Return JSON with all required fields. Ensure:
       {
         role: "system",
         content:
-          "You are a nutrition expert and recipe validator. Respond with valid JSON only. Use exact enum values.",
+          "You are a nutrition expert, recipe validator, and culinary expert. Generate missing metadata (cuisine, tags, categories, allergens) intelligently based on recipe content. Respond with valid JSON only. Use exact enum values.",
       },
       { role: "user", content: prompt },
     ],
