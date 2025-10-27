@@ -36,6 +36,7 @@ model Recipe {
   servings        Int?
   prepTimeMinutes Int?
   cookTimeMinutes Int?
+  difficulty      String?
   imageUrl        String?
   isPublished     Boolean            @default(false)
   calories        Int?

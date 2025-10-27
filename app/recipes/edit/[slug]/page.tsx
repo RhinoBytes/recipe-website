@@ -20,6 +20,7 @@ interface RecipeFormData {
   servings: number;
   prepTimeMinutes: number;
   cookTimeMinutes: number;
+  difficulty: string;
   imageUrl: string;
   ingredients: Ingredient[];
   tags: string[];
@@ -49,6 +50,7 @@ export default function EditRecipePage() {
     servings: 4,
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
+    difficulty: "Medium",
     imageUrl: "",
     ingredients: [],
     tags: [],
@@ -86,6 +88,7 @@ export default function EditRecipePage() {
           servings: recipe.servings || 4,
           prepTimeMinutes: recipe.prepTimeMinutes || 15,
           cookTimeMinutes: recipe.cookTimeMinutes || 30,
+          difficulty: recipe.difficulty || "Medium",
           imageUrl: recipe.imageUrl || "",
           ingredients: recipe.ingredients || [],
           tags: recipe.tags.map((t: { name: string }) => t.name) || [],
@@ -137,6 +140,7 @@ export default function EditRecipePage() {
         servings: formatted.servings || formData.servings,
         prepTimeMinutes: formatted.prepTimeMinutes || formData.prepTimeMinutes,
         cookTimeMinutes: formatted.cookTimeMinutes || formData.cookTimeMinutes,
+        difficulty: formatted.difficulty || formData.difficulty,
         imageUrl: formatted.imageUrl || formData.imageUrl,
         ingredients: formatted.ingredients || formData.ingredients,
         tags: formatted.tags || formData.tags,
@@ -335,6 +339,22 @@ export default function EditRecipePage() {
                     min="0"
                   />
                 </div>
+              </div>
+
+              {/* Difficulty */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Difficulty
+                </label>
+                <select
+                  value={formData.difficulty}
+                  onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                >
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
               </div>
 
               {/* Image URL */}

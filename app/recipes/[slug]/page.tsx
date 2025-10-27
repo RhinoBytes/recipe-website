@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import Image from "next/image";
-import { Clock, Flame, Users, Tag, AlertCircle } from "lucide-react";
+import { Clock, Flame, Users, Tag, AlertCircle, ChefHat } from "lucide-react";
 import RecipeActions from "@/components/RecipeActions";
 import FavoriteButton from "@/components/FavoriteButton";
 import RecipeReviews from "@/components/RecipeReviews";
@@ -164,6 +164,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 {recipe.calories}
               </div>
               <div className="text-sm text-gray-600">Calories</div>
+            </div>
+          )}
+          
+          {recipe.difficulty && (
+            <div className="bg-white rounded-lg shadow-md p-4 text-center">
+              <ChefHat className="mx-auto mb-2 text-purple-600" size={24} />
+              <div className="text-2xl font-bold text-gray-900">
+                {recipe.difficulty}
+              </div>
+              <div className="text-sm text-gray-600">Difficulty</div>
             </div>
           )}
         </div>
