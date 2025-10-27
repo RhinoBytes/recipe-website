@@ -46,3 +46,6 @@ next-env.d.ts
 # Documentation
 /Documentation
 .env
+
+# Recipe data (created in development)
+/prisma/data/recipes/*/

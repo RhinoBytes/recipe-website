@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { Prisma, MeasurementUnit, Difficulty, RecipeStatus } from "@prisma/client";
+import { saveRecipeToFile } from "@/lib/recipeStorage";
 
 export async function GET(request: Request) {
   try {
@@ -351,6 +352,70 @@ export async function POST(request: Request) {
 
       return newRecipe;
     });
+
+    // Get full recipe data with all relations for JSON export
+    const fullRecipe = await prisma.recipe.findUnique({
+      where: { id: recipe.id },
+      include: {
+        ingredients: {
+          orderBy: { displayOrder: 'asc' }
+        },
+        steps: {
+          orderBy: { stepNumber: 'asc' }
+        },
+        tags: {
+          include: { tag: true }
+        },
+        categories: {
+          include: { category: true }
+        },
+        allergens: {
+          include: { allergen: true }
+        },
+        cuisine: true,
+      },
+    });
+
+    // Save recipe to JSON file in development mode
+    if (fullRecipe) {
+      const recipeDataForFile = {
+        title: fullRecipe.title,
+        slug: fullRecipe.slug,
+        description: fullRecipe.description,
+        servings: fullRecipe.servings,
+        prepTimeMinutes: fullRecipe.prepTimeMinutes,
+        cookTimeMinutes: fullRecipe.cookTimeMinutes,
+        difficulty: fullRecipe.difficulty,
+        imageUrl: fullRecipe.imageUrl,
+        sourceUrl: fullRecipe.sourceUrl,
+        sourceText: fullRecipe.sourceText,
+        status: fullRecipe.status,
+        calories: fullRecipe.calories,
+        proteinG: fullRecipe.proteinG,
+        fatG: fullRecipe.fatG,
+        carbsG: fullRecipe.carbsG,
+        cuisine: fullRecipe.cuisine?.name || null,
+        ingredients: fullRecipe.ingredients.map(ing => ({
+          amount: ing.amount,
+          unit: ing.unit,
+          name: ing.name,
+          notes: ing.notes,
+          groupName: ing.groupName,
+          isOptional: ing.isOptional,
+          displayOrder: ing.displayOrder,
+        })),
+        steps: fullRecipe.steps.map(step => ({
+          stepNumber: step.stepNumber,
+          instruction: step.instruction,
+          isOptional: step.isOptional,
+        })),
+        tags: fullRecipe.tags.map(rt => rt.tag.name),
+        categories: fullRecipe.categories.map(rc => rc.category.name),
+        allergens: fullRecipe.allergens.map(ra => ra.allergen.name),
+      };
+
+      await saveRecipeToFile(recipe.slug!, recipeDataForFile);
+    }
 
     // Get author username for response
     const author = await prisma.user.findUnique({
