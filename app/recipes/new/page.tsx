@@ -121,9 +121,9 @@ export default function NewRecipePage() {
     let difficultyEnum: Difficulty = Difficulty.MEDIUM;
     if (formatted.difficulty) {
       const upper = formatted.difficulty.toUpperCase();
-      if (upper === "EASY") difficultyEnum = Difficulty.EASY as Difficulty;
-      else if (upper === "HARD") difficultyEnum = Difficulty.HARD as Difficulty;
-      else difficultyEnum = Difficulty.MEDIUM as Difficulty;
+      if (upper === "EASY") difficultyEnum = Difficulty.EASY;
+      else if (upper === "HARD") difficultyEnum = Difficulty.HARD;
+      else difficultyEnum = Difficulty.MEDIUM;
     }
 
     // Update form with AI-formatted data
@@ -141,7 +141,7 @@ export default function NewRecipePage() {
       cuisineName: "",
       ingredients: formatted.ingredients && formatted.ingredients.length > 0
         ? formatted.ingredients.map((ing: RecipeIngredient, idx: number) => ({
-            amount: ing.amount?.toString() || null,
+            amount: ing.amount != null ? String(ing.amount) : null,
             unit: ing.unit as MeasurementUnit | null,
             name: ing.name,
             notes: null,
@@ -459,7 +459,13 @@ export default function NewRecipePage() {
                         />
                         <select
                           value={ingredient.unit || ""}
-                          onChange={(e) => updateIngredient(index, "unit", e.target.value ? e.target.value as MeasurementUnit : null)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            // Validate that value is a valid MeasurementUnit enum or empty
+                            if (!value || Object.values(MeasurementUnit).includes(value as MeasurementUnit)) {
+                              updateIngredient(index, "unit", value ? value as MeasurementUnit : null);
+                            }
+                          }}
                           className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                         >
                           <option value="">None</option>

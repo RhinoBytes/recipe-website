@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     // Build where clause with filters
     const where: Prisma.RecipeWhereInput = { status: RecipeStatus.PUBLISHED };
 
-    // Text search on title and description
+    // Text search on title and description (instructions removed - now in steps)
     if (query) {
       where.OR = [
         { title: { contains: query, mode: "insensitive" } },

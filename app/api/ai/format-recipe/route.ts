@@ -15,7 +15,8 @@ const RecipeIngredientSchema = z.object({
       if (val == null) return null;
       const unitStr = String(val).toUpperCase().replace(/[- ]/g, '_');
       // Try to match to a MeasurementUnit enum value
-      if (Object.values(MeasurementUnit).includes(unitStr as MeasurementUnit)) {
+      const enumValues = Object.values(MeasurementUnit) as string[];
+      if (enumValues.includes(unitStr)) {
         return unitStr;
       }
       return null;

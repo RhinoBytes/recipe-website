@@ -172,6 +172,8 @@ export async function POST(
     }
 
     // Recalculate average rating and review count
+    // Note: For recipes with many reviews, consider moving this to a background job
+    // or using database triggers for better performance
     const stats = await prisma.review.aggregate({
       where: { recipeId: recipe.id },
       _avg: { rating: true },
