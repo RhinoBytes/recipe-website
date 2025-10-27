@@ -14,8 +14,6 @@ import Utensils from './Utensils';
 
 const NAV_LINKS = [
   { label: 'Browse', href: '/browse' },
-  { label: 'Categories', href: '/categories' },
-  { label: 'Popular', href: '/popular' },
 ];
 
 export default function Navbar() {

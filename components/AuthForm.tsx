@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "./Button";
 import { validateAuthForm } from "@/utils/validation";
 
@@ -10,6 +10,7 @@ type Mode = "login" | "register";
 
 export default function AuthForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +18,16 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    // Check for tab parameter in URL
+    const tab = searchParams.get("tab");
+    if (tab === "register") {
+      setMode("register");
+    } else if (tab === "login") {
+      setMode("login");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     async function checkAuth() {

@@ -20,6 +20,7 @@ interface RecipeFormData {
   servings: number;
   prepTimeMinutes: number;
   cookTimeMinutes: number;
+  difficulty: string;
   imageUrl: string;
   ingredients: Ingredient[];
   tags: string[];
@@ -48,6 +49,7 @@ export default function NewRecipePage() {
     servings: 4,
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
+    difficulty: "Medium",
     imageUrl: "",
     ingredients: [{ amount: null, unit: null, name: "", displayOrder: 0 }],
     tags: [],
@@ -116,6 +118,7 @@ export default function NewRecipePage() {
         servings: formatted.servings || 4,
         prepTimeMinutes: formatted.prepTimeMinutes || 15,
         cookTimeMinutes: formatted.cookTimeMinutes || 30,
+        difficulty: formatted.difficulty || "Medium",
         imageUrl: formatted.imageUrl || "",
         ingredients: formatted.ingredients || [],
         tags: formatted.tags || [],
@@ -156,7 +159,7 @@ export default function NewRecipePage() {
       }
 
       const recipe = await response.json();
-      router.push(`/recipes/${recipe.slug}`);
+      router.push(`/recipes/${recipe.username}/${recipe.slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create recipe");
     } finally {
@@ -372,6 +375,21 @@ export default function NewRecipePage() {
                         min="0"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Difficulty
+                    </label>
+                    <select
+                      value={formData.difficulty}
+                      onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    >
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
                   </div>
 
                   <div>

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import Image from "next/image";
-import { Clock, Flame, Users, Tag, AlertCircle } from "lucide-react";
+import { Clock, Flame, Users, Tag, AlertCircle, ChefHat } from "lucide-react";
 import RecipeActions from "@/components/RecipeActions";
 import FavoriteButton from "@/components/FavoriteButton";
 import RecipeReviews from "@/components/RecipeReviews";
@@ -10,15 +10,21 @@ import SocialShare from "@/components/SocialShare";
 import PrintButton from "@/components/PrintButton";
 
 interface RecipePageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ username: string; slug: string }>;
 }
 
 export default async function RecipePage({ params }: RecipePageProps) {
-  const { slug } = await params;
+  const { username, slug } = await params;
   const currentUser = await getCurrentUser();
 
-  const recipe = await prisma.recipe.findUnique({
-    where: { slug },
+  // Find recipe by slug and verify it belongs to the specified username
+  const recipe = await prisma.recipe.findFirst({
+    where: { 
+      slug,
+      author: {
+        username
+      }
+    },
     include: {
       author: {
         select: {
@@ -164,6 +170,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 {recipe.calories}
               </div>
               <div className="text-sm text-gray-600">Calories</div>
+            </div>
+          )}
+          
+          {recipe.difficulty && (
+            <div className="bg-white rounded-lg shadow-md p-4 text-center">
+              <ChefHat className="mx-auto mb-2 text-purple-600" size={24} />
+              <div className="text-2xl font-bold text-gray-900">
+                {recipe.difficulty}
+              </div>
+              <div className="text-sm text-gray-600">Difficulty</div>
             </div>
           )}
         </div>

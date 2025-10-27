@@ -158,6 +158,7 @@ export async function POST(request: Request) {
       servings,
       prepTimeMinutes,
       cookTimeMinutes,
+      difficulty,
       imageUrl,
       calories,
       proteinG,
@@ -205,6 +206,7 @@ export async function POST(request: Request) {
           servings,
           prepTimeMinutes,
           cookTimeMinutes,
+          difficulty,
           imageUrl,
           isPublished: true,
           calories,
@@ -292,9 +294,16 @@ export async function POST(request: Request) {
       return newRecipe;
     });
 
+    // Get author username for response
+    const author = await prisma.user.findUnique({
+      where: { id: currentUser.userId },
+      select: { username: true }
+    });
+
     return NextResponse.json({
       ...recipe,
       slug: recipe.slug,
+      username: author?.username,
     }, { status: 201 });
   } catch (error) {
     console.error("Create recipe error:", error);

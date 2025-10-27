@@ -1,6 +1,7 @@
 'use client';
 
 import { Heart } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -18,9 +19,8 @@ export default function Footer() {
           <div>
             <h4 className="text-xl font-bold text-[#d4735a] mb-4">Browse</h4>
             <nav className="flex flex-col space-y-2">
-              <a href="#" className="text-zinc-300 hover:text-[#d4735a] transition-colors">Popular Recipes</a>
-              <a href="#" className="text-zinc-300 hover:text-[#d4735a] transition-colors">Recent Recipes</a>
-              <a href="#" className="text-zinc-300 hover:text-[#d4735a] transition-colors">Categories</a>
+              <Link href="/browse" className="text-zinc-300 hover:text-[#d4735a] transition-colors">All Recipes</Link>
+              <Link href="/browse" className="text-zinc-300 hover:text-[#d4735a] transition-colors">Recent Recipes</Link>
             </nav>
           </div>
           {/* Community */}
