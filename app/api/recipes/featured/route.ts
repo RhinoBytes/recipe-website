@@ -6,7 +6,7 @@ export async function GET() {
     // Strategy: Get the highest-rated recipe with at least 5 reviews
     const featuredRecipes = await prisma.recipe.findMany({
       where: {
-        isPublished: true,
+        status: "PUBLISHED",
         reviews: {
           some: {},
         },

@@ -131,9 +131,10 @@ export async function POST(
       },
     });
 
+    let review;
     if (existingReview) {
       // Update existing review
-      const updatedReview = await prisma.review.update({
+      review = await prisma.review.update({
         where: { id: existingReview.id },
         data: {
           rating,
@@ -149,36 +150,40 @@ export async function POST(
           },
         },
       });
-
-      return NextResponse.json({
-        id: updatedReview.id,
-        rating: updatedReview.rating,
-        comment: updatedReview.comment,
-        createdAt: updatedReview.createdAt,
-        user: {
-          id: updatedReview.user.id,
-          username: updatedReview.user.username,
-          avatarUrl: updatedReview.user.avatarUrl,
+    } else {
+      // Create new review
+      review = await prisma.review.create({
+        data: {
+          recipeId: recipe.id,
+          userId: currentUser.userId,
+          rating,
+          comment: comment || null,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              avatarUrl: true,
+            },
+          },
         },
       });
     }
 
-    // Create new review
-    const review = await prisma.review.create({
+    // Recalculate average rating and review count
+    const stats = await prisma.review.aggregate({
+      where: { recipeId: recipe.id },
+      _avg: { rating: true },
+      _count: true,
+    });
+
+    // Update recipe with new rating stats
+    await prisma.recipe.update({
+      where: { id: recipe.id },
       data: {
-        recipeId: recipe.id,
-        userId: currentUser.userId,
-        rating,
-        comment: comment || null,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            avatarUrl: true,
-          },
-        },
+        averageRating: stats._avg.rating || 0,
+        reviewCount: stats._count,
       },
     });
 
@@ -194,7 +199,7 @@ export async function POST(
           avatarUrl: review.user.avatarUrl,
         },
       },
-      { status: 201 }
+      { status: existingReview ? 200 : 201 }
     );
   } catch (error) {
     console.error("Error creating review:", error);

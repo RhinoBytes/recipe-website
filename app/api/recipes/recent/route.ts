@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const recentRecipes = await prisma.recipe.findMany({
       where: {
-        isPublished: true,
+        status: "PUBLISHED",
       },
       select: {
         id: true,

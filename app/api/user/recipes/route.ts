@@ -41,11 +41,6 @@ export async function GET(request: Request) {
             category: true,
           },
         },
-        reviews: {
-          select: {
-            rating: true,
-          },
-        },
         _count: {
           select: {
             favorites: true,
@@ -61,15 +56,6 @@ export async function GET(request: Request) {
 
     // Format recipes for display
     const formattedRecipes = recipes.map((recipe) => {
-      const totalRating = recipe.reviews.reduce(
-        (sum, review) => sum + review.rating,
-        0
-      );
-      const averageRating =
-        recipe.reviews.length > 0
-          ? Math.round(totalRating / recipe.reviews.length)
-          : 0;
-
       return {
         id: recipe.id,
         slug: recipe.slug,
@@ -79,9 +65,9 @@ export async function GET(request: Request) {
         prepTimeMinutes: recipe.prepTimeMinutes,
         cookTimeMinutes: recipe.cookTimeMinutes,
         servings: recipe.servings,
-        isPublished: recipe.isPublished,
-        rating: averageRating,
-        reviewCount: recipe.reviews.length,
+        status: recipe.status,
+        rating: recipe.averageRating ? parseFloat(recipe.averageRating.toString()) : 0,
+        reviewCount: recipe.reviewCount,
         favoriteCount: recipe._count.favorites,
         tags: recipe.tags.map((rt) => rt.tag.name),
         categories: recipe.categories.map((rc) => rc.category.name),

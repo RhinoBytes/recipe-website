@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { MeasurementUnit } from "@prisma/client";
 
 /**
  * GET /api/recipes/[slug]
@@ -24,9 +25,15 @@ export async function GET(
             bio: true,
           },
         },
+        cuisine: true,
         ingredients: {
           orderBy: {
             displayOrder: 'asc',
+          },
+        },
+        steps: {
+          orderBy: {
+            stepNumber: 'asc',
           },
         },
         tags: {
@@ -115,12 +122,15 @@ export async function PATCH(
     const {
       title,
       description,
-      instructions,
+      steps,
       servings,
       prepTimeMinutes,
       cookTimeMinutes,
       difficulty,
       imageUrl,
+      sourceUrl,
+      sourceText,
+      cuisineName,
       calories,
       proteinG,
       fatG,
@@ -129,6 +139,7 @@ export async function PATCH(
       tags,
       categories,
       allergens,
+      status,
     } = body;
 
     // Generate new slug if title changed
@@ -157,6 +168,26 @@ export async function PATCH(
 
     // Update recipe with all relations in a transaction
     const updatedRecipe = await prisma.$transaction(async (tx) => {
+      // Handle cuisine
+      let cuisineId = existingRecipe.cuisineId;
+      if (cuisineName !== undefined) {
+        if (cuisineName && cuisineName.trim()) {
+          let cuisine = await tx.cuisine.findUnique({
+            where: { name: cuisineName.trim() },
+          });
+
+          if (!cuisine) {
+            cuisine = await tx.cuisine.create({
+              data: { name: cuisineName.trim() },
+            });
+          }
+
+          cuisineId = cuisine.id;
+        } else {
+          cuisineId = null;
+        }
+      }
+
       // Update the recipe
       const recipe = await tx.recipe.update({
         where: { id: existingRecipe.id },
@@ -164,18 +195,41 @@ export async function PATCH(
           title: title ?? existingRecipe.title,
           slug: newSlug,
           description,
-          instructions,
           servings,
           prepTimeMinutes,
           cookTimeMinutes,
-          difficulty,
+          difficulty: difficulty ?? existingRecipe.difficulty,
           imageUrl,
+          sourceUrl,
+          sourceText,
+          cuisineId,
+          status: status ?? existingRecipe.status,
           calories,
           proteinG,
           fatG,
           carbsG,
         },
       });
+
+      // Update steps if provided
+      if (steps !== undefined && Array.isArray(steps)) {
+        // Delete existing steps
+        await tx.recipeStep.deleteMany({
+          where: { recipeId: recipe.id },
+        });
+
+        // Create new steps
+        if (steps.length > 0) {
+          await tx.recipeStep.createMany({
+            data: steps.map((step: { stepNumber: number; instruction: string; isOptional?: boolean }) => ({
+              recipeId: recipe.id,
+              stepNumber: step.stepNumber,
+              instruction: step.instruction,
+              isOptional: step.isOptional || false,
+            })),
+          });
+        }
+      }
 
       // Update ingredients if provided
       if (ingredients !== undefined && Array.isArray(ingredients)) {
@@ -187,11 +241,22 @@ export async function PATCH(
         // Create new ingredients
         if (ingredients.length > 0) {
           await tx.recipeIngredient.createMany({
-            data: ingredients.map((ing: { amount?: number | null; unit?: string | null; name: string; displayOrder?: number }, index: number) => ({
+            data: ingredients.map((ing: { 
+              amount?: string | null; 
+              unit?: MeasurementUnit | null; 
+              name: string; 
+              notes?: string | null;
+              groupName?: string | null;
+              isOptional?: boolean;
+              displayOrder?: number 
+            }, index: number) => ({
               recipeId: recipe.id,
-              amount: ing.amount,
-              unit: ing.unit,
+              amount: ing.amount || null,
+              unit: ing.unit || null,
               name: ing.name,
+              notes: ing.notes || null,
+              groupName: ing.groupName || null,
+              isOptional: ing.isOptional || false,
               displayOrder: ing.displayOrder ?? index,
             })),
           });

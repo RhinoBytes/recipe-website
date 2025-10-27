@@ -34,9 +34,15 @@ export default async function RecipePage({ params }: RecipePageProps) {
           bio: true,
         },
       },
+      cuisine: true,
       ingredients: {
         orderBy: {
           displayOrder: 'asc',
+        },
+      },
+      steps: {
+        orderBy: {
+          stepNumber: 'asc',
         },
       },
       tags: {
@@ -211,6 +217,39 @@ export default async function RecipePage({ params }: RecipePageProps) {
           </div>
         )}
 
+        {/* Cuisine */}
+        {recipe.cuisine && (
+          <div className="bg-white rounded-lg shadow-md p-4 mb-8">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-gray-700">Cuisine:</span>
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium">
+                {recipe.cuisine.name}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Source Attribution */}
+        {(recipe.sourceUrl || recipe.sourceText) && (
+          <div className="bg-white rounded-lg shadow-md p-4 mb-8">
+            <div className="text-sm text-gray-700">
+              <span className="font-semibold">Source:</span>{' '}
+              {recipe.sourceUrl ? (
+                <a 
+                  href={recipe.sourceUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-amber-600 hover:text-amber-700 underline"
+                >
+                  {recipe.sourceText || recipe.sourceUrl}
+                </a>
+              ) : (
+                <span>{recipe.sourceText}</span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Tags */}
         {recipe.tags.length > 0 && (
           <div className="mb-8">
@@ -272,32 +311,75 @@ export default async function RecipePage({ params }: RecipePageProps) {
         {/* Ingredients */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Ingredients</h2>
-          <ul className="space-y-2">
-            {recipe.ingredients.map((ingredient) => (
-              <li key={ingredient.id} className="flex items-start gap-2">
-                <span className="text-amber-600 mt-1">•</span>
-                <span className="text-gray-700">
-                  {ingredient.amount && (
-                    <span className="font-semibold">{ingredient.amount.toString()} </span>
-                  )}
-                  {ingredient.unit && (
-                    <span className="font-semibold">{ingredient.unit} </span>
-                  )}
-                  {ingredient.name}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {/* Group ingredients by groupName */}
+          {(() => {
+            const grouped = recipe.ingredients.reduce((acc, ing) => {
+              const group = ing.groupName || 'Main';
+              if (!acc[group]) acc[group] = [];
+              acc[group].push(ing);
+              return acc;
+            }, {} as Record<string, typeof recipe.ingredients>);
+
+            return Object.entries(grouped).map(([groupName, ings]) => (
+              <div key={groupName} className="mb-4 last:mb-0">
+                {Object.keys(grouped).length > 1 && (
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    {groupName}
+                  </h3>
+                )}
+                <ul className="space-y-2">
+                  {ings.map((ingredient) => (
+                    <li key={ingredient.id} className="flex items-start gap-2">
+                      <span className="text-amber-600 mt-1">•</span>
+                      <span className="text-gray-700">
+                        {ingredient.amount && (
+                          <span className="font-semibold">{ingredient.amount} </span>
+                        )}
+                        {ingredient.unit && (
+                          <span className="font-semibold">{ingredient.unit.toLowerCase().replace(/_/g, ' ')} </span>
+                        )}
+                        {ingredient.name}
+                        {ingredient.isOptional && (
+                          <span className="text-sm text-gray-500 italic"> (optional)</span>
+                        )}
+                        {ingredient.notes && (
+                          <span className="text-sm text-gray-600 block ml-6 mt-1">
+                            {ingredient.notes}
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ));
+          })()}
         </div>
 
-        {/* Instructions */}
+        {/* Instructions/Steps */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Instructions</h2>
-          <div className="prose prose-gray max-w-none">
-            <div className="whitespace-pre-wrap text-gray-700">
-              {recipe.instructions}
+          {recipe.steps && recipe.steps.length > 0 ? (
+            <div className="space-y-4">
+              {recipe.steps.map((step) => (
+                <div key={step.id} className="flex gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center font-semibold">
+                    {step.stepNumber}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gray-700">{step.instruction}</p>
+                    {step.isOptional && (
+                      <span className="text-sm text-gray-500 italic mt-1 block">
+                        (Optional)
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          ) : (
+            <p className="text-gray-500">No instructions provided.</p>
+          )}
         </div>
 
         {/* Reviews & Ratings */}

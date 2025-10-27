@@ -16,7 +16,7 @@ async function getPopularRecipes() {
 
   const popularRecipes = await prisma.recipe.findMany({
     where: {
-      isPublished: true,
+      status: "PUBLISHED",
     },
     select: {
       id: true,
@@ -80,7 +80,7 @@ async function getPopularRecipes() {
 async function getRecentRecipes() {
   const recentRecipes = await prisma.recipe.findMany({
     where: {
-      isPublished: true,
+      status: "PUBLISHED",
     },
     select: {
       id: true,
@@ -167,7 +167,7 @@ async function getCategories() {
 async function getFeaturedRecipe() {
   const featuredRecipes = await prisma.recipe.findMany({
     where: {
-      isPublished: true,
+      status: "PUBLISHED",
       reviews: {
         some: {},
       },
@@ -239,7 +239,7 @@ async function getSpotlightChef() {
     where: {
       recipes: {
         some: {
-          isPublished: true,
+          status: "PUBLISHED",
         },
       },
     },
@@ -257,14 +257,14 @@ async function getSpotlightChef() {
           },
         },
         where: {
-          isPublished: true,
+          status: "PUBLISHED",
         },
       },
       _count: {
         select: {
           recipes: {
             where: {
-              isPublished: true,
+              status: "PUBLISHED",
             },
           },
         },
