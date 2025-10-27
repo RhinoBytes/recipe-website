@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ProtectedPage from "@/components/ProtectedPage";
 import { Plus, Trash2, Loader2, Sparkles } from "lucide-react";
 import Button from "@/components/Button";
+import AIRecipeModal from "@/components/ui/AIRecipeModal";
 
 interface Ingredient {
   amount: number | null;
@@ -28,6 +29,26 @@ interface RecipeFormData {
   allergens: string[];
 }
 
+interface FormattedRecipeResponse {
+  title?: string;
+  description?: string;
+  instructions?: string;
+  servings?: number;
+  prepTimeMinutes?: number;
+  cookTimeMinutes?: number;
+  difficulty?: string;
+  imageUrl?: string;
+  ingredients?: Array<{
+    amount: number | null;
+    unit: string | null;
+    name: string;
+    displayOrder?: number;
+  }>;
+  tags?: string[];
+  categories?: string[];
+  allergens?: string[];
+}
+
 interface Category {
   id: string;
   name: string;
@@ -40,8 +61,7 @@ interface Allergen {
 
 export default function NewRecipePage() {
   const router = useRouter();
-  const [mode, setMode] = useState<"manual" | "paste">("manual");
-  const [pasteText, setPasteText] = useState("");
+  const [showAIModal, setShowAIModal] = useState(true); // Show modal on page load
   const [formData, setFormData] = useState<RecipeFormData>({
     title: "",
     description: "",
@@ -59,7 +79,6 @@ export default function NewRecipePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [loading, setLoading] = useState(false);
-  const [aiFormatted, setAiFormatted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState("");
 
@@ -89,59 +108,33 @@ export default function NewRecipePage() {
     fetchData();
   }, []);
 
-  const handleFormatWithAI = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const payload = mode === "paste" 
-        ? { text: pasteText }
-        : { data: formData };
-      
-      const response = await fetch("/api/ai/format-recipe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to format recipe");
-      }
-
-      const formatted = await response.json();
-      
-      // Update form with AI-formatted data
-      setFormData({
-        title: formatted.title || "",
-        description: formatted.description || "",
-        instructions: formatted.instructions || "",
-        servings: formatted.servings || 4,
-        prepTimeMinutes: formatted.prepTimeMinutes || 15,
-        cookTimeMinutes: formatted.cookTimeMinutes || 30,
-        difficulty: formatted.difficulty || "Medium",
-        imageUrl: formatted.imageUrl || "",
-        ingredients: formatted.ingredients || [],
-        tags: formatted.tags || [],
-        categories: formatted.categories || [],
-        allergens: formatted.allergens || [],
-      });
-      
-      setAiFormatted(true);
-      setMode("manual"); // Switch to manual mode to allow editing
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to format recipe");
-    } finally {
-      setLoading(false);
-    }
+  const handleAIFormattedRecipe = (formatted: FormattedRecipeResponse) => {
+    // Update form with AI-formatted data
+    setFormData({
+      title: formatted.title || "",
+      description: formatted.description || "",
+      instructions: formatted.instructions || "",
+      servings: formatted.servings || 4,
+      prepTimeMinutes: formatted.prepTimeMinutes || 15,
+      cookTimeMinutes: formatted.cookTimeMinutes || 30,
+      difficulty: formatted.difficulty || "Medium",
+      imageUrl: formatted.imageUrl || "",
+      ingredients: formatted.ingredients && formatted.ingredients.length > 0
+        ? formatted.ingredients.map((ing: { amount: number | null; unit: string | null; name: string }, idx: number) => ({
+            amount: ing.amount,
+            unit: ing.unit,
+            name: ing.name,
+            displayOrder: idx,
+          }))
+        : [{ amount: null, unit: null, name: "", displayOrder: 0 }],
+      tags: formatted.tags || [],
+      categories: formatted.categories || [],
+      allergens: formatted.allergens || [],
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!aiFormatted) {
-      setError("Please format your recipe with AI before submitting");
-      return;
-    }
     
     setLoading(true);
     setError(null);
@@ -237,9 +230,24 @@ export default function NewRecipePage() {
 
   return (
     <ProtectedPage>
+      <AIRecipeModal
+        isOpen={showAIModal}
+        onClose={() => setShowAIModal(false)}
+        onRecipeFormatted={handleAIFormattedRecipe}
+      />
+
       <div className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-gray-900">Create New Recipe</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-4xl font-bold text-gray-900">Create New Recipe</h1>
+            <Button
+              variant="secondary"
+              onClick={() => setShowAIModal(true)}
+            >
+              <Sparkles size={18} />
+              Use AI Formatter
+            </Button>
+          </div>
           
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
@@ -247,66 +255,7 @@ export default function NewRecipePage() {
             </div>
           )}
 
-          {/* Mode Toggle */}
-          <div className="bg-white rounded-lg shadow-sm p-2 mb-6 flex gap-2">
-            <button
-              onClick={() => setMode("manual")}
-              className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-                mode === "manual"
-                  ? "bg-amber-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Manual Entry
-            </button>
-            <button
-              onClick={() => setMode("paste")}
-              className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-                mode === "paste"
-                  ? "bg-amber-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              Paste & Format
-            </button>
-          </div>
-
-          {/* Paste Mode */}
-          {mode === "paste" && (
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Paste Your Recipe
-              </label>
-              <textarea
-                value={pasteText}
-                onChange={(e) => setPasteText(e.target.value)}
-                className="w-full h-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                placeholder="Paste your recipe here... Include title, ingredients, instructions, and any other details."
-              />
-              <Button
-                onClick={handleFormatWithAI}
-                disabled={loading || !pasteText.trim()}
-                className="mt-4"
-                variant="primary"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={18} />
-                    Formatting...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={18} />
-                    Format Recipe with AI
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-
-          {/* Manual Entry Form */}
-          {mode === "manual" && (
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-bold mb-4 text-gray-900">Basic Information</h2>
                 
@@ -563,30 +512,9 @@ export default function NewRecipePage() {
               {/* Submit Actions */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex gap-4">
-                  {!aiFormatted && (
-                    <Button
-                      type="button"
-                      onClick={handleFormatWithAI}
-                      disabled={loading}
-                      variant="secondary"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="animate-spin" size={18} />
-                          Formatting...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles size={18} />
-                          Format & Validate with AI
-                        </>
-                      )}
-                    </Button>
-                  )}
-                  
                   <Button
                     type="submit"
-                    disabled={loading || !aiFormatted}
+                    disabled={loading}
                     variant="primary"
                   >
                     {loading ? (
@@ -599,15 +527,8 @@ export default function NewRecipePage() {
                     )}
                   </Button>
                 </div>
-                
-                {!aiFormatted && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    You must format and validate your recipe with AI before publishing.
-                  </p>
-                )}
               </div>
             </form>
-          )}
         </div>
       </div>
     </ProtectedPage>
