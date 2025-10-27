@@ -1,10 +1,4 @@
-import {
-  popularRecipes,
-  recentRecipes,
-  categories,
-  featuredRecipe,
-  spotlightChef,
-} from "./data";
+import { prisma } from "@/lib/prisma";
 import RecipeCard from "@/components/ui/RecipeCard";
 import CategoryCard from "@/components/ui/CategoryCard";
 import FeaturedRecipe from "@/components/ui/FeaturedRecipe";
@@ -13,7 +7,332 @@ import Button from "@/components/Button";
 import { Flame, Compass } from "lucide-react";
 import Link from "next/link";
 
-export default function HomePage() {
+// Make this page dynamic since it fetches from database
+export const dynamic = 'force-dynamic';
+
+async function getPopularRecipes() {
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const popularRecipes = await prisma.recipe.findMany({
+    where: {
+      isPublished: true,
+    },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      imageUrl: true,
+      prepTimeMinutes: true,
+      cookTimeMinutes: true,
+      author: {
+        select: {
+          username: true,
+          avatarUrl: true,
+        },
+      },
+      reviews: {
+        select: {
+          rating: true,
+        },
+      },
+      _count: {
+        select: {
+          favorites: {
+            where: {
+              createdAt: {
+                gte: oneWeekAgo,
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ favorites: { _count: "desc" } }],
+    take: 6,
+  });
+
+  return popularRecipes.map((recipe) => {
+    const totalRating = recipe.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    const averageRating =
+      recipe.reviews.length > 0
+        ? Math.round(totalRating / recipe.reviews.length)
+        : 0;
+
+    return {
+      id: recipe.slug || recipe.id,
+      title: recipe.title,
+      image: recipe.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop",
+      time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
+      rating: averageRating,
+      author: {
+        name: recipe.author.username,
+        avatar: recipe.author.username.charAt(0),
+      },
+    };
+  });
+}
+
+async function getRecentRecipes() {
+  const recentRecipes = await prisma.recipe.findMany({
+    where: {
+      isPublished: true,
+    },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      imageUrl: true,
+      prepTimeMinutes: true,
+      cookTimeMinutes: true,
+      author: {
+        select: {
+          username: true,
+          avatarUrl: true,
+        },
+      },
+      reviews: {
+        select: {
+          rating: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 4,
+  });
+
+  return recentRecipes.map((recipe) => {
+    const totalRating = recipe.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    const averageRating =
+      recipe.reviews.length > 0
+        ? Math.round(totalRating / recipe.reviews.length)
+        : 0;
+
+    return {
+      id: recipe.slug || recipe.id,
+      title: recipe.title,
+      image: recipe.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop",
+      time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
+      rating: averageRating,
+      author: {
+        name: recipe.author.username,
+        avatar: recipe.author.username.charAt(0),
+      },
+    };
+  });
+}
+
+async function getCategories() {
+  const categories = await prisma.category.findMany({
+    where: {
+      parentId: null,
+    },
+    select: {
+      id: true,
+      name: true,
+      _count: {
+        select: {
+          recipes: true,
+        },
+      },
+    },
+    orderBy: {
+      recipes: {
+        _count: "desc",
+      },
+    },
+    take: 6,
+  });
+
+  return categories.map((category) => {
+    const slug = category.name.toLowerCase().replace(/\s+/g, "-");
+    return {
+      slug: slug,
+      name: category.name,
+      image: `https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=150&fit=crop`,
+    };
+  });
+}
+
+async function getFeaturedRecipe() {
+  const featuredRecipes = await prisma.recipe.findMany({
+    where: {
+      isPublished: true,
+      reviews: {
+        some: {},
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      imageUrl: true,
+      reviews: {
+        select: {
+          rating: true,
+        },
+      },
+      _count: {
+        select: {
+          reviews: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 10,
+  });
+
+  let featured = null;
+  let highestScore = 0;
+
+  for (const recipe of featuredRecipes) {
+    if (recipe._count.reviews < 2) continue;
+
+    const totalRating = recipe.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    const avgRating = totalRating / recipe._count.reviews;
+    const score = avgRating * Math.min(recipe._count.reviews / 5, 1);
+
+    if (score > highestScore) {
+      highestScore = score;
+      featured = {
+        id: recipe.id,
+        title: "Recipe of the Day",
+        description:
+          recipe.description ||
+          "Every day we feature an exceptional recipe that showcases the creativity and skill of our community. Today's featured dish combines fresh seasonal ingredients with classic techniques for an unforgettable dining experience.",
+        image: recipe.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=300&fit=crop",
+      };
+    }
+  }
+
+  if (!featured && featuredRecipes.length > 0) {
+    featured = {
+      id: featuredRecipes[0].id,
+      title: "Recipe of the Day",
+      description:
+        featuredRecipes[0].description ||
+        "Check out this recently added recipe from our community!",
+      image: featuredRecipes[0].imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=300&fit=crop",
+    };
+  }
+
+  return featured;
+}
+
+async function getSpotlightChef() {
+  const users = await prisma.user.findMany({
+    where: {
+      recipes: {
+        some: {
+          isPublished: true,
+        },
+      },
+    },
+    select: {
+      id: true,
+      username: true,
+      avatarUrl: true,
+      bio: true,
+      recipes: {
+        select: {
+          reviews: {
+            select: {
+              rating: true,
+            },
+          },
+        },
+        where: {
+          isPublished: true,
+        },
+      },
+      _count: {
+        select: {
+          recipes: {
+            where: {
+              isPublished: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      recipes: {
+        _count: "desc",
+      },
+    },
+    take: 5,
+  });
+
+  let spotlight = null;
+  let highestAvgRating = 0;
+
+  for (const user of users) {
+    if (user._count.recipes < 3) continue;
+
+    let totalRatings = 0;
+    let ratingCount = 0;
+
+    user.recipes.forEach((recipe) => {
+      recipe.reviews.forEach((review) => {
+        totalRatings += review.rating;
+        ratingCount++;
+      });
+    });
+
+    const avgRating = ratingCount > 0 ? totalRatings / ratingCount : 0;
+
+    if (avgRating > highestAvgRating) {
+      highestAvgRating = avgRating;
+      spotlight = {
+        id: user.id,
+        name: user.username,
+        title: "Home Cook & Food Blogger",
+        avatar: user.avatarUrl || "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face",
+        quote:
+          user.bio ||
+          "Cooking is my passion, and I love sharing family recipes that have been passed down through generations. My goal is to help others discover the joy of creating delicious meals from scratch.",
+      };
+    }
+  }
+
+  if (!spotlight && users.length > 0) {
+    const topContributor = users[0];
+    spotlight = {
+      id: topContributor.id,
+      name: topContributor.username,
+      title: "Home Cook & Food Blogger",
+      avatar: topContributor.avatarUrl || "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face",
+      quote:
+        topContributor.bio ||
+        "Sharing my passion for food through delicious recipes.",
+    };
+  }
+
+  return spotlight;
+}
+
+export default async function HomePage() {
+  const [popularRecipes, recentRecipes, categories, featuredRecipe, spotlightChef] = await Promise.all([
+    getPopularRecipes(),
+    getRecentRecipes(),
+    getCategories(),
+    getFeaturedRecipe(),
+    getSpotlightChef(),
+  ]);
+
   return (
     <main>
       {/* Hero Section */}
