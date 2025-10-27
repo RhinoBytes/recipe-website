@@ -1,7 +1,7 @@
 "use client";
 
 import { Share2, Facebook, Twitter, Link as LinkIcon, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 interface SocialShareProps {
   title: string;
@@ -12,6 +12,11 @@ interface SocialShareProps {
 export default function SocialShare({ title, description, url }: SocialShareProps) {
   const [copied, setCopied] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+
+  // Memoize native share support check
+  const supportsNativeShare = useMemo(() => {
+    return typeof navigator !== 'undefined' && !!navigator.share;
+  }, []);
 
   // Get the current URL if not provided
   const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
@@ -55,7 +60,7 @@ export default function SocialShare({ title, description, url }: SocialShareProp
     <div className="relative">
       <button
         onClick={() => {
-          if (navigator.share) {
+          if (supportsNativeShare) {
             handleNativeShare();
           } else {
             setShowMenu(!showMenu);
@@ -67,7 +72,7 @@ export default function SocialShare({ title, description, url }: SocialShareProp
         Share
       </button>
 
-      {showMenu && !navigator.share && (
+      {showMenu && !supportsNativeShare && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
           <div className="py-2">
             <button
@@ -118,6 +123,14 @@ export default function SocialShare({ title, description, url }: SocialShareProp
         <div
           className="fixed inset-0 z-0"
           onClick={() => setShowMenu(false)}
+          role="button"
+          aria-label="Close share menu"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              setShowMenu(false);
+            }
+          }}
         />
       )}
     </div>

@@ -37,9 +37,25 @@ export default function PrintButton() {
             page-break-after: always;
           }
 
-          /* Show all content */
-          * {
+          /* Simplify styling for better print output */
+          .bg-white,
+          .bg-gray-50,
+          .bg-gray-100,
+          .bg-amber-50,
+          .bg-orange-50,
+          .bg-blue-100,
+          .bg-red-50,
+          .bg-amber-100 {
             background: white !important;
+          }
+
+          .text-white,
+          .text-gray-900,
+          .text-gray-700,
+          .text-gray-600,
+          .text-amber-600,
+          .text-blue-800,
+          .text-red-800 {
             color: black !important;
           }
 
