@@ -18,7 +18,7 @@ interface Recipe {
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   servings: number;
-  isPublished: boolean;
+  status: string;
   rating: number;
   reviewCount: number;
   favoriteCount: number;

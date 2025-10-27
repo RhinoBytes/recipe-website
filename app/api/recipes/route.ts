@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { Prisma } from "@prisma/client";
+import { Prisma, MeasurementUnit, Difficulty, RecipeStatus } from "@prisma/client";
 
 export async function GET(request: Request) {
   try {
@@ -14,14 +14,13 @@ export async function GET(request: Request) {
     const skip = (page - 1) * perPage;
 
     // Build where clause with filters
-    const where: Prisma.RecipeWhereInput = { isPublished: true };
+    const where: Prisma.RecipeWhereInput = { status: RecipeStatus.PUBLISHED };
 
-    // Text search on title, description, and instructions
+    // Text search on title and description (instructions removed - now in steps)
     if (query) {
       where.OR = [
         { title: { contains: query, mode: "insensitive" } },
         { description: { contains: query, mode: "insensitive" } },
-        { instructions: { contains: query, mode: "insensitive" } },
       ];
     }
 
@@ -71,11 +70,6 @@ export async function GET(request: Request) {
             category: true,
           },
         },
-        reviews: {
-          select: {
-            rating: true,
-          },
-        },
       },
       orderBy: {
         createdAt: "desc",
@@ -86,15 +80,6 @@ export async function GET(request: Request) {
 
     // Format recipes for display with ratings
     const formattedRecipes = recipes.map((recipe) => {
-      const totalRating = recipe.reviews.reduce(
-        (sum, review) => sum + review.rating,
-        0
-      );
-      const averageRating =
-        recipe.reviews.length > 0
-          ? Math.round(totalRating / recipe.reviews.length)
-          : 0;
-
       return {
         id: recipe.id,
         slug: recipe.slug,
@@ -104,8 +89,8 @@ export async function GET(request: Request) {
         time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
         prepTimeMinutes: recipe.prepTimeMinutes,
         cookTimeMinutes: recipe.cookTimeMinutes,
-        rating: averageRating,
-        reviewCount: recipe.reviews.length,
+        rating: recipe.averageRating ? parseFloat(recipe.averageRating.toString()) : 0,
+        reviewCount: recipe.reviewCount,
         author: {
           id: recipe.author.id,
           name: recipe.author.username,
@@ -154,12 +139,15 @@ export async function POST(request: Request) {
     const {
       title,
       description,
-      instructions,
+      steps,
       servings,
       prepTimeMinutes,
       cookTimeMinutes,
       difficulty,
       imageUrl,
+      sourceUrl,
+      sourceText,
+      cuisineName,
       calories,
       proteinG,
       fatG,
@@ -168,6 +156,7 @@ export async function POST(request: Request) {
       tags,
       categories,
       allergens,
+      status,
     } = body;
 
     // Validate required fields
@@ -176,6 +165,34 @@ export async function POST(request: Request) {
         { error: "Title is required" },
         { status: 400 }
       );
+    }
+
+    // Validate difficulty if provided
+    if (difficulty && !Object.values(Difficulty).includes(difficulty)) {
+      return NextResponse.json(
+        { error: "Invalid difficulty value. Must be EASY, MEDIUM, or HARD" },
+        { status: 400 }
+      );
+    }
+
+    // Validate status if provided
+    if (status && !Object.values(RecipeStatus).includes(status)) {
+      return NextResponse.json(
+        { error: "Invalid status value. Must be DRAFT or PUBLISHED" },
+        { status: 400 }
+      );
+    }
+
+    // Validate ingredient units if provided
+    if (ingredients && Array.isArray(ingredients)) {
+      for (const ing of ingredients) {
+        if (ing.unit && !Object.values(MeasurementUnit).includes(ing.unit)) {
+          return NextResponse.json(
+            { error: `Invalid measurement unit: ${ing.unit}` },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     // Generate slug from title
@@ -195,6 +212,22 @@ export async function POST(request: Request) {
 
     // Create recipe with all relations in a transaction
     const recipe = await prisma.$transaction(async (tx) => {
+      // Handle cuisine
+      let cuisineId = null;
+      if (cuisineName && cuisineName.trim()) {
+        let cuisine = await tx.cuisine.findUnique({
+          where: { name: cuisineName.trim() },
+        });
+
+        if (!cuisine) {
+          cuisine = await tx.cuisine.create({
+            data: { name: cuisineName.trim() },
+          });
+        }
+
+        cuisineId = cuisine.id;
+      }
+
       // Create the recipe
       const newRecipe = await tx.recipe.create({
         data: {
@@ -202,13 +235,15 @@ export async function POST(request: Request) {
           title,
           slug,
           description,
-          instructions,
           servings,
           prepTimeMinutes,
           cookTimeMinutes,
-          difficulty,
+          difficulty: difficulty || null,
           imageUrl,
-          isPublished: true,
+          sourceUrl: sourceUrl || null,
+          sourceText: sourceText || null,
+          cuisineId,
+          status: status || RecipeStatus.PUBLISHED,
           calories,
           proteinG,
           fatG,
@@ -216,14 +251,37 @@ export async function POST(request: Request) {
         },
       });
 
+      // Create steps
+      if (steps && Array.isArray(steps) && steps.length > 0) {
+        await tx.recipeStep.createMany({
+          data: steps.map((step: { stepNumber: number; instruction: string; isOptional?: boolean }) => ({
+            recipeId: newRecipe.id,
+            stepNumber: step.stepNumber,
+            instruction: step.instruction,
+            isOptional: step.isOptional || false,
+          })),
+        });
+      }
+
       // Create ingredients
       if (ingredients && Array.isArray(ingredients) && ingredients.length > 0) {
         await tx.recipeIngredient.createMany({
-          data: ingredients.map((ing: { amount?: number | null; unit?: string | null; name: string; displayOrder?: number }, index: number) => ({
+          data: ingredients.map((ing: { 
+            amount?: string | null; 
+            unit?: MeasurementUnit | null; 
+            name: string; 
+            notes?: string | null;
+            groupName?: string | null;
+            isOptional?: boolean;
+            displayOrder?: number 
+          }, index: number) => ({
             recipeId: newRecipe.id,
-            amount: ing.amount,
-            unit: ing.unit,
+            amount: ing.amount || null,
+            unit: ing.unit || null,
             name: ing.name,
+            notes: ing.notes || null,
+            groupName: ing.groupName || null,
+            isOptional: ing.isOptional || false,
             displayOrder: ing.displayOrder ?? index,
           })),
         });

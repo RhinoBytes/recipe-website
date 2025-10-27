@@ -1,6 +1,5 @@
 // Cookbook MVP Schema
 
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,84 +9,153 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum MeasurementUnit {
+  CUP
+  TBSP
+  TSP
+  FL_OZ
+  ML
+  L
+  PINT
+  QUART
+  GALLON
+  OZ
+  LB
+  G
+  KG
+  MG
+  PIECE
+  WHOLE
+  SLICE
+  CLOVE
+  PINCH
+  DASH
+  HANDFUL
+  TO_TASTE
+  AS_NEEDED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum RecipeStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model User {
-  id           String    @id @default(uuid())
-  username     String    @unique
-  email        String    @unique
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String   @unique
   passwordHash String
   avatarUrl    String?
   bio          String?
-  role         String    @default("USER")
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  recipes       Recipe[]
-  reviews       Review[]
+  recipes         Recipe[]
+  reviews         Review[]
   favoriteRecipes FavoriteRecipe[]
 }
 
 model Recipe {
-  id              String             @id @default(uuid())
+  id              String       @id @default(uuid())
   authorId        String
   title           String
-  slug            String?            @unique
+  slug            String?      @unique
   description     String?
-  instructions    String?
   servings        Int?
   prepTimeMinutes Int?
   cookTimeMinutes Int?
-  difficulty      String?
+  difficulty      Difficulty?
   imageUrl        String?
-  isPublished     Boolean            @default(false)
+  status          RecipeStatus @default(DRAFT)
+  sourceUrl       String?
+  sourceText      String?
+  cuisineId       String?
+  averageRating   Decimal?     @db.Decimal(3, 2)
+  reviewCount     Int          @default(0)
   calories        Int?
   proteinG        Int?
   fatG            Int?
   carbsG          Int?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  author          User               @relation(fields: [authorId], references: [id])
-  ingredients     RecipeIngredient[]
-  categories      RecipesCategories[]
-  tags            RecipesTags[]
-  reviews         Review[]
-  favorites       FavoriteRecipe[]
-  allergens       RecipesAllergens[]
+  author      User                @relation(fields: [authorId], references: [id])
+  cuisine     Cuisine?            @relation(fields: [cuisineId], references: [id])
+  ingredients RecipeIngredient[]
+  steps       RecipeStep[]
+  categories  RecipesCategories[]
+  tags        RecipesTags[]
+  reviews     Review[]
+  favorites   FavoriteRecipe[]
+  allergens   RecipesAllergens[]
 }
 
 model RecipeIngredient {
-  id            String   @id @default(uuid())
-  recipeId      String
-  amount        Decimal?
-  unit          String?
-  name          String
-  displayOrder  Int      @default(0)
-  
-  recipe        Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  id           String           @id @default(uuid())
+  recipeId     String
+  amount       String?
+  unit         MeasurementUnit?
+  name         String
+  notes        String?
+  groupName    String?
+  isOptional   Boolean          @default(false)
+  displayOrder Int              @default(0)
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+model RecipeStep {
+  id          String  @id @default(uuid())
+  recipeId    String
+  stepNumber  Int
+  instruction String
+  isOptional  Boolean @default(false)
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, stepNumber])
+}
+
+model Cuisine {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  recipes Recipe[]
 }
 
 model Category {
-  id        String              @id @default(uuid())
-  name      String              @unique
-  parentId  String?
-  parent    Category?           @relation("CategoryToParent", fields: [parentId], references: [id])
-  children  Category[]          @relation("CategoryToParent")
-  recipes   RecipesCategories[]
+  id       String              @id @default(uuid())
+  name     String              @unique
+  parentId String?
+  parent   Category?           @relation("CategoryToParent", fields: [parentId], references: [id])
+  children Category[]          @relation("CategoryToParent")
+  recipes  RecipesCategories[]
 }
 
 model RecipesCategories {
-  recipeId    String
-  categoryId  String
+  recipeId   String
+  categoryId String
 
-  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  category    Category @relation(fields: [categoryId], references: [id])
+  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
 
   @@id([recipeId, categoryId])
 }
 
 model Tag {
-  id      String         @id @default(uuid())
-  name    String         @unique
+  id      String        @id @default(uuid())
+  name    String        @unique
   recipes RecipesTags[]
 }
 
@@ -95,38 +163,38 @@ model RecipesTags {
   recipeId String
   tagId    String
 
-  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  tag      Tag    @relation(fields: [tagId], references: [id])
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id])
 
   @@id([recipeId, tagId])
 }
 
 model Review {
-  id         String    @id @default(uuid())
-  recipeId   String
-  userId     String
-  rating     Int
-  comment    String?
-  createdAt  DateTime  @default(now())
+  id        String   @id @default(uuid())
+  recipeId  String
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
 
-  recipe     Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  user       User      @relation(fields: [userId], references: [id])
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model FavoriteRecipe {
-  userId     String
-  recipeId   String
-  createdAt  DateTime @default(now())
+  userId    String
+  recipeId  String
+  createdAt DateTime @default(now())
 
-  user       User     @relation(fields: [userId], references: [id])
-  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@id([userId, recipeId])
 }
 
 model Allergen {
-  id      String              @id @default(uuid())
-  name    String              @unique
+  id      String             @id @default(uuid())
+  name    String             @unique
   recipes RecipesAllergens[]
 }
 
@@ -134,8 +202,8 @@ model RecipesAllergens {
   recipeId   String
   allergenId String
 
-  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  allergen   Allergen @relation(fields: [allergenId], references: [id])
+  recipe   Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  allergen Allergen @relation(fields: [allergenId], references: [id])
 
   @@id([recipeId, allergenId])
 }

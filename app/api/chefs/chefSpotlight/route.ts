@@ -8,7 +8,7 @@ export async function GET() {
       where: {
         recipes: {
           some: {
-            isPublished: true,
+            status: "PUBLISHED",
           },
         },
       },
@@ -26,14 +26,14 @@ export async function GET() {
             },
           },
           where: {
-            isPublished: true,
+            status: "PUBLISHED",
           },
         },
         _count: {
           select: {
             recipes: {
               where: {
-                isPublished: true,
+                status: "PUBLISHED",
               },
             },
           },

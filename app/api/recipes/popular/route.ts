@@ -9,7 +9,7 @@ export async function GET() {
 
     const popularRecipes = await prisma.recipe.findMany({
       where: {
-        isPublished: true,
+        status: "PUBLISHED",
       },
       select: {
         id: true,
