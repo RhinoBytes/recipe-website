@@ -62,7 +62,7 @@ model RecipeIngredient {
   name          String
   displayOrder  Int      @default(0)
   
-  recipe        Recipe   @relation(fields: [recipeId], references: [id])
+  recipe        Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -78,7 +78,7 @@ model RecipesCategories {
   recipeId    String
   categoryId  String
 
-  recipe      Recipe   @relation(fields: [recipeId], references: [id])
+  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   category    Category @relation(fields: [categoryId], references: [id])
 
   @@id([recipeId, categoryId])
@@ -94,7 +94,7 @@ model RecipesTags {
   recipeId String
   tagId    String
 
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   tag      Tag    @relation(fields: [tagId], references: [id])
 
   @@id([recipeId, tagId])
@@ -108,7 +108,7 @@ model Review {
   comment    String?
   createdAt  DateTime  @default(now())
 
-  recipe     Recipe    @relation(fields: [recipeId], references: [id])
+  recipe     Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   user       User      @relation(fields: [userId], references: [id])
 }
 
@@ -118,7 +118,7 @@ model FavoriteRecipe {
   createdAt  DateTime @default(now())
 
   user       User     @relation(fields: [userId], references: [id])
-  recipe     Recipe   @relation(fields: [recipeId], references: [id])
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@id([userId, recipeId])
 }
@@ -133,7 +133,7 @@ model RecipesAllergens {
   recipeId   String
   allergenId String
 
-  recipe     Recipe   @relation(fields: [recipeId], references: [id])
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   allergen   Allergen @relation(fields: [allergenId], references: [id])
 
   @@id([recipeId, allergenId])
