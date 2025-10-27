@@ -82,7 +82,7 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
           // Non-authenticated user options
           <>
             <Link
-              href="/auth"
+              href="/auth?tab=login"
               onClick={() => setDropdownOpen(false)}
               className="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 hover:text-amber-700 transition-colors"
             >
@@ -90,7 +90,7 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
               Sign In
             </Link>
             <Link
-              href="/auth"
+              href="/auth?tab=register"
               onClick={() => setDropdownOpen(false)}
               className="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 hover:text-amber-700 transition-colors"
             >

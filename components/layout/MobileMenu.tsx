@@ -67,7 +67,7 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
               My Profile
             </Link>
             <Link
-              href="/create"
+              href="/recipes/new"
               onClick={handleLinkClick}
               className="flex items-center gap-3 text-amber-700 font-medium hover:text-amber-800 transition-colors py-1"
             >
@@ -86,7 +86,7 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
           // Non-authenticated user options
           <>
             <Link
-              href="/auth"
+              href="/auth?tab=login"
               onClick={handleLinkClick}
               className="flex items-center gap-3 text-gray-800 font-medium hover:text-amber-700 transition-colors py-1"
             >
@@ -94,7 +94,7 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
               Sign In
             </Link>
             <Link
-              href="/auth"
+              href="/auth?tab=register"
               onClick={handleLinkClick}
               className="flex items-center gap-3 text-gray-800 font-medium hover:text-amber-700 transition-colors py-1"
             >
