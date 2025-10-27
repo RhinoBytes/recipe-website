@@ -1,5 +1,19 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import OpenAI from "openai";
+
+/**
+ * Recipe Formatting API with OpenAI Integration
+ * 
+ * This endpoint intelligently formats recipes using OpenAI's GPT-4 when an API key is available.
+ * If no OpenAI API key is configured (OPENAI_API_KEY env var), it falls back to a simple
+ * text parsing implementation that extracts basic recipe information.
+ * 
+ * To enable OpenAI integration:
+ * 1. Sign up for an OpenAI API key at https://platform.openai.com/
+ * 2. Set the OPENAI_API_KEY environment variable
+ * 3. The endpoint will automatically use GPT-4 for better recipe parsing
+ */
 
 interface RecipeIngredient {
   amount: number | null;
@@ -26,10 +40,15 @@ interface FormattedRecipe {
   allergens: string[];
 }
 
+// Initialize OpenAI client (will be null if no API key)
+const openai = process.env.OPENAI_API_KEY 
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
+
 /**
  * POST /api/ai/format-recipe
  * Accepts raw text or structured data and returns a formatted recipe object
- * This is a mock implementation that provides basic parsing
+ * Uses OpenAI if available, falls back to mock implementation
  */
 export async function POST(request: Request) {
   try {
@@ -48,11 +67,19 @@ export async function POST(request: Request) {
     let formattedRecipe: FormattedRecipe;
 
     if (text) {
-      // Parse raw text into structured recipe
-      formattedRecipe = parseRecipeText(text);
+      // Parse raw text into structured recipe using AI if available
+      if (openai) {
+        formattedRecipe = await parseRecipeWithOpenAI(text);
+      } else {
+        formattedRecipe = parseRecipeText(text);
+      }
     } else if (data) {
       // Validate and complete existing recipe data
-      formattedRecipe = validateAndCompleteRecipe(data);
+      if (openai && !data.calories) {
+        formattedRecipe = await validateAndCompleteRecipeWithAI(data);
+      } else {
+        formattedRecipe = validateAndCompleteRecipe(data);
+      }
     } else {
       return NextResponse.json(
         { error: "Either 'text' or 'data' must be provided" },
@@ -60,8 +87,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Add nutrition data if missing
-    if (!formattedRecipe.calories) {
+    // Add nutrition data if missing (and not using AI)
+    if (!formattedRecipe.calories && !openai) {
       formattedRecipe = addNutritionData(formattedRecipe);
     }
 
@@ -73,6 +100,110 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Parse recipe text using OpenAI
+ */
+async function parseRecipeWithOpenAI(text: string): Promise<FormattedRecipe> {
+  if (!openai) {
+    throw new Error("OpenAI client not initialized");
+  }
+
+  const prompt = `Parse the following recipe text and return a JSON object with this exact structure:
+{
+  "title": "Recipe Title",
+  "description": "Brief description",
+  "instructions": "Step by step instructions",
+  "servings": 4,
+  "prepTimeMinutes": 15,
+  "cookTimeMinutes": 30,
+  "calories": 350,
+  "proteinG": 25,
+  "fatG": 15,
+  "carbsG": 40,
+  "ingredients": [
+    {"amount": 2, "unit": "cups", "name": "flour", "displayOrder": 0}
+  ],
+  "tags": ["Quick", "Easy"],
+  "categories": ["Dinner", "Main Course"],
+  "allergens": ["Gluten", "Dairy"]
+}
+
+Extract as much information as possible. For nutrition values, provide reasonable estimates based on the ingredients.
+
+Recipe text:
+${text}`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: "You are a helpful recipe parser. Always respond with valid JSON only, no additional text.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    response_format: { type: "json_object" },
+  });
+
+  const result = completion.choices[0].message.content;
+  if (!result) {
+    throw new Error("No response from OpenAI");
+  }
+
+  const parsed = JSON.parse(result);
+  
+  // Ensure ingredients have displayOrder
+  if (parsed.ingredients && Array.isArray(parsed.ingredients)) {
+    parsed.ingredients = parsed.ingredients.map((ing: RecipeIngredient, index: number) => ({
+      ...ing,
+      displayOrder: ing.displayOrder ?? index,
+    }));
+  }
+
+  return parsed as FormattedRecipe;
+}
+
+/**
+ * Validate and complete recipe with OpenAI (adds nutrition data)
+ */
+async function validateAndCompleteRecipeWithAI(data: Partial<FormattedRecipe>): Promise<FormattedRecipe> {
+  if (!openai) {
+    throw new Error("OpenAI client not initialized");
+  }
+
+  const prompt = `Given this partial recipe data, add accurate nutrition information (calories, protein, fat, carbs) based on the ingredients and servings. Return the complete recipe as JSON:
+
+${JSON.stringify(data, null, 2)}
+
+Return the same structure with added nutrition fields.`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: "You are a nutrition expert. Calculate accurate nutrition values based on recipe ingredients. Always respond with valid JSON only.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    response_format: { type: "json_object" },
+  });
+
+  const result = completion.choices[0].message.content;
+  if (!result) {
+    throw new Error("No response from OpenAI");
+  }
+
+  const parsed = JSON.parse(result);
+  return validateAndCompleteRecipe(parsed);
 }
 
 function parseRecipeText(text: string): FormattedRecipe {

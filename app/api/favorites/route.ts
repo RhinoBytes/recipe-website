@@ -1,0 +1,233 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+
+/**
+ * GET /api/favorites
+ * Get all favorite recipes for the currently authenticated user
+ */
+export async function GET() {
+  try {
+    const currentUser = await getCurrentUser();
+    
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const favorites = await prisma.favoriteRecipe.findMany({
+      where: { userId: currentUser.userId },
+      include: {
+        recipe: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                avatarUrl: true,
+              },
+            },
+            tags: {
+              include: {
+                tag: true,
+              },
+            },
+            categories: {
+              include: {
+                category: true,
+              },
+            },
+            reviews: {
+              select: {
+                rating: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    // Format favorites for display
+    const formattedFavorites = favorites.map(({ recipe }) => {
+      const totalRating = recipe.reviews.reduce(
+        (sum, review) => sum + review.rating,
+        0
+      );
+      const averageRating =
+        recipe.reviews.length > 0
+          ? Math.round(totalRating / recipe.reviews.length)
+          : 0;
+
+      return {
+        id: recipe.id,
+        slug: recipe.slug,
+        title: recipe.title,
+        description: recipe.description,
+        imageUrl: recipe.imageUrl,
+        prepTimeMinutes: recipe.prepTimeMinutes,
+        cookTimeMinutes: recipe.cookTimeMinutes,
+        servings: recipe.servings,
+        rating: averageRating,
+        reviewCount: recipe.reviews.length,
+        author: {
+          id: recipe.author.id,
+          name: recipe.author.username,
+          avatar: recipe.author.avatarUrl || recipe.author.username.charAt(0),
+        },
+        tags: recipe.tags.map((rt) => rt.tag.name),
+        categories: recipe.categories.map((rc) => rc.category.name),
+      };
+    });
+
+    return NextResponse.json({
+      favorites: formattedFavorites,
+    });
+  } catch (error) {
+    console.error("Error fetching favorites:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch favorites" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST /api/favorites
+ * Add a recipe to favorites
+ */
+export async function POST(request: Request) {
+  try {
+    const currentUser = await getCurrentUser();
+    
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { recipeId } = body;
+
+    if (!recipeId) {
+      return NextResponse.json(
+        { error: "Recipe ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if recipe exists
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: recipeId },
+    });
+
+    if (!recipe) {
+      return NextResponse.json(
+        { error: "Recipe not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if already favorited
+    const existingFavorite = await prisma.favoriteRecipe.findUnique({
+      where: {
+        userId_recipeId: {
+          userId: currentUser.userId,
+          recipeId,
+        },
+      },
+    });
+
+    if (existingFavorite) {
+      return NextResponse.json(
+        { error: "Recipe already favorited" },
+        { status: 409 }
+      );
+    }
+
+    // Create favorite
+    const favorite = await prisma.favoriteRecipe.create({
+      data: {
+        userId: currentUser.userId,
+        recipeId,
+      },
+    });
+
+    return NextResponse.json(favorite, { status: 201 });
+  } catch (error) {
+    console.error("Error adding favorite:", error);
+    return NextResponse.json(
+      { error: "Failed to add favorite" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/favorites
+ * Remove a recipe from favorites
+ */
+export async function DELETE(request: Request) {
+  try {
+    const currentUser = await getCurrentUser();
+    
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const recipeId = searchParams.get("recipeId");
+
+    if (!recipeId) {
+      return NextResponse.json(
+        { error: "Recipe ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if favorite exists
+    const existingFavorite = await prisma.favoriteRecipe.findUnique({
+      where: {
+        userId_recipeId: {
+          userId: currentUser.userId,
+          recipeId,
+        },
+      },
+    });
+
+    if (!existingFavorite) {
+      return NextResponse.json(
+        { error: "Favorite not found" },
+        { status: 404 }
+      );
+    }
+
+    // Delete favorite
+    await prisma.favoriteRecipe.delete({
+      where: {
+        userId_recipeId: {
+          userId: currentUser.userId,
+          recipeId,
+        },
+      },
+    });
+
+    return NextResponse.json({
+      message: "Favorite removed successfully",
+    });
+  } catch (error) {
+    console.error("Error removing favorite:", error);
+    return NextResponse.json(
+      { error: "Failed to remove favorite" },
+      { status: 500 }
+    );
+  }
+}

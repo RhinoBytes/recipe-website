@@ -1,7 +1,13 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
 import Image from "next/image";
 import { Clock, Flame, Users, Tag, AlertCircle } from "lucide-react";
+import RecipeActions from "@/components/RecipeActions";
+import FavoriteButton from "@/components/FavoriteButton";
+import RecipeReviews from "@/components/RecipeReviews";
+import SocialShare from "@/components/SocialShare";
+import PrintButton from "@/components/PrintButton";
 
 interface RecipePageProps {
   params: Promise<{ slug: string }>;
@@ -9,6 +15,7 @@ interface RecipePageProps {
 
 export default async function RecipePage({ params }: RecipePageProps) {
   const { slug } = await params;
+  const currentUser = await getCurrentUser();
 
   const recipe = await prisma.recipe.findUnique({
     where: { slug },
@@ -47,6 +54,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
   if (!recipe) {
     notFound();
   }
+
+  const isAuthor = currentUser?.userId === recipe.authorId;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -92,6 +101,17 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Recipe Actions (Edit/Delete) - Author Only */}
+        <div className="flex gap-3 mb-6">
+          <RecipeActions slug={slug} isAuthor={isAuthor} />
+          <FavoriteButton recipeId={recipe.id} />
+          <SocialShare 
+            title={recipe.title}
+            description={recipe.description || undefined}
+          />
+          <PrintButton />
+        </div>
+        
         {/* Hero Image */}
         {recipe.imageUrl && (
           <div className="mb-8">
@@ -263,6 +283,12 @@ export default async function RecipePage({ params }: RecipePageProps) {
             </div>
           </div>
         </div>
+
+        {/* Reviews & Ratings */}
+        <RecipeReviews 
+          recipeSlug={slug} 
+          isAuthor={isAuthor} 
+        />
       </div>
     </div>
   );
