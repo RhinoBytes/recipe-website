@@ -6,6 +6,8 @@ import { Clock, Flame, Users, Tag, AlertCircle } from "lucide-react";
 import RecipeActions from "@/components/RecipeActions";
 import FavoriteButton from "@/components/FavoriteButton";
 import RecipeReviews from "@/components/RecipeReviews";
+import SocialShare from "@/components/SocialShare";
+import PrintButton from "@/components/PrintButton";
 
 interface RecipePageProps {
   params: Promise<{ slug: string }>;
@@ -103,6 +105,11 @@ export default async function RecipePage({ params }: RecipePageProps) {
         <div className="flex gap-3 mb-6">
           <RecipeActions slug={slug} isAuthor={isAuthor} />
           <FavoriteButton recipeId={recipe.id} />
+          <SocialShare 
+            title={recipe.title}
+            description={recipe.description || undefined}
+          />
+          <PrintButton />
         </div>
         
         {/* Hero Image */}
