@@ -9,9 +9,14 @@ interface RecipeCardProps {
 }
 
 export default function RecipeCard({ recipe, priority = false }: RecipeCardProps) {
+  // Use author username if available, fallback to id
+  const recipeUrl = recipe.author.username 
+    ? `/recipes/${recipe.author.username}/${recipe.id}`
+    : `/recipes/${recipe.id}`;
+    
   return (
     <Link
-      href={`/recipes/${recipe.id}`}
+      href={recipeUrl}
       className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-1 transition group"
     >
       <div className="relative w-full h-48">

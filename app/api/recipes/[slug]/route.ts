@@ -275,9 +275,16 @@ export async function PATCH(
       return recipe;
     });
 
+    // Get author username for response
+    const author = await prisma.user.findUnique({
+      where: { id: currentUser.userId },
+      select: { username: true }
+    });
+
     return NextResponse.json({
       ...updatedRecipe,
       slug: updatedRecipe.slug,
+      username: author?.username,
     });
   } catch (error) {
     console.error("Update recipe error:", error);

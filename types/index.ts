@@ -20,6 +20,7 @@ export interface Recipe {
   author: {
     name: string;
     avatar: string;
+    username?: string;
   };
 }
 

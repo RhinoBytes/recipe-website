@@ -173,7 +173,7 @@ export default function EditRecipePage() {
       }
 
       const recipe = await response.json();
-      router.push(`/recipes/${recipe.slug}`);
+      router.push(`/recipes/${recipe.username}/${recipe.slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update recipe");
     } finally {

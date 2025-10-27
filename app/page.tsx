@@ -71,6 +71,7 @@ async function getPopularRecipes() {
       author: {
         name: recipe.author.username,
         avatar: recipe.author.username.charAt(0),
+        username: recipe.author.username,
       },
     };
   });
@@ -125,6 +126,7 @@ async function getRecentRecipes() {
       author: {
         name: recipe.author.username,
         avatar: recipe.author.username.charAt(0),
+        username: recipe.author.username,
       },
     };
   });

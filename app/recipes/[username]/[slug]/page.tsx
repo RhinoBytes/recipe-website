@@ -10,15 +10,21 @@ import SocialShare from "@/components/SocialShare";
 import PrintButton from "@/components/PrintButton";
 
 interface RecipePageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ username: string; slug: string }>;
 }
 
 export default async function RecipePage({ params }: RecipePageProps) {
-  const { slug } = await params;
+  const { username, slug } = await params;
   const currentUser = await getCurrentUser();
 
-  const recipe = await prisma.recipe.findUnique({
-    where: { slug },
+  // Find recipe by slug and verify it belongs to the specified username
+  const recipe = await prisma.recipe.findFirst({
+    where: { 
+      slug,
+      author: {
+        username
+      }
+    },
     include: {
       author: {
         select: {
