@@ -38,16 +38,16 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
   };
 
   return (
-    <div className="md:hidden border-t border-orange-200 py-4 space-y-4 animate-fadeIn">
+    <div className="md:hidden border-t-2 border-border py-4 space-y-4 animate-fadeIn">
       {/* Search */}
       <form onSubmit={handleSearch} className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-900 w-4 h-4 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary w-4 h-4 pointer-events-none" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search recipes..."
-          className="w-full pl-10 pr-4 py-2 border-2 border-orange-200 rounded-full text-sm focus:outline-none focus:border-amber-700"
+          className="w-full pl-10 pr-4 py-2 border-2 border-border rounded-full text-sm bg-bg-secondary text-text focus:outline-none focus:border-accent"
         />
       </form>
 
@@ -58,7 +58,7 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
             <Link
               href={href}
               onClick={handleLinkClick}
-              className="block text-gray-800 font-medium hover:text-amber-700 transition-colors py-1"
+              className="block text-text font-medium hover:text-accent transition-colors py-1"
             >
               {label}
             </Link>
@@ -67,16 +67,16 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
       </ul>
 
       {/* auth Links */}
-      <div className="border-t border-orange-200 pt-4 space-y-2">
+      <div className="border-t-2 border-border pt-4 space-y-2">
         {loading ? (
-          <div className="text-gray-500">Loading...</div>
+          <div className="text-text-secondary">Loading...</div>
         ) : isAuthenticated ? (
           // Authenticated user options
           <>
             <Link
               href="/profile"
               onClick={handleLinkClick}
-              className="flex items-center gap-3 text-gray-800 font-medium hover:text-amber-700 transition-colors py-1"
+              className="flex items-center gap-3 text-text font-medium hover:text-accent transition-colors py-1"
             >
               <User size={16} />
               My Profile
@@ -84,14 +84,14 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
             <Link
               href="/recipes/new"
               onClick={handleLinkClick}
-              className="flex items-center gap-3 text-amber-700 font-medium hover:text-amber-800 transition-colors py-1"
+              className="flex items-center gap-3 text-accent font-medium hover:text-accent-hover transition-colors py-1"
             >
               <Plus size={16} />
               Create Recipe
             </Link>
             <button
               onClick={handleLogout}
-              className="flex w-full text-left items-center gap-3 text-gray-800 font-medium hover:text-red-600 transition-colors py-1"
+              className="flex w-full text-left items-center gap-3 text-text font-medium hover:text-error transition-colors py-1"
             >
               <LogOut size={16} />
               Sign Out
@@ -103,7 +103,7 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
             <Link
               href="/auth?tab=login"
               onClick={handleLinkClick}
-              className="flex items-center gap-3 text-gray-800 font-medium hover:text-amber-700 transition-colors py-1"
+              className="flex items-center gap-3 text-text font-medium hover:text-accent transition-colors py-1"
             >
               <LogIn size={16} />
               Sign In
@@ -111,7 +111,7 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
             <Link
               href="/auth?tab=register"
               onClick={handleLinkClick}
-              className="flex items-center gap-3 text-gray-800 font-medium hover:text-amber-700 transition-colors py-1"
+              className="flex items-center gap-3 text-text font-medium hover:text-accent transition-colors py-1"
             >
               <UserPlus size={16} />
               Register

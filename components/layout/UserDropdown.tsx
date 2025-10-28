@@ -23,7 +23,7 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center gap-2 px-4 py-2 text-gray-800 font-medium hover:text-amber-700 focus-visible:ring-2 focus-visible:ring-amber-700 rounded-md transition"
+        className="flex items-center gap-2 px-4 py-2 text-text font-medium hover:text-accent focus-visible:ring-2 focus-visible:ring-accent rounded-2xl transition"
         aria-haspopup="menu"
         aria-expanded={dropdownOpen}
         aria-controls="user-menu"
@@ -39,24 +39,24 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
       <div
         id="user-menu"
         role="menu"
-        className={`absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 transition-all duration-200 ease-out ${
+        className={`absolute right-0 mt-2 w-48 bg-bg-secondary rounded-2xl shadow-xl border-2 border-border py-2 z-50 transition-all duration-200 ease-out ${
           dropdownOpen
             ? 'opacity-100 scale-100 pointer-events-auto'
             : 'opacity-0 scale-95 pointer-events-none'
         }`}
       >
         {loading ? (
-          <div className="px-4 py-3 text-gray-500">Loading...</div>
+          <div className="px-4 py-3 text-text-secondary">Loading...</div>
         ) : isAuthenticated ? (
           // Authenticated user options
           <>
-            <div className="px-4 py-1 text-xs text-gray-500">
+            <div className="px-4 py-1 text-xs text-text-muted">
               Logged in as {user?.email || user?.username}
             </div>
             <Link
               href="/profile"
               onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 hover:text-amber-700 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 text-text hover:bg-accent-light/30 hover:text-accent transition-colors"
             >
               <User size={16} />
               My Profile
@@ -64,15 +64,15 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
             <Link
               href="/recipes/new"
               onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 text-amber-700 font-medium hover:bg-orange-50 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 text-accent font-medium hover:bg-accent-light/30 transition-colors"
             >
               <Plus size={16} />
               Create Recipe
             </Link>
-            <div className="h-px bg-orange-200 my-2"></div>
+            <div className="h-px bg-border my-2"></div>
             <button
               onClick={handleLogout}
-              className="flex w-full text-left items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 hover:text-red-600 transition-colors"
+              className="flex w-full text-left items-center gap-3 px-4 py-3 text-text hover:bg-accent-light/30 hover:text-error transition-colors"
             >
               <LogOut size={16} />
               Sign Out
@@ -84,7 +84,7 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
             <Link
               href="/auth?tab=login"
               onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 hover:text-amber-700 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 text-text hover:bg-accent-light/30 hover:text-accent transition-colors"
             >
               <LogIn size={16} />
               Sign In
@@ -92,7 +92,7 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
             <Link
               href="/auth?tab=register"
               onClick={() => setDropdownOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-gray-50 hover:text-amber-700 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 text-text hover:bg-accent-light/30 hover:text-accent transition-colors"
             >
               <UserPlus size={16} />
               Register

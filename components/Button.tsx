@@ -40,14 +40,14 @@ export default function Button(props: ButtonProps) {
   } = props as ButtonProps & { className?: string };
 
   const base =
-    "inline-flex items-center justify-center gap-2 font-medium rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60 disabled:pointer-events-none";
+    "inline-flex items-center justify-center gap-2 font-medium rounded-2xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-60 disabled:pointer-events-none";
   const variants = {
     primary:
-      "bg-[#d4735a] hover:bg-[#b85c42] text-white border border-transparent",
+      "bg-accent hover:bg-accent-hover text-bg border border-transparent shadow-md",
     secondary:
-      "bg-[#fef9f7] text-[#b85c42] border border-[#f0d5cf] hover:bg-[#f5ede8]",
+      "bg-secondary text-text border border-border hover:bg-secondary-hover shadow-sm",
     outline:
-      "bg-transparent text-[#d4735a] border-2 border-[#d4735a] hover:bg-[#f5ede8]",
+      "bg-transparent text-accent border-2 border-accent hover:bg-accent-light",
   } as const;
   const sizes = {
     sm: "px-3 py-1.5 text-sm",

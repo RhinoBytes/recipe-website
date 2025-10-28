@@ -1,1 +1,62 @@
+/* Import Google Fonts first */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&display=swap');
+
 @import "tailwindcss";
+@import "./theme.css";
+
+/* Tailwind theme configuration using CSS variables */
+@theme {
+  /* Font families */
+  --font-family-heading: 'Playfair Display', serif;
+  --font-family-body: 'Lora', serif;
+  --font-family-handwritten: 'Dancing Script', cursive;
+  
+  /* Colors mapped to CSS variables */
+  --color-bg: var(--bg);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-elevated: var(--bg-elevated);
+  
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-light: var(--secondary-light);
+  
+  --color-highlight: var(--highlight);
+  --color-highlight-hover: var(--highlight-hover);
+  
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-border-dark: var(--border-dark);
+  
+  --color-muted: var(--muted);
+  --color-muted-light: var(--muted-light);
+  
+  /* Shadows */
+  --color-shadow-sm: var(--shadow-sm);
+  --color-shadow-md: var(--shadow-md);
+  --color-shadow-lg: var(--shadow-lg);
+  
+  /* State colors */
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-family-body);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  line-height: 1.3;
+}
