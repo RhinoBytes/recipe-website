@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import {
   Prisma,
-  MeasurementUnit,
   Difficulty,
   RecipeStatus,
 } from "@prisma/client";
@@ -187,18 +186,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate ingredient units if provided
-    if (ingredients && Array.isArray(ingredients)) {
-      for (const ing of ingredients) {
-        if (ing.unit && !Object.values(MeasurementUnit).includes(ing.unit)) {
-          return NextResponse.json(
-            { error: `Invalid measurement unit: ${ing.unit}` },
-            { status: 400 }
-          );
-        }
-      }
-    }
-
     // Generate slug from title
     const slug = generateSlug(title);
 
@@ -312,7 +299,7 @@ export async function POST(request: Request) {
             (
               ing: {
                 amount?: string | null;
-                unit?: MeasurementUnit | null;
+                unit?: string | null;
                 name: string;
                 notes?: string | null;
                 groupName?: string | null;

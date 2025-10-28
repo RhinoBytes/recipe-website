@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { MeasurementUnit } from "@prisma/client";
 
 /**
  * GET /api/recipes/[slug]
@@ -244,7 +243,7 @@ export async function PATCH(
           await tx.recipeIngredient.createMany({
             data: ingredients.map((ing: { 
               amount?: string | null; 
-              unit?: MeasurementUnit | null; 
+              unit?: string | null; 
               name: string; 
               notes?: string | null;
               groupName?: string | null;

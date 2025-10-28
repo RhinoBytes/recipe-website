@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import OpenAI from "openai";
 import { z } from "zod";
-import { MeasurementUnit, Difficulty } from "@prisma/client";
+import { Difficulty } from "@prisma/client";
 
 /** Zod Schemas with preprocessing to handle AI quirks */
 const RecipeIngredientSchema = z.object({
@@ -13,15 +13,10 @@ const RecipeIngredientSchema = z.object({
   unit: z.preprocess(
     (val) => {
       if (val == null) return null;
-      const unitStr = String(val).toUpperCase().replace(/[- ]/g, '_');
-      // Try to match to a MeasurementUnit enum value
-      const enumValues = Object.values(MeasurementUnit) as string[];
-      if (enumValues.includes(unitStr)) {
-        return unitStr;
-      }
-      return null;
+      // Just convert to string, no enum validation
+      return String(val).toLowerCase();
     },
-    z.nativeEnum(MeasurementUnit).nullable()
+    z.string().nullable()
   ),
   name: z.string().min(1).max(200),
   notes: z.string().nullable().optional(),
@@ -208,10 +203,10 @@ title, description, servings, prepTimeMinutes, cookTimeMinutes,
 calories, proteinG, fatG, carbsG, cuisineName,
 difficulty (must be one of: EASY, MEDIUM, HARD),
 steps (array of objects with stepNumber, instruction, groupName, isOptional),
-ingredients (array with amount as string like "1/2" or "2-3", unit as one of the MeasurementUnit enums like CUP/TBSP/TSP/etc, name, notes, groupName, isOptional, displayOrder),
+ingredients (array with amount as string like "1/2" or "2-3", unit as lowercase string like "cup", "tbsp", "tsp", "oz", "lb", "g", etc., name, notes, groupName, isOptional, displayOrder),
 tags, categories, allergens.
 
-MeasurementUnit options: CUP, TBSP, TSP, FL_OZ, ML, L, PINT, QUART, GALLON, OZ, LB, G, KG, MG, PIECE, WHOLE, SLICE, CLOVE, PINCH, DASH, HANDFUL, TO_TASTE, AS_NEEDED
+Common unit strings: cup, tbsp, tsp, fl oz, ml, l, pint, quart, gallon, oz, lb, g, kg, mg, piece, whole, slice, clove, pinch, dash, handful, to taste, as needed
 
 CRITICAL REQUIREMENTS:
 - ALWAYS extract and include ALL cooking instructions/steps from the recipe text
@@ -219,6 +214,7 @@ CRITICAL REQUIREMENTS:
 - If recipe has grouped steps (e.g., "For the cake:", "For the frosting:"), set groupName accordingly
 - If not grouped, leave groupName as null
 - ingredients should have groupName set if they're in groups (e.g., "Cake Ingredients", "Frosting Ingredients")
+- unit should be a lowercase string (e.g., "cup", "tbsp", "oz"), not an enum value
 - If cuisineName is not in the recipe, intelligently determine it from the recipe content (e.g., "pasta carbonara" = "Italian", "pad thai" = "Thai")
 - If tags are not provided, generate relevant tags based on recipe characteristics (e.g., "quick", "vegetarian", "dessert", "dinner")
 - If categories are not provided, determine appropriate categories (e.g., "Main Dish", "Dessert", "Appetizer", "Side Dish")
@@ -262,7 +258,7 @@ ${JSON.stringify(data, null, 2)}
 Return JSON with all required fields. Ensure:
 - difficulty is one of: EASY, MEDIUM, HARD
 - steps is an array with stepNumber, instruction, groupName, isOptional
-- ingredients have amount as string, unit as valid MeasurementUnit enum or null, and groupName if applicable
+- ingredients have amount as string, unit as lowercase string (e.g., "cup", "tbsp", "oz") or null, and groupName if applicable
 - If cuisineName is missing, intelligently determine it from the recipe content
 - If tags are missing, generate relevant tags based on recipe characteristics
 - If categories are missing, determine appropriate categories

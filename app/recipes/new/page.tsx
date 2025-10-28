@@ -3,17 +3,17 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedPage from "@/components/ProtectedPage";
-import { Plus, Trash2, Loader2, Sparkles, Upload, AlertCircle } from "lucide-react";
+import { Loader2, Sparkles, Upload, AlertCircle } from "lucide-react";
 import Button from "@/components/Button";
 import AIRecipeModal from "@/components/ui/AIRecipeModal";
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
-import DraggableItem from "@/components/ui/DraggableItem";
 import { FormattedRecipeResponse, RecipeIngredient } from "@/types/recipe";
-import { MeasurementUnit, Difficulty, RecipeStatus } from "@prisma/client";
+import { Difficulty, RecipeStatus } from "@prisma/client";
+import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
 
 interface Ingredient {
   amount: string | null;
-  unit: MeasurementUnit | null;
+  unit: string | null;
   name: string;
   notes: string | null;
   groupName: string | null;
@@ -60,10 +60,15 @@ interface Allergen {
 export default function NewRecipePage() {
   const router = useRouter();
   const [showAIModal, setShowAIModal] = useState(true); // Show modal on page load
+  
+  // State for textarea inputs
+  const [ingredientsText, setIngredientsText] = useState("");
+  const [stepsText, setStepsText] = useState("");
+  
   const [formData, setFormData] = useState<RecipeFormData>({
     title: "",
     description: "",
-    steps: [{ stepNumber: 1, instruction: "", groupName: null, isOptional: false }],
+    steps: [],
     servings: 4,
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
@@ -72,7 +77,7 @@ export default function NewRecipePage() {
     sourceUrl: "",
     sourceText: "",
     cuisineName: "",
-    ingredients: [{ amount: null, unit: null, name: "", notes: null, groupName: null, isOptional: false, displayOrder: 0 }],
+    ingredients: [],
     tags: [],
     categories: [],
     allergens: [],
@@ -85,8 +90,6 @@ export default function NewRecipePage() {
   const [error, setError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState("");
   const [imageError, setImageError] = useState(false);
-  const [draggedIngredient, setDraggedIngredient] = useState<number | null>(null);
-  const [draggedStep, setDraggedStep] = useState<number | null>(null);
 
   useEffect(() => {
     // Fetch categories and allergens
@@ -149,7 +152,7 @@ export default function NewRecipePage() {
       }));
     } else {
       // Default empty step
-      finalSteps = [{ stepNumber: 1, instruction: "", groupName: null, isOptional: false }];
+      finalSteps = [];
     }
 
     // Convert difficulty string to enum
@@ -160,6 +163,23 @@ export default function NewRecipePage() {
       else if (upper === "HARD") difficultyEnum = Difficulty.HARD;
       else difficultyEnum = Difficulty.MEDIUM;
     }
+
+    // Convert AI ingredients to our format
+    const finalIngredients = formatted.ingredients && formatted.ingredients.length > 0
+      ? formatted.ingredients.map((ing: RecipeIngredient, idx: number) => ({
+          amount: ing.amount || null,
+          unit: ing.unit || null,
+          name: ing.name,
+          notes: ing.notes || null,
+          groupName: ing.groupName || null,
+          isOptional: ing.isOptional || false,
+          displayOrder: idx,
+        }))
+      : [];
+
+    // Convert to textarea format
+    setIngredientsText(ingredientsToText(finalIngredients));
+    setStepsText(stepsToText(finalSteps));
 
     // Update form with AI-formatted data
     setFormData({
@@ -174,17 +194,7 @@ export default function NewRecipePage() {
       sourceUrl: "",
       sourceText: "",
       cuisineName: formatted.cuisineName || "",
-      ingredients: formatted.ingredients && formatted.ingredients.length > 0
-        ? formatted.ingredients.map((ing: RecipeIngredient, idx: number) => ({
-            amount: ing.amount != null ? String(ing.amount) : null,
-            unit: ing.unit as MeasurementUnit | null,
-            name: ing.name,
-            notes: null,
-            groupName: null,
-            isOptional: false,
-            displayOrder: idx,
-          }))
-        : [{ amount: null, unit: null, name: "", notes: null, groupName: null, isOptional: false, displayOrder: 0 }],
+      ingredients: finalIngredients,
       tags: formatted.tags || [],
       categories: formatted.categories || [],
       allergens: formatted.allergens || [],
@@ -229,10 +239,28 @@ export default function NewRecipePage() {
     setError(null);
     
     try {
+      // Parse textareas into structured data
+      const parsedIngredients = parseIngredients(ingredientsText);
+      const parsedSteps = parseSteps(stepsText);
+
+      // Validate at least one ingredient and step
+      if (parsedIngredients.length === 0) {
+        throw new Error("Please add at least one ingredient");
+      }
+      if (parsedSteps.length === 0) {
+        throw new Error("Please add at least one instruction step");
+      }
+
+      const submissionData = {
+        ...formData,
+        ingredients: parsedIngredients,
+        steps: parsedSteps,
+      };
+
       const response = await fetch("/api/recipes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submissionData),
       });
 
       if (!response.ok) {
@@ -247,52 +275,6 @@ export default function NewRecipePage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const addIngredient = () => {
-    setFormData({
-      ...formData,
-      ingredients: [
-        ...formData.ingredients,
-        { amount: null, unit: null, name: "", notes: null, groupName: null, isOptional: false, displayOrder: formData.ingredients.length },
-      ],
-    });
-  };
-
-  const removeIngredient = (index: number) => {
-    setFormData({
-      ...formData,
-      ingredients: formData.ingredients.filter((_, i) => i !== index),
-    });
-  };
-
-  const updateIngredient = (index: number, field: keyof Ingredient, value: string | MeasurementUnit | boolean | null) => {
-    const newIngredients = [...formData.ingredients];
-    newIngredients[index] = { ...newIngredients[index], [field]: value };
-    setFormData({ ...formData, ingredients: newIngredients });
-  };
-
-  const addStep = () => {
-    setFormData({
-      ...formData,
-      steps: [
-        ...formData.steps,
-        { stepNumber: formData.steps.length + 1, instruction: "", groupName: null, isOptional: false },
-      ],
-    });
-  };
-
-  const removeStep = (index: number) => {
-    const newSteps = formData.steps
-      .filter((_, i) => i !== index)
-      .map((step, idx) => ({ ...step, stepNumber: idx + 1 }));
-    setFormData({ ...formData, steps: newSteps });
-  };
-
-  const updateStep = (index: number, field: keyof RecipeStep, value: string | boolean | null) => {
-    const newSteps = [...formData.steps];
-    newSteps[index] = { ...newSteps[index], [field]: value };
-    setFormData({ ...formData, steps: newSteps });
   };
 
   const addTag = () => {
@@ -338,58 +320,6 @@ export default function NewRecipePage() {
         allergens: [...formData.allergens, allergenName],
       });
     }
-  };
-
-  // Drag and drop handlers for ingredients
-  const handleIngredientDragStart = (index: number) => {
-    setDraggedIngredient(index);
-  };
-
-  const handleIngredientDragEnter = (index: number) => {
-    if (draggedIngredient === null || draggedIngredient === index) return;
-    
-    const newIngredients = [...formData.ingredients];
-    const draggedItem = newIngredients[draggedIngredient];
-    newIngredients.splice(draggedIngredient, 1);
-    newIngredients.splice(index, 0, draggedItem);
-    
-    // Update displayOrder
-    newIngredients.forEach((ing, idx) => {
-      ing.displayOrder = idx;
-    });
-    
-    setFormData({ ...formData, ingredients: newIngredients });
-    setDraggedIngredient(index);
-  };
-
-  const handleIngredientDragEnd = () => {
-    setDraggedIngredient(null);
-  };
-
-  // Drag and drop handlers for steps
-  const handleStepDragStart = (index: number) => {
-    setDraggedStep(index);
-  };
-
-  const handleStepDragEnter = (index: number) => {
-    if (draggedStep === null || draggedStep === index) return;
-    
-    const newSteps = [...formData.steps];
-    const draggedItem = newSteps[draggedStep];
-    newSteps.splice(draggedStep, 1);
-    newSteps.splice(index, 0, draggedItem);
-    
-    // Update stepNumber for display (1-based sequential)
-    newSteps.forEach((step, idx) => {
-      step.stepNumber = idx + 1;
-    });
-    
-    setFormData({ ...formData, steps: newSteps });
-    setDraggedStep(index);
-  };
-
-  const handleStepDragEnd = () => {
-    setDraggedStep(null);
   };
 
   return (
@@ -614,199 +544,45 @@ export default function NewRecipePage() {
               {/* Ingredients */}
               <CollapsibleSection 
                 title="Ingredients" 
-                badge={formData.ingredients.length}
                 defaultOpen={true}
               >
                 <p className="text-sm text-gray-600 mb-4">
-                  <span className="font-medium">Tip:</span> Drag items to reorder. Group related ingredients together.
+                  <span className="font-medium">Enter one ingredient per line.</span> Format: <code className="bg-gray-100 px-1 rounded">amount unit name (notes) optional</code>
+                  <br />
+                  <span className="text-xs">Examples: <code className="bg-gray-100 px-1 rounded">2 cups flour</code>, <code className="bg-gray-100 px-1 rounded">1/2 cup sugar (or brown sugar) optional</code></span>
+                  <br />
+                  <span className="text-xs">Group ingredients: <code className="bg-gray-100 px-1 rounded">For the sauce:</code></span>
                 </p>
-                <div className="space-y-3">
-                  {formData.ingredients.map((ingredient, index) => (
-                    <DraggableItem
-                      key={index}
-                      index={index}
-                      onDragStart={handleIngredientDragStart}
-                      onDragEnter={handleIngredientDragEnter}
-                      onDragEnd={handleIngredientDragEnd}
-                      isDragging={draggedIngredient === index}
-                    >
-                      <div className="border border-gray-200 rounded-lg p-3 space-y-2">
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <input
-                            type="text"
-                            value={ingredient.amount || ""}
-                            onChange={(e) => updateIngredient(index, "amount", e.target.value || null)}
-                            className="w-full sm:w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                            placeholder="Amount (e.g., 1/2, 2-3)"
-                          />
-                          <select
-                            value={ingredient.unit || ""}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (!value || Object.values(MeasurementUnit).includes(value as MeasurementUnit)) {
-                                updateIngredient(index, "unit", value ? value as MeasurementUnit : null);
-                              }
-                            }}
-                            className="w-full sm:w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                          >
-                            <option value="">None</option>
-                            <option value={MeasurementUnit.CUP}>Cup</option>
-                            <option value={MeasurementUnit.TBSP}>Tbsp</option>
-                            <option value={MeasurementUnit.TSP}>Tsp</option>
-                            <option value={MeasurementUnit.FL_OZ}>Fl oz</option>
-                            <option value={MeasurementUnit.ML}>mL</option>
-                            <option value={MeasurementUnit.L}>L</option>
-                            <option value={MeasurementUnit.PINT}>Pint</option>
-                            <option value={MeasurementUnit.QUART}>Quart</option>
-                            <option value={MeasurementUnit.GALLON}>Gallon</option>
-                            <option value={MeasurementUnit.OZ}>oz</option>
-                            <option value={MeasurementUnit.LB}>lb</option>
-                            <option value={MeasurementUnit.G}>g</option>
-                            <option value={MeasurementUnit.KG}>kg</option>
-                            <option value={MeasurementUnit.MG}>mg</option>
-                            <option value={MeasurementUnit.PIECE}>Piece</option>
-                            <option value={MeasurementUnit.WHOLE}>Whole</option>
-                            <option value={MeasurementUnit.SLICE}>Slice</option>
-                            <option value={MeasurementUnit.CLOVE}>Clove</option>
-                            <option value={MeasurementUnit.PINCH}>Pinch</option>
-                            <option value={MeasurementUnit.DASH}>Dash</option>
-                            <option value={MeasurementUnit.HANDFUL}>Handful</option>
-                            <option value={MeasurementUnit.TO_TASTE}>To taste</option>
-                            <option value={MeasurementUnit.AS_NEEDED}>As needed</option>
-                          </select>
-                          <input
-                            type="text"
-                            value={ingredient.name}
-                            onChange={(e) => updateIngredient(index, "name", e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                            placeholder="Ingredient name *"
-                            required
-                          />
-                          {formData.ingredients.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeIngredient(index)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
-                              title="Remove ingredient"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          )}
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <input
-                            type="text"
-                            value={ingredient.groupName || ""}
-                            onChange={(e) => updateIngredient(index, "groupName", e.target.value || null)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                            placeholder="Group (e.g., For the dough)"
-                          />
-                          <input
-                            type="text"
-                            value={ingredient.notes || ""}
-                            onChange={(e) => updateIngredient(index, "notes", e.target.value || null)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                            placeholder="Notes (e.g., or substitute)"
-                          />
-                          <label className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm whitespace-nowrap">
-                            <input
-                              type="checkbox"
-                              checked={ingredient.isOptional}
-                              onChange={(e) => updateIngredient(index, "isOptional", e.target.checked)}
-                              className="rounded focus:ring-2 focus:ring-amber-500"
-                            />
-                            Optional
-                          </label>
-                        </div>
-                      </div>
-                    </DraggableItem>
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={addIngredient}
-                  className="mt-4 flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium transition-colors"
-                >
-                  <Plus size={18} />
-                  Add Ingredient
-                </button>
+                <textarea
+                  value={ingredientsText}
+                  onChange={(e) => setIngredientsText(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono text-sm"
+                  rows={10}
+                  placeholder={`2 cups all-purpose flour\n1/2 cup sugar\n1 tsp baking powder\n\nFor the sauce:\n3 tbsp olive oil\n2 cloves garlic, minced (optional)`}
+                  required
+                />
               </CollapsibleSection>
 
               {/* Instructions/Steps */}
               <CollapsibleSection 
                 title="Instructions" 
-                badge={formData.steps.length}
                 defaultOpen={true}
               >
                 <p className="text-sm text-gray-600 mb-4">
-                  <span className="font-medium">Tip:</span> Drag steps to reorder. Steps are automatically numbered.
+                  <span className="font-medium">Enter one step per line.</span> Steps will be numbered automatically.
+                  <br />
+                  <span className="text-xs">Group steps: <code className="bg-gray-100 px-1 rounded">For the cake:</code></span>
+                  <br />
+                  <span className="text-xs">Mark optional: Add <code className="bg-gray-100 px-1 rounded">(optional)</code> at the end</span>
                 </p>
-                <div className="space-y-3">
-                  {formData.steps.map((step, index) => (
-                    <DraggableItem
-                      key={index}
-                      index={index}
-                      onDragStart={handleStepDragStart}
-                      onDragEnter={handleStepDragEnter}
-                      onDragEnd={handleStepDragEnd}
-                      isDragging={draggedStep === index}
-                    >
-                      <div className="border border-gray-200 rounded-lg p-3">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center font-semibold text-sm">
-                            {index + 1}
-                          </div>
-                          <textarea
-                            value={step.instruction}
-                            onChange={(e) => updateStep(index, "instruction", e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                            rows={3}
-                            placeholder="Describe this step... *"
-                            required
-                          />
-                          {formData.steps.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeStep(index)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
-                              title="Remove step"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          )}
-                        </div>
-                        <div className="mt-2 ml-11 space-y-2">
-                          <input
-                            type="text"
-                            value={step.groupName || ""}
-                            onChange={(e) => updateStep(index, "groupName", e.target.value || null)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                            placeholder="Group name (e.g., For the cake, For the frosting)"
-                          />
-                          <label className="flex items-center gap-2 text-sm">
-                            <input
-                              type="checkbox"
-                              checked={step.isOptional}
-                              onChange={(e) => updateStep(index, "isOptional", e.target.checked)}
-                              className="rounded focus:ring-2 focus:ring-amber-500"
-                            />
-                            Optional step
-                          </label>
-                        </div>
-                      </div>
-                    </DraggableItem>
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={addStep}
-                  className="mt-4 flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium transition-colors"
-                >
-                  <Plus size={18} />
-                  Add Step
-                </button>
+                <textarea
+                  value={stepsText}
+                  onChange={(e) => setStepsText(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                  rows={12}
+                  placeholder={`Preheat oven to 350°F\nMix flour and sugar in a large bowl\n\nFor the sauce:\nHeat oil in a pan\nAdd garlic and cook until fragrant (optional)`}
+                  required
+                />
               </CollapsibleSection>
 
               {/* Tags */}

@@ -9,31 +9,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum MeasurementUnit {
-  CUP
-  TBSP
-  TSP
-  FL_OZ
-  ML
-  L
-  PINT
-  QUART
-  GALLON
-  OZ
-  LB
-  G
-  KG
-  MG
-  PIECE
-  WHOLE
-  SLICE
-  CLOVE
-  PINCH
-  DASH
-  HANDFUL
-  TO_TASTE
-  AS_NEEDED
-}
+
 
 enum Difficulty {
   EASY
@@ -103,15 +79,15 @@ model Recipe {
 }
 
 model RecipeIngredient {
-  id           String           @id @default(uuid())
+  id           String  @id @default(uuid())
   recipeId     String
   amount       String?
-  unit         MeasurementUnit?
+  unit         String?
   name         String
   notes        String?
   groupName    String?
-  isOptional   Boolean          @default(false)
-  displayOrder Int              @default(0)
+  isOptional   Boolean @default(false)
+  displayOrder Int     @default(0)
 
   recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }
