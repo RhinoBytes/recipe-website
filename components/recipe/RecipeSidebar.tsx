@@ -38,8 +38,8 @@ export default function RecipeSidebar({
             size={24}
             className={
               star <= roundedRating
-                ? "fill-amber-400 text-amber-400"
-                : "text-gray-300"
+                ? "fill-highlight text-highlight"
+                : "text-border"
             }
           />
         ))}
@@ -57,14 +57,14 @@ export default function RecipeSidebar({
   return (
     <div className="space-y-6">
       {/* Recipe Actions */}
-      <div className="bg-white rounded-lg shadow-md p-6 space-y-3">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Recipe Actions</h3>
+      <div className="bg-bg-secondary rounded-lg shadow-md p-6 space-y-3">
+        <h3 className="text-lg font-semibold text-text mb-4">Recipe Actions</h3>
         <FavoriteButton recipeId={recipeId} />
         <SocialShare title={title} description={description} />
         <PrintButton />
         <button
           onClick={handlePrintIngredients}
-          className="w-full flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium transition-colors print:hidden"
+          className="w-full flex items-center gap-2 px-4 py-2 bg-bg text-text hover:bg-accent-light rounded-lg font-medium transition-colors print:hidden"
         >
           <ShoppingCart size={20} />
           Print Ingredients
@@ -73,14 +73,14 @@ export default function RecipeSidebar({
 
       {/* Rating Section */}
       {(averageRating > 0 || reviewCount > 0) && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Rating</h3>
+        <div className="bg-bg-secondary rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-text mb-4">Rating</h3>
           <div className="text-center">
             {renderStars(averageRating)}
-            <div className="mt-2 text-2xl font-bold text-gray-900">
+            <div className="mt-2 text-2xl font-bold text-text">
               {averageRating.toFixed(1)}
             </div>
-            <div className="text-sm text-gray-600 mt-1">
+            <div className="text-sm text-text-secondary mt-1">
               {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
             </div>
           </div>
@@ -89,33 +89,33 @@ export default function RecipeSidebar({
 
       {/* Nutrition Info */}
       {hasNutrition && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="bg-bg-secondary rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-text mb-4">
             Nutrition Per Serving
           </h3>
           <div className="grid grid-cols-2 gap-4">
             {calories && (
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900">{calories}</div>
-                <div className="text-xs text-gray-600 mt-1">Calories</div>
+              <div className="text-center p-3 bg-bg rounded-lg">
+                <div className="text-2xl font-bold text-text">{calories}</div>
+                <div className="text-xs text-text-secondary mt-1">Calories</div>
               </div>
             )}
             {proteinG && (
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900">{proteinG}g</div>
-                <div className="text-xs text-gray-600 mt-1">Protein</div>
+              <div className="text-center p-3 bg-bg rounded-lg">
+                <div className="text-2xl font-bold text-text">{proteinG}g</div>
+                <div className="text-xs text-text-secondary mt-1">Protein</div>
               </div>
             )}
             {fatG && (
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900">{fatG}g</div>
-                <div className="text-xs text-gray-600 mt-1">Fat</div>
+              <div className="text-center p-3 bg-bg rounded-lg">
+                <div className="text-2xl font-bold text-text">{fatG}g</div>
+                <div className="text-xs text-text-secondary mt-1">Fat</div>
               </div>
             )}
             {carbsG && (
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-900">{carbsG}g</div>
-                <div className="text-xs text-gray-600 mt-1">Carbs</div>
+              <div className="text-center p-3 bg-bg rounded-lg">
+                <div className="text-2xl font-bold text-text">{carbsG}g</div>
+                <div className="text-xs text-text-secondary mt-1">Carbs</div>
               </div>
             )}
           </div>

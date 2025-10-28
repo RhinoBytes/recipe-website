@@ -86,7 +86,7 @@ export default function BrowseMobileFilters({
         <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-5">
           <button
             onClick={onClose}
-            className="w-full px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-semibold"
+            className="w-full px-6 py-3 bg-accent text-bg rounded-lg hover:bg-accent-hover transition font-semibold"
           >
             Apply Filters
           </button>

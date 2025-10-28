@@ -120,9 +120,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
   return (
     <div className="min-h-screen bg-bg">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50 py-12">
+      <div className="bg-gradient-to-br from-accent-light to-secondary-light py-12">
         <div className="container mx-auto px-4 max-w-7xl">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-text mb-4">
             {recipe.title}
           </h1>
           
@@ -144,7 +144,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
               />
             )}
             <div>
-              <div className="font-semibold text-gray-900">
+              <div className="font-semibold text-text">
                 {recipe.author.username}
               </div>
               <div className="text-sm text-text-muted">
@@ -189,8 +189,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {recipe.prepTimeMinutes && (
                 <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
-                  <Clock className="mx-auto mb-2 text-amber-600" size={24} />
-                  <div className="text-2xl font-bold text-gray-900">
+                  <Clock className="mx-auto mb-2 text-accent" size={24} />
+                  <div className="text-2xl font-bold text-text">
                     {recipe.prepTimeMinutes}
                   </div>
                   <div className="text-sm text-text-secondary">Prep Time (min)</div>
@@ -199,8 +199,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
               
               {recipe.cookTimeMinutes && (
                 <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
-                  <Flame className="mx-auto mb-2 text-orange-600" size={24} />
-                  <div className="text-2xl font-bold text-gray-900">
+                  <Flame className="mx-auto mb-2 text-accent" size={24} />
+                  <div className="text-2xl font-bold text-text">
                     {recipe.cookTimeMinutes}
                   </div>
                   <div className="text-sm text-text-secondary">Cook Time (min)</div>
@@ -209,8 +209,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
               
               {recipe.servings && (
                 <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
-                  <Users className="mx-auto mb-2 text-blue-600" size={24} />
-                  <div className="text-2xl font-bold text-gray-900">
+                  <Users className="mx-auto mb-2 text-secondary" size={24} />
+                  <div className="text-2xl font-bold text-text">
                     {recipe.servings}
                   </div>
                   <div className="text-sm text-text-secondary">Servings</div>
@@ -219,8 +219,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
               
               {recipe.difficulty && (
                 <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
-                  <ChefHat className="mx-auto mb-2 text-purple-600" size={24} />
-                  <div className="text-2xl font-bold text-gray-900 capitalize">
+                  <ChefHat className="mx-auto mb-2 text-muted" size={24} />
+                  <div className="text-2xl font-bold text-text capitalize">
                     {recipe.difficulty.toLowerCase()}
                   </div>
                   <div className="text-sm text-text-secondary">Difficulty</div>

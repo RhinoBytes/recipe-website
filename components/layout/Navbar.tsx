@@ -76,7 +76,7 @@ export default function Navbar() {
           </Link>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="relative flex-1 max-w-xs">
+          <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary w-4 h-4 pointer-events-none" />
             <input
               type="text"
@@ -87,29 +87,31 @@ export default function Navbar() {
             />
           </form>
 
-          {/* Nav Links */}
-          <ul className="flex gap-8 items-center m-0 p-0 list-none">
-            {NAV_LINKS.map(({ label, href }) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className="text-text font-medium hover:text-accent transition-colors"
-                >
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {/* Nav Links & Actions */}
+          <div className="flex items-center gap-4">
+            <ul className="flex gap-8 items-center m-0 p-0 list-none">
+              {NAV_LINKS.map(({ label, href }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="text-text font-medium hover:text-accent transition-colors"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
 
-          {/* Theme Toggle */}
-          <ThemeToggle />
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
-          {/* User Actions Dropdown */}
-          <UserDropdown
-            dropdownOpen={dropdownOpen}
-            setDropdownOpen={setDropdownOpen}
-            dropdownRef={dropdownRef}
-          />
+            {/* User Actions Dropdown */}
+            <UserDropdown
+              dropdownOpen={dropdownOpen}
+              setDropdownOpen={setDropdownOpen}
+              dropdownRef={dropdownRef}
+            />
+          </div>
         </nav>
 
         {/* Mobile Navigation */}
