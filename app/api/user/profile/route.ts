@@ -28,7 +28,9 @@ export async function PATCH(request: NextRequest) {
 
     if (username !== undefined) {
       const sanitizedUsername = sanitizeInput(username);
-      if (sanitizedUsername.length < 3) {
+      
+      // Validate the sanitized username
+      if (!sanitizedUsername || sanitizedUsername.length < 3) {
         return NextResponse.json(
           { error: "Username must be at least 3 characters" },
           { status: 400 }

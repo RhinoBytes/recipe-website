@@ -135,5 +135,17 @@ export const COTTAGECORE_CATEGORY_IMAGES: Record<string, string> = {
  */
 export function getCategoryImage(categoryName: string): string {
   const normalizedName = categoryName.toLowerCase();
-  return COTTAGECORE_CATEGORY_IMAGES[normalizedName] || COTTAGECORE_RECIPE_PLACEHOLDERS[0];
+  const categoryImage = COTTAGECORE_CATEGORY_IMAGES[normalizedName];
+  
+  if (categoryImage) {
+    return categoryImage;
+  }
+  
+  // Fallback to first recipe placeholder if available
+  if (COTTAGECORE_RECIPE_PLACEHOLDERS.length > 0) {
+    return COTTAGECORE_RECIPE_PLACEHOLDERS[0];
+  }
+  
+  // Ultimate fallback: a simple cottagecore-themed SVG
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Crect fill='%23FAF8F5' width='400' height='200'/%3E%3Ctext x='200' y='100' font-family='serif' font-size='24' fill='%238C6B56' text-anchor='middle'%3ERecipe%3C/text%3E%3C/svg%3E`;
 }
