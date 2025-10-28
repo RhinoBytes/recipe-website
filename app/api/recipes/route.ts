@@ -12,8 +12,23 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") || "";
-    const category = searchParams.get("category") || "";
-    const tag = searchParams.get("tag") || "";
+    
+    // Support multiple values for filters
+    const categories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
+    const tags = searchParams.get("tags")?.split(",").filter(Boolean) || [];
+    const cuisines = searchParams.get("cuisines")?.split(",").filter(Boolean) || [];
+    const allergens = searchParams.get("allergens")?.split(",").filter(Boolean) || [];
+    const difficulty = searchParams.get("difficulty") || "";
+    
+    // Time filters
+    const minPrepTime = searchParams.get("minPrepTime") ? parseInt(searchParams.get("minPrepTime")!) : null;
+    const maxPrepTime = searchParams.get("maxPrepTime") ? parseInt(searchParams.get("maxPrepTime")!) : null;
+    const minCookTime = searchParams.get("minCookTime") ? parseInt(searchParams.get("minCookTime")!) : null;
+    const maxCookTime = searchParams.get("maxCookTime") ? parseInt(searchParams.get("maxCookTime")!) : null;
+    
+    // Sort option
+    const sort = searchParams.get("sort") || "newest";
+    
     const page = parseInt(searchParams.get("page") || "1");
     const perPage = parseInt(searchParams.get("perPage") || "12");
     const skip = (page - 1) * perPage;
@@ -21,38 +36,93 @@ export async function GET(request: Request) {
     // Build where clause with filters
     const where: Prisma.RecipeWhereInput = { status: RecipeStatus.PUBLISHED };
 
-    // Text search on title and description (instructions removed - now in steps)
+    // Text search on title, description, and ingredients
     if (query) {
       where.OR = [
         { title: { contains: query, mode: "insensitive" } },
         { description: { contains: query, mode: "insensitive" } },
+        {
+          ingredients: {
+            some: {
+              name: { contains: query, mode: "insensitive" },
+            },
+          },
+        },
       ];
     }
 
-    // Filter by category
-    if (category) {
+    // Filter by multiple categories
+    if (categories.length > 0) {
       where.categories = {
         some: {
           category: {
-            name: { equals: category, mode: "insensitive" },
+            name: { in: categories, mode: "insensitive" },
           },
         },
       };
     }
 
-    // Filter by tag
-    if (tag) {
+    // Filter by multiple tags
+    if (tags.length > 0) {
       where.tags = {
         some: {
           tag: {
-            name: { equals: tag, mode: "insensitive" },
+            name: { in: tags, mode: "insensitive" },
           },
         },
       };
+    }
+
+    // Filter by multiple cuisines
+    if (cuisines.length > 0) {
+      where.cuisine = {
+        name: { in: cuisines, mode: "insensitive" },
+      };
+    }
+
+    // Filter by multiple allergens
+    if (allergens.length > 0) {
+      where.allergens = {
+        some: {
+          allergen: {
+            name: { in: allergens, mode: "insensitive" },
+          },
+        },
+      };
+    }
+
+    // Filter by difficulty
+    if (difficulty && Object.values(Difficulty).includes(difficulty as Difficulty)) {
+      where.difficulty = difficulty as Difficulty;
+    }
+
+    // Filter by prep time range
+    if (minPrepTime !== null || maxPrepTime !== null) {
+      where.prepTimeMinutes = {};
+      if (minPrepTime !== null) where.prepTimeMinutes.gte = minPrepTime;
+      if (maxPrepTime !== null) where.prepTimeMinutes.lte = maxPrepTime;
+    }
+
+    // Filter by cook time range
+    if (minCookTime !== null || maxCookTime !== null) {
+      where.cookTimeMinutes = {};
+      if (minCookTime !== null) where.cookTimeMinutes.gte = minCookTime;
+      if (maxCookTime !== null) where.cookTimeMinutes.lte = maxCookTime;
     }
 
     // Get total count for pagination
     const totalCount = await prisma.recipe.count({ where });
+
+    // Determine sort order
+    let orderBy: Prisma.RecipeOrderByWithRelationInput = { createdAt: "desc" };
+    if (sort === "oldest") {
+      orderBy = { createdAt: "asc" };
+    } else if (sort === "popular") {
+      orderBy = [
+        { averageRating: "desc" },
+        { reviewCount: "desc" },
+      ] as Prisma.RecipeOrderByWithRelationInput;
+    }
 
     // Get recipes with pagination
     const recipes = await prisma.recipe.findMany({
@@ -75,10 +145,14 @@ export async function GET(request: Request) {
             category: true,
           },
         },
+        cuisine: true,
+        allergens: {
+          include: {
+            allergen: true,
+          },
+        },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy,
       skip,
       take: perPage,
     });
@@ -94,6 +168,8 @@ export async function GET(request: Request) {
         time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
         prepTimeMinutes: recipe.prepTimeMinutes,
         cookTimeMinutes: recipe.cookTimeMinutes,
+        servings: recipe.servings,
+        difficulty: recipe.difficulty,
         rating: recipe.averageRating
           ? parseFloat(recipe.averageRating.toString())
           : 0,
@@ -102,9 +178,12 @@ export async function GET(request: Request) {
           id: recipe.author.id,
           name: recipe.author.username,
           avatar: recipe.author.avatarUrl || recipe.author.username.charAt(0),
+          username: recipe.author.username,
         },
         tags: recipe.tags.map((rt) => rt.tag.name),
         categories: recipe.categories.map((rc) => rc.category.name),
+        cuisine: recipe.cuisine?.name || null,
+        allergens: recipe.allergens.map((ra) => ra.allergen.name),
         createdAt: recipe.createdAt,
       };
     });
