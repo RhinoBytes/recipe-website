@@ -221,10 +221,11 @@ export async function PATCH(
         // Create new steps
         if (steps.length > 0) {
           await tx.recipeStep.createMany({
-            data: steps.map((step: { stepNumber: number; instruction: string; isOptional?: boolean }) => ({
+            data: steps.map((step: { stepNumber: number; instruction: string; groupName?: string | null; isOptional?: boolean }) => ({
               recipeId: recipe.id,
               stepNumber: step.stepNumber,
               instruction: step.instruction,
+              groupName: step.groupName || null,
               isOptional: step.isOptional || false,
             })),
           });

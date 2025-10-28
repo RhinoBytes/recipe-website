@@ -400,13 +400,14 @@ export default function NewRecipePage() {
         onRecipeFormatted={handleAIFormattedRecipe}
       />
 
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen bg-gray-50 py-4 md:py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-4xl font-bold text-gray-900">Create New Recipe</h1>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Create New Recipe</h1>
             <Button
               variant="secondary"
               onClick={() => setShowAIModal(true)}
+              className="w-full sm:w-auto"
             >
               <Sparkles size={18} />
               Use AI Formatter
@@ -630,13 +631,13 @@ export default function NewRecipePage() {
                       isDragging={draggedIngredient === index}
                     >
                       <div className="border border-gray-200 rounded-lg p-3 space-y-2">
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <input
                             type="text"
                             value={ingredient.amount || ""}
                             onChange={(e) => updateIngredient(index, "amount", e.target.value || null)}
-                            className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                            placeholder="1/2, 2-3"
+                            className="w-full sm:w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                            placeholder="Amount (e.g., 1/2, 2-3)"
                           />
                           <select
                             value={ingredient.unit || ""}
@@ -646,7 +647,7 @@ export default function NewRecipePage() {
                                 updateIngredient(index, "unit", value ? value as MeasurementUnit : null);
                               }
                             }}
-                            className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                            className="w-full sm:w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
                           >
                             <option value="">None</option>
                             <option value={MeasurementUnit.CUP}>Cup</option>
@@ -692,7 +693,7 @@ export default function NewRecipePage() {
                             </button>
                           )}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <input
                             type="text"
                             value={ingredient.groupName || ""}
@@ -936,12 +937,12 @@ export default function NewRecipePage() {
                     <option value={RecipeStatus.PUBLISHED}>Publish Recipe - Visible to everyone</option>
                   </select>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <Button
                     type="submit"
                     disabled={loading}
                     variant="primary"
-                    className="flex-1"
+                    className="flex-1 justify-center"
                   >
                     {loading ? (
                       <>
@@ -957,6 +958,7 @@ export default function NewRecipePage() {
                     onClick={() => router.back()}
                     variant="outline"
                     disabled={loading}
+                    className="sm:flex-none"
                   >
                     Cancel
                   </Button>
