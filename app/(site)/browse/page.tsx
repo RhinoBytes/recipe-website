@@ -281,12 +281,12 @@ function BrowsePageContent() {
   };
 
   const hasActiveFilters =
-    searchQuery ||
+    !!searchQuery ||
     selectedCategories.length > 0 ||
     selectedTags.length > 0 ||
     selectedCuisines.length > 0 ||
     selectedAllergens.length > 0 ||
-    selectedDifficulty;
+    !!selectedDifficulty;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
