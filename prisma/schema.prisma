@@ -125,8 +125,6 @@ model RecipeStep {
   isOptional  Boolean @default(false)
 
   recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-
-  @@unique([recipeId, stepNumber])
 }
 
 model Cuisine {
