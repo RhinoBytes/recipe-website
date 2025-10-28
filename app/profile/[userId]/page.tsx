@@ -62,6 +62,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const [usernameError, setUsernameError] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [sortOption, setSortOption] = useState<"newest" | "oldest" | "popular">("newest");
 
   const isOwnProfile = currentUser?.userId === resolvedParams.userId;
 
@@ -89,7 +90,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     fetchProfileUser();
   }, [resolvedParams.userId]);
 
-  // Fetch recipes when tab changes
+  // Fetch recipes when tab changes or sort changes
   useEffect(() => {
     if (profileUser) {
       if (activeTab === "recipes") {
@@ -98,12 +99,13 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         fetchFavorites();
       }
     }
-  }, [activeTab, profileUser, isOwnProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, profileUser, isOwnProfile, sortOption]);
 
   const fetchUserRecipes = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/users/${resolvedParams.userId}/recipes`);
+      const response = await fetch(`/api/users/${resolvedParams.userId}/recipes?sort=${sortOption}`);
       if (response.ok) {
         const data = await response.json();
         setRecipes(data.recipes);
@@ -351,18 +353,30 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           <>
             {activeTab === "recipes" && (
               <div>
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                   <h2 className="text-2xl font-bold text-text dark:text-white">
                     {isOwnProfile ? "Your Recipes" : `${profileUser.username}'s Recipes`}
                   </h2>
-                  {isOwnProfile && (
-                    <Button
-                      onClick={() => router.push("/recipes/new")}
-                      variant="primary"
+                  <div className="flex gap-3 items-center w-full sm:w-auto">
+                    {/* Sort Dropdown */}
+                    <select
+                      value={sortOption}
+                      onChange={(e) => setSortOption(e.target.value as "newest" | "oldest" | "popular")}
+                      className="px-4 py-2 border border-border dark:border-gray-700 rounded-lg bg-bg-secondary dark:bg-gray-800 text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-accent text-sm"
                     >
-                      Create New Recipe
-                    </Button>
-                  )}
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="popular">Most Popular</option>
+                    </select>
+                    {isOwnProfile && (
+                      <Button
+                        onClick={() => router.push("/recipes/new")}
+                        variant="primary"
+                      >
+                        Create New Recipe
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {recipes.length === 0 ? (

@@ -7,6 +7,19 @@ export async function GET(
 ) {
   try {
     const { userId } = await params;
+    const { searchParams } = new URL(request.url);
+    const sort = searchParams.get("sort") || "newest";
+
+    // Determine sort order
+    let orderBy: 
+      | { createdAt: "desc" | "asc" } 
+      | { favorites: { _count: "desc" } } = { createdAt: "desc" }; // default: newest
+    
+    if (sort === "oldest") {
+      orderBy = { createdAt: "asc" };
+    } else if (sort === "popular") {
+      orderBy = { favorites: { _count: "desc" } };
+    }
 
     const recipes = await prisma.recipe.findMany({
       where: {
@@ -52,9 +65,7 @@ export async function GET(
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy,
     });
 
     const formattedRecipes = recipes.map((recipe) => {

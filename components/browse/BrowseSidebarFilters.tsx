@@ -35,12 +35,11 @@ interface CollapsibleSectionProps {
   title: string;
   sectionKey: SectionKey;
   children: React.ReactNode;
-  defaultOpen?: boolean;
   openSection: SectionKey | null;
   onToggle: (key: SectionKey) => void;
 }
 
-function CollapsibleSection({ title, sectionKey, children, defaultOpen = false, openSection, onToggle }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, sectionKey, children, openSection, onToggle }: CollapsibleSectionProps) {
   const isOpen = openSection === sectionKey;
 
   return (
