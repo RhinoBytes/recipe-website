@@ -9,25 +9,25 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const res = await fetch("/api/auth");
-        const data = await res.json();
+  const loadUser = async () => {
+    try {
+      const res = await fetch("/api/auth");
+      const data = await res.json();
 
-        if (data.authenticated) {
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Auth error:", error);
+      if (data.authenticated) {
+        setUser(data.user);
+      } else {
         setUser(null);
-      } finally {
-        setLoading(false);
       }
+    } catch (error) {
+      console.error("Auth error:", error);
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadUser();
   }, []);
 
@@ -35,7 +35,7 @@ export function useAuth() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       setUser(null);
-      router.push("/login");
+      router.push("/auth");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -46,5 +46,6 @@ export function useAuth() {
     loading,
     isAuthenticated: !!user,
     logout,
+    refreshUser: loadUser,
   };
 }

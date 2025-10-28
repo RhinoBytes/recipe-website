@@ -118,7 +118,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-bg">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-amber-50 to-orange-50 py-12">
         <div className="container mx-auto px-4 max-w-7xl">
@@ -127,7 +127,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
           </h1>
           
           {recipe.description && (
-            <p className="text-lg text-gray-600 mb-6 max-w-3xl">
+            <p className="text-lg text-text-secondary mb-6 max-w-3xl">
               {recipe.description}
             </p>
           )}
@@ -147,7 +147,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
               <div className="font-semibold text-gray-900">
                 {recipe.author.username}
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-text-muted">
                 Published {new Date(recipe.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -188,42 +188,42 @@ export default async function RecipePage({ params }: RecipePageProps) {
             {/* Metadata Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {recipe.prepTimeMinutes && (
-                <div className="bg-white rounded-lg shadow-md p-4 text-center">
+                <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
                   <Clock className="mx-auto mb-2 text-amber-600" size={24} />
                   <div className="text-2xl font-bold text-gray-900">
                     {recipe.prepTimeMinutes}
                   </div>
-                  <div className="text-sm text-gray-600">Prep Time (min)</div>
+                  <div className="text-sm text-text-secondary">Prep Time (min)</div>
                 </div>
               )}
               
               {recipe.cookTimeMinutes && (
-                <div className="bg-white rounded-lg shadow-md p-4 text-center">
+                <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
                   <Flame className="mx-auto mb-2 text-orange-600" size={24} />
                   <div className="text-2xl font-bold text-gray-900">
                     {recipe.cookTimeMinutes}
                   </div>
-                  <div className="text-sm text-gray-600">Cook Time (min)</div>
+                  <div className="text-sm text-text-secondary">Cook Time (min)</div>
                 </div>
               )}
               
               {recipe.servings && (
-                <div className="bg-white rounded-lg shadow-md p-4 text-center">
+                <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
                   <Users className="mx-auto mb-2 text-blue-600" size={24} />
                   <div className="text-2xl font-bold text-gray-900">
                     {recipe.servings}
                   </div>
-                  <div className="text-sm text-gray-600">Servings</div>
+                  <div className="text-sm text-text-secondary">Servings</div>
                 </div>
               )}
               
               {recipe.difficulty && (
-                <div className="bg-white rounded-lg shadow-md p-4 text-center">
+                <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
                   <ChefHat className="mx-auto mb-2 text-purple-600" size={24} />
                   <div className="text-2xl font-bold text-gray-900 capitalize">
                     {recipe.difficulty.toLowerCase()}
                   </div>
-                  <div className="text-sm text-gray-600">Difficulty</div>
+                  <div className="text-sm text-text-secondary">Difficulty</div>
                 </div>
               )}
             </div>
@@ -246,7 +246,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
             {/* Categories */}
             {recipe.categories.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Categories</h3>
+                <h3 className="text-sm font-semibold text-text mb-2">Categories</h3>
                 <div className="flex flex-wrap gap-2">
                   {recipe.categories.map(({ category }) => (
                     <span
@@ -286,7 +286,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
             <IngredientsList ingredients={recipe.ingredients} />
 
             {/* Instructions/Steps */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-bg-secondary rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <ListOrdered className="text-amber-600" size={28} />
                 Instructions
@@ -305,7 +305,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                     return Object.entries(grouped).map(([groupName, steps]) => (
                       <div key={groupName} className="mb-6 last:mb-0">
                         {Object.keys(grouped).length > 1 && (
-                          <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                          <h3 className="text-lg font-semibold text-text mb-3">
                             {groupName}
                           </h3>
                         )}
@@ -316,9 +316,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                 {step.stepNumber}
                               </div>
                               <div className="flex-1 pt-1">
-                                <p className="text-gray-700 leading-relaxed">{step.instruction}</p>
+                                <p className="text-text leading-relaxed">{step.instruction}</p>
                                 {step.isOptional && (
-                                  <span className="text-sm text-gray-500 italic mt-1 block">
+                                  <span className="text-sm text-text-muted italic mt-1 block">
                                     (Optional step)
                                   </span>
                                 )}
@@ -331,7 +331,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                   })()}
                 </div>
               ) : (
-                <p className="text-gray-500">No instructions provided.</p>
+                <p className="text-text-muted">No instructions provided.</p>
               )}
             </div>
 
@@ -340,17 +340,17 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
             {/* Cuisine & Source */}
             {(recipe.cuisine || recipe.sourceUrl) && (
-              <div className="bg-white rounded-lg shadow-md p-4 text-sm">
+              <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-sm">
                 {recipe.cuisine && (
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="font-semibold text-gray-700">Cuisine:</span>
+                    <span className="font-semibold text-text">Cuisine:</span>
                     <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg font-medium">
                       {recipe.cuisine.name}
                     </span>
                   </div>
                 )}
                 {recipe.sourceUrl && (
-                  <div className="text-gray-700">
+                  <div className="text-text">
                     <span className="font-semibold">Source:</span>{' '}
                     <a 
                       href={recipe.sourceUrl} 

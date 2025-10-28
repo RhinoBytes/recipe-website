@@ -5,12 +5,14 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "./Button";
 import { validateAuthForm } from "@/utils/validation";
+import { useAuth } from "@/hooks/useAuth";
 
 type Mode = "login" | "register";
 
 export default function AuthForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { refreshUser } = useAuth();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -77,6 +79,8 @@ export default function AuthForm() {
       const data = await res.json();
       
       if (res.ok) {
+        // Refresh user state immediately
+        await refreshUser();
         router.push("/");
       } else {
         setFormError(data.error || "Authentication failed. Please try again.");

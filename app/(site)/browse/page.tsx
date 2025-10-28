@@ -289,29 +289,29 @@ function BrowsePageContent() {
     !!selectedDifficulty;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-bg dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl lg:text-4xl font-bold mb-3 text-gray-900 dark:text-white">
+          <h1 className="text-3xl lg:text-4xl font-bold mb-3 text-text dark:text-white">
             Browse Recipes
           </h1>
-          <p className="text-base lg:text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-base lg:text-lg text-text-secondary dark:text-text-muted">
             Discover amazing recipes from our community of home cooks
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 lg:p-6 mb-6">
+        <div className="bg-bg-secondary dark:bg-gray-800 rounded-xl shadow-sm p-4 lg:p-6 mb-6">
           <form onSubmit={handleSearch} className="flex gap-2">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted" size={20} />
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search recipes by title, description, or ingredients..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-bg-secondary dark:bg-gray-700 text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <button
@@ -402,7 +402,7 @@ function BrowsePageContent() {
           <main className="flex-1 min-w-0">
             {/* Results Count */}
             <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-text-secondary dark:text-text-muted">
                 {loading ? (
                   "Loading..."
                 ) : (
@@ -417,7 +417,7 @@ function BrowsePageContent() {
                 <select
                   value={sortOption}
                   onChange={(e) => handleSortChange(e.target.value)}
-                  className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-bg-secondary dark:bg-gray-800 text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
                 >
                   <option value="newest">Newest</option>
                   <option value="oldest">Oldest</option>
@@ -453,7 +453,7 @@ function BrowsePageContent() {
                     <button
                       onClick={() => handlePageChange(pagination.page - 1)}
                       disabled={pagination.page === 1}
-                      className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-2 text-gray-900 dark:text-white"
+                      className="px-4 py-2 bg-bg-secondary dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-bg dark:hover:bg-gray-700 transition flex items-center gap-2 text-text dark:text-white"
                     >
                       <ChevronLeft size={20} />
                       <span className="hidden sm:inline">Previous</span>
@@ -465,7 +465,7 @@ function BrowsePageContent() {
                         <>
                           <button
                             onClick={() => handlePageChange(1)}
-                            className="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition text-gray-900 dark:text-white"
+                            className="w-10 h-10 rounded-lg bg-bg-secondary dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-bg dark:hover:bg-gray-700 transition text-text dark:text-white"
                           >
                             1
                           </button>
@@ -489,7 +489,7 @@ function BrowsePageContent() {
                             className={`w-10 h-10 rounded-lg transition ${
                               pagination.page === pageNum
                                 ? "bg-amber-600 text-white"
-                                : "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                                : "bg-bg-secondary dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-bg dark:hover:bg-gray-700 text-text dark:text-white"
                             }`}
                           >
                             {pageNum}
@@ -505,7 +505,7 @@ function BrowsePageContent() {
                           )}
                           <button
                             onClick={() => handlePageChange(pagination.totalPages)}
-                            className="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition text-gray-900 dark:text-white"
+                            className="w-10 h-10 rounded-lg bg-bg-secondary dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-bg dark:hover:bg-gray-700 transition text-text dark:text-white"
                           >
                             {pagination.totalPages}
                           </button>
@@ -516,7 +516,7 @@ function BrowsePageContent() {
                     <button
                       onClick={() => handlePageChange(pagination.page + 1)}
                       disabled={pagination.page === pagination.totalPages}
-                      className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center gap-2 text-gray-900 dark:text-white"
+                      className="px-4 py-2 bg-bg-secondary dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-bg dark:hover:bg-gray-700 transition flex items-center gap-2 text-text dark:text-white"
                     >
                       <span className="hidden sm:inline">Next</span>
                       <ChevronRight size={20} />
@@ -535,7 +535,7 @@ function BrowsePageContent() {
 export default function BrowsePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-12">
+      <div className="min-h-screen bg-bg dark:bg-gray-900 px-4 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>

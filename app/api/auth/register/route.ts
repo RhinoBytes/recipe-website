@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hashPassword, createToken, setAuthCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sanitizeInput, isValidEmail } from "@/utils/validation";
+import { getRandomProfileAvatar } from "@/lib/cottagecorePlaceholders";
 
 /**
  * POST /api/auth/register
@@ -66,11 +67,15 @@ export async function POST(request: NextRequest) {
     // Generate a temporary username from email
     const tempUsername = email.split("@")[0] + "_" + Date.now();
 
+    // Assign a random avatar
+    const avatarUrl = getRandomProfileAvatar();
+
     const user = await prisma.user.create({
       data: {
         username: tempUsername,
         email,
         passwordHash,
+        avatarUrl,
       },
       select: {
         id: true,
