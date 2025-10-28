@@ -1,6 +1,6 @@
 "use client";
 
-import { Star } from "lucide-react";
+import { Star, ShoppingCart } from "lucide-react";
 import FavoriteButton from "@/components/FavoriteButton";
 import SocialShare from "@/components/SocialShare";
 import PrintButton from "@/components/PrintButton";
@@ -47,6 +47,11 @@ export default function RecipeSidebar({
     );
   };
 
+  const handlePrintIngredients = () => {
+    // Create a printable view of just ingredients
+    window.print();
+  };
+
   const hasNutrition = calories || proteinG || fatG || carbsG;
 
   return (
@@ -57,6 +62,13 @@ export default function RecipeSidebar({
         <FavoriteButton recipeId={recipeId} />
         <SocialShare title={title} description={description} />
         <PrintButton />
+        <button
+          onClick={handlePrintIngredients}
+          className="w-full flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium transition-colors print:hidden"
+        >
+          <ShoppingCart size={20} />
+          Print Ingredients
+        </button>
       </div>
 
       {/* Rating Section */}
