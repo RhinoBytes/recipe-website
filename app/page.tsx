@@ -53,28 +53,28 @@ async function getPopularRecipes() {
   });
 
   return popularRecipes.map((recipe) => {
-    const totalRating = recipe.reviews.reduce(
-      (sum, review) => sum + review.rating,
-      0
-    );
-    const averageRating =
-      recipe.reviews.length > 0
-        ? Math.round(totalRating / recipe.reviews.length)
-        : 0;
+  const totalRating = recipe.reviews.reduce(
+    (sum, review) => sum + review.rating,
+    0
+  );
+  const averageRating =
+    recipe.reviews.length > 0
+      ? Math.round(totalRating / recipe.reviews.length)
+      : 0;
 
-    return {
-      id: recipe.slug || recipe.id,
-      title: recipe.title,
-      image: recipe.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop",
-      time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
-      rating: averageRating,
-      author: {
-        name: recipe.author.username,
-        avatar: recipe.author.username.charAt(0),
-        username: recipe.author.username,
-      },
-    };
-  });
+  return {
+    id: recipe.slug || recipe.id,
+    title: recipe.title,
+    image: recipe.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop",
+    time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
+    rating: averageRating,
+    author: {
+      name: recipe.author.username,
+      username: recipe.author.username,
+      avatar: recipe.author.avatarUrl || "/img/users/default-avatar.png", // ✅ use actual DB avatar
+    },
+  };
+});
 }
 
 async function getRecentRecipes() {
@@ -124,10 +124,10 @@ async function getRecentRecipes() {
       time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
       rating: averageRating,
       author: {
-        name: recipe.author.username,
-        avatar: recipe.author.username.charAt(0),
-        username: recipe.author.username,
-      },
+  name: recipe.author.username,
+  username: recipe.author.username,
+  avatar: recipe.author.avatarUrl || "/img/users/default-avatar.png",
+},
     };
   });
 }
@@ -165,74 +165,50 @@ async function getCategories() {
 }
 
 async function getFeaturedRecipe() {
-  const featuredRecipes = await prisma.recipe.findMany({
-    where: {
-      status: "PUBLISHED",
-      reviews: {
-        some: {},
-      },
-    },
+  const recipes = await prisma.recipe.findMany({
+    where: { status: "PUBLISHED", reviews: { some: {} } },
     select: {
       id: true,
       title: true,
       description: true,
       imageUrl: true,
-      reviews: {
-        select: {
-          rating: true,
-        },
-      },
-      _count: {
-        select: {
-          reviews: true,
-        },
-      },
+      reviews: { select: { rating: true } },
+      _count: { select: { reviews: true } },
     },
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: { createdAt: "desc" },
     take: 10,
   });
+  console.log("Fetched recipes for featured:", recipes);
 
-  let featured = null;
+  if (!recipes.length) return null;
+
+  // Always have at least the first recipe
+  let featured = recipes[0];
   let highestScore = 0;
 
-  for (const recipe of featuredRecipes) {
-    if (recipe._count.reviews < 2) continue;
-
-    const totalRating = recipe.reviews.reduce(
-      (sum, review) => sum + review.rating,
-      0
-    );
-    const avgRating = totalRating / recipe._count.reviews;
-    const score = avgRating * Math.min(recipe._count.reviews / 5, 1);
-
-    if (score > highestScore) {
-      highestScore = score;
-      featured = {
-        id: recipe.id,
-        title: "Recipe of the Day",
-        description:
-          recipe.description ||
-          "Every day we feature an exceptional recipe that showcases the creativity and skill of our community. Today's featured dish combines fresh seasonal ingredients with classic techniques for an unforgettable dining experience.",
-        image: recipe.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=300&fit=crop",
-      };
+  for (const r of recipes) {
+    if (r._count.reviews >= 2) {
+      const avg = r.reviews.reduce((sum, rev) => sum + rev.rating, 0) / r._count.reviews;
+      const score = avg * Math.min(r._count.reviews / 5, 1);
+      if (score > highestScore) {
+        highestScore = score;
+        featured = r;
+      }
     }
   }
 
-  if (!featured && featuredRecipes.length > 0) {
-    featured = {
-      id: featuredRecipes[0].id,
-      title: "Recipe of the Day",
-      description:
-        featuredRecipes[0].description ||
-        "Check out this recently added recipe from our community!",
-      image: featuredRecipes[0].imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=300&fit=crop",
-    };
-  }
-
-  return featured;
+  return {
+    id: featured.id,
+    title: "Recipe of the Day",
+    description:
+      featured.description ||
+      "Every day we feature an exceptional recipe that showcases the creativity and skill of our community. Today's featured dish combines fresh seasonal ingredients with classic techniques for an unforgettable dining experience.",
+    image:
+      featured.imageUrl ||
+      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=300&fit=crop",
+  };
 }
+
 
 async function getSpotlightChef() {
   const users = await prisma.user.findMany({

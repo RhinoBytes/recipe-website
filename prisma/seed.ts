@@ -1,54 +1,62 @@
-import {
-  PrismaClient,
-  Difficulty,
-  RecipeStatus,
-} from "@prisma/client";
+import { PrismaClient, Difficulty, RecipeStatus } from "@prisma/client";
 import { faker } from "@faker-js/faker";
-import { readRecipeFolders } from "../lib/recipeStorage.js"; // notice the .js extension
+import { readRecipeFolders } from "../lib/recipeStorage.js";
 import bcrypt from "bcrypt";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ["query", "info", "warn", "error"],
+});
 
 type DifficultyType = keyof typeof Difficulty;
 type RecipeStatusType = keyof typeof RecipeStatus;
 
 async function main() {
-  console.log("Seeding database...");
+  console.log("Seeding database started...");
 
-  // Delete all existing recipes and related data (cascading deletes will handle relations)
-  console.log("Deleting existing recipes...");
+  // --- DELETE EXISTING DATA ---
+  console.log("Deleting all existing data...");
+
+  // Delete child tables first to avoid foreign key constraints
+  await prisma.recipesAllergens.deleteMany({});
+  await prisma.recipesCategories.deleteMany({});
+  await prisma.recipesTags.deleteMany({});
+  await prisma.recipeStep.deleteMany({});
+  await prisma.recipeIngredient.deleteMany({});
+  await prisma.review.deleteMany({});
   await prisma.recipe.deleteMany({});
-  console.log("Existing recipes deleted.");
+  await prisma.tag.deleteMany({});
+  await prisma.category.deleteMany({});
+  await prisma.allergen.deleteMany({});
+  await prisma.cuisine.deleteMany({});
+  await prisma.user.deleteMany({});
 
-  // Create or get users (seed users for testing)
+  console.log("All tables cleared.");
+
+  // --- CREATE USERS ---
   console.log("Creating seed users...");
   const seedUsernames = ["HomeBaker", "ChefDad", "TheRealSpiceGirl"];
+  const seedAvatarUrls = [
+    "/users/HomeBaker.png",
+    "/users/chefdad.png",
+    "/users/spicegirl.png",
+  ];
   const users = [];
 
-  for (const username of seedUsernames) {
-    // Check if user exists
-    let user = await prisma.user.findUnique({
-      where: { username },
+  for (const [index, username] of seedUsernames.entries()) {
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email: `${username.toLowerCase()}@example.com`,
+        passwordHash: await bcrypt.hash("password123", 10),
+        avatarUrl: seedAvatarUrls[index],
+        bio: faker.lorem.sentence(),
+      },
     });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          username,
-          email: `${username.toLowerCase()}@example.com`,
-          passwordHash: "password123",
-          avatarUrl: `https://images.unsplash.com/photo-${faker.string.numeric(
-            13
-          )}?auto=format&fit=crop&w=400&h=400`,
-          bio: faker.lorem.sentence(),
-        },
-      });
-    }
-
     users.push(user);
+    console.log(`Created user: ${username} (ID: ${user.id})`);
   }
 
-  // Create Categories if they don't exist
+  // --- CREATE CATEGORIES ---
   console.log("Creating categories...");
   const categoryNames = [
     "Breakfast",
@@ -61,14 +69,12 @@ async function main() {
   ];
   const categories = [];
   for (const name of categoryNames) {
-    let category = await prisma.category.findUnique({ where: { name } });
-    if (!category) {
-      category = await prisma.category.create({ data: { name } });
-    }
+    const category = await prisma.category.create({ data: { name } });
     categories.push(category);
+    console.log(`Created category: ${name} (ID: ${category.id})`);
   }
 
-  // Create Tags if they don't exist
+  // --- CREATE TAGS ---
   console.log("Creating tags...");
   const tagNames = [
     "Easy",
@@ -82,14 +88,12 @@ async function main() {
   ];
   const tags = [];
   for (const name of tagNames) {
-    let tag = await prisma.tag.findUnique({ where: { name } });
-    if (!tag) {
-      tag = await prisma.tag.create({ data: { name } });
-    }
+    const tag = await prisma.tag.create({ data: { name } });
     tags.push(tag);
+    console.log(`Created tag: ${name} (ID: ${tag.id})`);
   }
 
-  // Create Allergens if they don't exist
+  // --- CREATE ALLERGENS ---
   console.log("Creating allergens...");
   const allergenNames = [
     "Peanuts",
@@ -103,43 +107,36 @@ async function main() {
   ];
   const allergens = [];
   for (const name of allergenNames) {
-    let allergen = await prisma.allergen.findUnique({ where: { name } });
-    if (!allergen) {
-      allergen = await prisma.allergen.create({ data: { name } });
-    }
+    const allergen = await prisma.allergen.create({ data: { name } });
     allergens.push(allergen);
+    console.log(`Created allergen: ${name} (ID: ${allergen.id})`);
   }
 
-  // Read recipe folders from /prisma/data/recipes/
+  // --- READ RECIPE JSON FILES ---
   console.log("Reading recipe folders...");
-  const recipeFolders = readRecipeFolders();
+  const recipeFolders = readRecipeFolders() || [];
   console.log(`Found ${recipeFolders.length} recipe(s) to import.`);
 
-  // Create recipes from JSON files
+  // --- IMPORT JSON RECIPES ---
   for (const { slug, data } of recipeFolders) {
-    console.log(`Creating recipe: ${data.title}`);
-
+    console.log(`Importing recipe: ${data.title}`);
     try {
-      // Select random author
       const author = faker.helpers.arrayElement(users);
 
-      // Handle cuisine
-      let cuisineId = null;
+      let cuisineId: string | null = null;
       if (data.cuisine) {
         let cuisine = await prisma.cuisine.findUnique({
           where: { name: data.cuisine },
         });
-
         if (!cuisine) {
           cuisine = await prisma.cuisine.create({
             data: { name: data.cuisine },
           });
+          console.log(`Created cuisine: ${cuisine.name}`);
         }
-
         cuisineId = cuisine.id;
       }
 
-      // Create the recipe
       const recipe = await prisma.recipe.create({
         data: {
           authorId: author.id,
@@ -149,7 +146,7 @@ async function main() {
           servings: data.servings,
           prepTimeMinutes: data.prepTimeMinutes,
           cookTimeMinutes: data.cookTimeMinutes,
-          difficulty: data.difficulty as DifficultyType | null,
+          difficulty: (data.difficulty as DifficultyType) || Difficulty.MEDIUM,
           imageUrl: data.imageUrl,
           sourceUrl: data.sourceUrl,
           sourceText: data.sourceText,
@@ -162,13 +159,13 @@ async function main() {
         },
       });
 
-      // Create ingredients
-      if (data.ingredients && Array.isArray(data.ingredients)) {
+      // Ingredients
+      if (data.ingredients?.length) {
         await prisma.recipeIngredient.createMany({
           data: data.ingredients.map((ing) => ({
             recipeId: recipe.id,
             amount: ing.amount,
-            unit: ing.unit as string | null,
+            unit: ing.unit || null,
             name: ing.name,
             notes: ing.notes,
             groupName: ing.groupName,
@@ -178,8 +175,8 @@ async function main() {
         });
       }
 
-      // Create steps
-      if (data.steps && Array.isArray(data.steps)) {
+      // Steps
+      if (data.steps?.length) {
         await prisma.recipeStep.createMany({
           data: data.steps.map((step) => ({
             recipeId: recipe.id,
@@ -190,49 +187,44 @@ async function main() {
         });
       }
 
-      // Handle tags
-      if (data.tags && Array.isArray(data.tags)) {
+      // Tags
+      if (data.tags?.length) {
         for (const tagName of data.tags) {
           let tag = await prisma.tag.findUnique({ where: { name: tagName } });
-          if (!tag) {
-            tag = await prisma.tag.create({ data: { name: tagName } });
-          }
+          if (!tag) tag = await prisma.tag.create({ data: { name: tagName } });
           await prisma.recipesTags.create({
             data: { recipeId: recipe.id, tagId: tag.id },
           });
         }
       }
 
-      // Handle categories
-      if (data.categories && Array.isArray(data.categories)) {
+      // Categories
+      if (data.categories?.length) {
         for (const categoryName of data.categories) {
           const category = await prisma.category.findUnique({
             where: { name: categoryName },
           });
-          if (category) {
+          if (category)
             await prisma.recipesCategories.create({
               data: { recipeId: recipe.id, categoryId: category.id },
             });
-          }
         }
       }
 
-      // Handle allergens
-      if (data.allergens && Array.isArray(data.allergens)) {
+      // Allergens
+      if (data.allergens?.length) {
         for (const allergenName of data.allergens) {
           const allergen = await prisma.allergen.findUnique({
             where: { name: allergenName },
           });
-          if (allergen) {
+          if (allergen)
             await prisma.recipesAllergens.create({
               data: { recipeId: recipe.id, allergenId: allergen.id },
             });
-          }
         }
       }
 
-      // Add some fake reviews (0-3 per recipe)
-      const reviewsCount = faker.number.int({ min: 0, max: 3 });
+      const reviewsCount = faker.number.int({ min: 1, max: 3 }); // min is now 1
       for (let r = 0; r < reviewsCount; r++) {
         const reviewer = faker.helpers.arrayElement(users);
         await prisma.review.create({
@@ -245,139 +237,21 @@ async function main() {
         });
       }
 
-      console.log(`✓ Created recipe: ${data.title}`);
-    } catch (error) {
-      console.error(`✗ Error creating recipe ${data.title}:`, error);
+      console.log(`✓ Imported recipe: ${data.title}`);
+    } catch (err) {
+      console.error(`✗ Failed to import recipe ${data.title}:`, err);
     }
   }
 
-  // If no recipes were imported, create some fake ones for testing
-  if (recipeFolders.length === 0) {
-    console.log(
-      "No recipe JSON files found. Creating sample recipes with fake data..."
-    );
-
-    for (let i = 0; i < 10; i++) {
-      const author = faker.helpers.arrayElement(users);
-      const title = faker.lorem.words(3);
-      const recipeSlug = faker.helpers.slugify(title).toLowerCase();
-
-      const recipe = await prisma.recipe.create({
-        data: {
-          authorId: author.id,
-          title,
-          slug: recipeSlug,
-          description: faker.lorem.sentences(2),
-          servings: faker.number.int({ min: 2, max: 8 }),
-          prepTimeMinutes: faker.number.int({ min: 10, max: 60 }),
-          cookTimeMinutes: faker.number.int({ min: 15, max: 120 }),
-          difficulty: faker.helpers.arrayElement([
-            Difficulty.EASY,
-            Difficulty.MEDIUM,
-            Difficulty.HARD,
-          ]),
-          imageUrl: `https://images.unsplash.com/photo-${faker.string.numeric(
-            13
-          )}?auto=format&fit=crop&w=800&h=600`,
-          status: RecipeStatus.PUBLISHED,
-          calories: faker.number.int({ min: 150, max: 800 }),
-          proteinG: faker.number.int({ min: 5, max: 50 }),
-          fatG: faker.number.int({ min: 5, max: 40 }),
-          carbsG: faker.number.int({ min: 10, max: 100 }),
-        },
-      });
-
-      // Add ingredients (3-6 per recipe)
-      const ingredientsCount = faker.number.int({ min: 3, max: 6 });
-      for (let j = 0; j < ingredientsCount; j++) {
-        await prisma.recipeIngredient.create({
-          data: {
-            recipeId: recipe.id,
-            name: faker.food.ingredient(),
-            amount: faker.number
-              .float({ min: 0.5, max: 5, fractionDigits: 1 })
-              .toString(),
-            unit: faker.helpers.arrayElement([
-              "cup",
-              "tbsp",
-              "tsp",
-              "g",
-              "ml",
-              "piece",
-            ]),
-            displayOrder: j,
-          },
-        });
-      }
-
-      // Add steps (3-5 per recipe)
-      const stepsCount = faker.number.int({ min: 3, max: 5 });
-      for (let s = 0; s < stepsCount; s++) {
-        await prisma.recipeStep.create({
-          data: {
-            recipeId: recipe.id,
-            stepNumber: s + 1,
-            instruction: faker.lorem.sentence(),
-          },
-        });
-      }
-
-      // Add 1-2 categories
-      const selectedCategories = faker.helpers.arrayElements(
-        categories,
-        faker.number.int({ min: 1, max: 2 })
-      );
-      for (const category of selectedCategories) {
-        await prisma.recipesCategories.create({
-          data: { recipeId: recipe.id, categoryId: category.id },
-        });
-      }
-
-      // Add 1-2 tags
-      const selectedTags = faker.helpers.arrayElements(
-        tags,
-        faker.number.int({ min: 1, max: 2 })
-      );
-      for (const tag of selectedTags) {
-        await prisma.recipesTags.create({
-          data: { recipeId: recipe.id, tagId: tag.id },
-        });
-      }
-
-      // Add 0-1 allergens
-      if (faker.datatype.boolean()) {
-        const allergen = faker.helpers.arrayElement(allergens);
-        await prisma.recipesAllergens.create({
-          data: { recipeId: recipe.id, allergenId: allergen.id },
-        });
-      }
-
-      // Add 0-2 reviews
-      const reviewsCount = faker.number.int({ min: 0, max: 2 });
-      for (let r = 0; r < reviewsCount; r++) {
-        const reviewer = faker.helpers.arrayElement(users);
-        await prisma.review.create({
-          data: {
-            recipeId: recipe.id,
-            userId: reviewer.id,
-            rating: faker.number.int({ min: 3, max: 5 }),
-            comment: faker.lorem.sentence(),
-          },
-        });
-      }
-
-      console.log(`✓ Created sample recipe: ${title}`);
-    }
-  }
-
-  console.log("Seeding finished!");
+  console.log("Seeding finished successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("Seeding failed:", e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
+    console.log("Database connection closed.");
   });

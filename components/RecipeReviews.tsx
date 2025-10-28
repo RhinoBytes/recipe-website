@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Star, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import Button from "@/components/Button";
@@ -44,8 +45,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
           setReviews(data.reviews);
           setAverageRating(data.averageRating);
           setTotalReviews(data.totalReviews);
-          
-          // Check if current user has already reviewed
+
           if (user) {
             const userReview = data.reviews.find(
               (r: Review) => r.user.id === user.userId
@@ -56,8 +56,8 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
             }
           }
         }
-      } catch (error) {
-        console.error("Failed to fetch reviews:", error);
+      } catch (err) {
+        console.error("Failed to fetch reviews:", err);
       } finally {
         setLoading(false);
       }
@@ -68,11 +68,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!isAuthenticated) {
-      window.location.href = "/auth";
-      return;
-    }
+    if (!isAuthenticated) return (window.location.href = "/auth");
 
     setSubmitting(true);
     setError(null);
@@ -83,7 +79,6 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating, comment }),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to submit review");
@@ -97,7 +92,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
         setAverageRating(data.averageRating);
         setTotalReviews(data.totalReviews);
       }
-      
+
       setShowReviewForm(false);
       setComment("");
     } catch (err) {
@@ -107,7 +102,8 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
     }
   };
 
-  const renderStars = (count: number, interactive: boolean = false) => {
+  const renderStars = (count: number, interactive = false) => {
+    const currentRating = interactive && hoveredRating > 0 ? hoveredRating : count;
     return (
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
@@ -115,9 +111,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
             key={star}
             size={interactive ? 28 : 20}
             className={`${
-              star <= (interactive && hoveredRating > 0 ? hoveredRating : count)
-                ? "fill-amber-400 text-amber-400"
-                : "text-gray-300"
+              star <= currentRating ? "fill-amber-400 text-amber-400" : "text-gray-300"
             } ${interactive ? "cursor-pointer" : ""}`}
             onClick={interactive ? () => setRating(star) : undefined}
             onMouseEnter={interactive ? () => setHoveredRating(star) : undefined}
@@ -128,7 +122,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
     );
   };
 
-  if (loading) {
+  if (loading)
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-center py-8">
@@ -136,10 +130,10 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
         </div>
       </div>
     );
-  }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Reviews & Ratings</h2>
@@ -161,9 +155,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
             onClick={() => setShowReviewForm(!showReviewForm)}
             variant="primary"
           >
-            {reviews.some((r) => r.user.id === user?.userId)
-              ? "Update Review"
-              : "Write a Review"}
+            {reviews.some((r) => r.user.id === user?.userId) ? "Update Review" : "Write a Review"}
           </Button>
         )}
       </div>
@@ -172,7 +164,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
       {showReviewForm && isAuthenticated && !isAuthor && (
         <form onSubmit={handleSubmitReview} className="mb-6 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Review</h3>
-          
+
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg">
               {error}
@@ -210,14 +202,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
                 "Submit Review"
               )}
             </Button>
-            <Button
-              type="button"
-              onClick={() => {
-                setShowReviewForm(false);
-                setError(null);
-              }}
-              variant="secondary"
-            >
+            <Button type="button" onClick={() => { setShowReviewForm(false); setError(null); }} variant="secondary">
               Cancel
             </Button>
           </div>
@@ -234,26 +219,28 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
           reviews.map((review) => (
             <div key={review.id} className="border-t border-gray-200 pt-4">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-amber-600 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
-                  {review.user.username.charAt(0).toUpperCase()}
+                <div className="w-12 h-12 relative rounded-full overflow-hidden flex-shrink-0">
+                  <Image
+                    src={review.user.avatarUrl || "/img/users/default-avatar.png"}
+                    alt={review.user.username}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-gray-900">
-                      {review.user.username}
-                    </span>
+                    <span className="font-semibold text-gray-900">{review.user.username}</span>
                     {renderStars(review.rating)}
                     <span className="text-sm text-gray-500">
-                      {new Date(review.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
+                      {new Date(review.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </span>
                   </div>
-                  {review.comment && (
-                    <p className="text-gray-700">{review.comment}</p>
-                  )}
+                  {review.comment && <p className="text-gray-700">{review.comment}</p>}
                 </div>
               </div>
             </div>

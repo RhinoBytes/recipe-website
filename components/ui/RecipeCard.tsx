@@ -35,9 +35,15 @@ export default function RecipeCard({ recipe, priority = false }: RecipeCardProps
         </h3>
         <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#d4735a] text-white flex items-center justify-center font-bold text-xs">
-              {recipe.author.avatar}
-            </div>
+            <div className="w-6 h-6 relative rounded-full overflow-hidden">
+  <Image
+    src={recipe.author.avatar || "/img/users/default-avatar.png"}
+    alt={recipe.author.name}
+    fill
+    className="object-cover"
+    sizes="24px"
+  />
+</div>
             <span>{recipe.author.name}</span>
           </div>
           <div className="flex items-center gap-2">
