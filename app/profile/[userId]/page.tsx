@@ -1,7 +1,7 @@
 // app/profile/[userId]/page.tsx
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { ChefHat, Heart, Settings, Loader2, Edit, X, ArrowLeft } from "lucide-react";
@@ -99,10 +99,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         fetchFavorites();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, profileUser, isOwnProfile, sortOption]);
+  }, [activeTab, profileUser, isOwnProfile, sortOption, fetchUserRecipes, fetchFavorites]);
 
-  const fetchUserRecipes = async () => {
+  const fetchUserRecipes = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/users/${resolvedParams.userId}/recipes?sort=${sortOption}`);
@@ -115,9 +114,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [resolvedParams.userId, sortOption]);
 
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     if (!isOwnProfile) return;
     
     setLoading(true);
@@ -132,7 +131,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isOwnProfile]);
 
   const handleAvatarSelect = async (avatarUrl: string) => {
     if (!isOwnProfile) return;

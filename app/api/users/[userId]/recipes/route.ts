@@ -10,10 +10,13 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const sort = searchParams.get("sort") || "newest";
 
-    // Determine sort order
-    let orderBy: 
+    // Define type for orderBy
+    type OrderByType = 
       | { createdAt: "desc" | "asc" } 
-      | { favorites: { _count: "desc" } } = { createdAt: "desc" }; // default: newest
+      | { favorites: { _count: "desc" } };
+
+    // Determine sort order
+    let orderBy: OrderByType = { createdAt: "desc" }; // default: newest
     
     if (sort === "oldest") {
       orderBy = { createdAt: "asc" };
