@@ -5,8 +5,9 @@ import { useState, useEffect } from "react";
 import ProtectedPage from "@/components/ProtectedPage";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { ChefHat, Heart, Settings, Loader2, Edit } from "lucide-react";
+import { ChefHat, Heart, Settings, Loader2, Edit, X } from "lucide-react";
 import Button from "@/components/Button";
+import AvatarPicker from "@/components/AvatarPicker";
 import Image from "next/image";
 
 interface Recipe {
@@ -31,12 +32,17 @@ interface Recipe {
 type Tab = "recipes" | "favorites" | "settings";
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("recipes");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [favorites, setFavorites] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [saving, setSaving] = useState(false);
   
   useEffect(() => {
     if (activeTab === "recipes") {
@@ -75,6 +81,65 @@ export default function ProfilePage() {
       setLoading(false);
     }
   };
+
+  const handleAvatarSelect = async (avatarUrl: string) => {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl }),
+      });
+
+      if (response.ok) {
+        await refreshUser();
+        setShowAvatarModal(false);
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to update avatar");
+      }
+    } catch (error) {
+      console.error("Failed to update avatar:", error);
+      alert("Failed to update avatar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUsernameUpdate = async () => {
+    if (!newUsername.trim()) {
+      setUsernameError("Username cannot be empty");
+      return;
+    }
+
+    if (newUsername.length < 3) {
+      setUsernameError("Username must be at least 3 characters");
+      return;
+    }
+
+    setSaving(true);
+    setUsernameError("");
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: newUsername }),
+      });
+
+      if (response.ok) {
+        await refreshUser();
+        setEditingUsername(false);
+      } else {
+        const data = await response.json();
+        setUsernameError(data.error || "Failed to update username");
+      }
+    } catch (error) {
+      console.error("Failed to update username:", error);
+      setUsernameError("Failed to update username");
+    } finally {
+      setSaving(false);
+    }
+  };
   
   return (
     <ProtectedPage>
@@ -83,9 +148,28 @@ export default function ProfilePage() {
         <div className="bg-gradient-to-br from-amber-50 to-orange-50 py-12">
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center gap-6">
-              <div className="w-24 h-24 bg-amber-600 rounded-full flex items-center justify-center text-white text-4xl font-bold">
-                {user?.username?.charAt(0).toUpperCase()}
-              </div>
+              <button
+                onClick={() => setShowAvatarModal(true)}
+                className="relative w-24 h-24 rounded-full flex items-center justify-center overflow-hidden border-4 border-amber-600 hover:border-amber-700 transition-all hover:scale-105 cursor-pointer group"
+              >
+                {user?.avatarUrl ? (
+                  <Image
+                    src={user.avatarUrl}
+                    alt={user.username || "User avatar"}
+                    width={96}
+                    height={96}
+                    className="object-cover"
+                    unoptimized={user.avatarUrl.startsWith('data:')}
+                  />
+                ) : (
+                  <span className="text-4xl font-bold text-white bg-amber-600 w-full h-full flex items-center justify-center">
+                    {user?.username?.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                  <Edit className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+                </div>
+              </button>
               <div>
                 <h1 className="text-4xl font-bold text-gray-900 mb-2">
                   {user?.username}
@@ -298,12 +382,60 @@ export default function ProfilePage() {
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Username
                           </label>
-                          <input
-                            type="text"
-                            value={user?.username || ""}
-                            disabled
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
-                          />
+                          {editingUsername ? (
+                            <div className="space-y-2">
+                              <input
+                                type="text"
+                                value={newUsername}
+                                onChange={(e) => setNewUsername(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                placeholder="Enter new username"
+                              />
+                              {usernameError && (
+                                <p className="text-sm text-red-600">{usernameError}</p>
+                              )}
+                              <div className="flex gap-2">
+                                <Button
+                                  onClick={handleUsernameUpdate}
+                                  variant="primary"
+                                  size="sm"
+                                  loading={saving}
+                                >
+                                  Save
+                                </Button>
+                                <Button
+                                  onClick={() => {
+                                    setEditingUsername(false);
+                                    setNewUsername("");
+                                    setUsernameError("");
+                                  }}
+                                  variant="secondary"
+                                  size="sm"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={user?.username || ""}
+                                disabled
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
+                              />
+                              <Button
+                                onClick={() => {
+                                  setEditingUsername(true);
+                                  setNewUsername(user?.username || "");
+                                }}
+                                variant="secondary"
+                                size="sm"
+                              >
+                                <Edit size={16} />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -335,6 +467,33 @@ export default function ProfilePage() {
             </>
           )}
         </div>
+
+        {/* Avatar Selection Modal */}
+        {showAvatarModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-gray-900">Select Avatar</h2>
+                <button
+                  onClick={() => setShowAvatarModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition"
+                  aria-label="Close modal"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <AvatarPicker
+                currentAvatar={user?.avatarUrl || ""}
+                onSelect={handleAvatarSelect}
+              />
+              {saving && (
+                <div className="mt-4 text-center text-gray-600">
+                  Updating avatar...
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedPage>
   );

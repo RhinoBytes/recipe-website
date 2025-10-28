@@ -2,6 +2,7 @@
 
 import { LogIn, UserPlus, Plus, User, ChevronDown, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth'; // Make sure this path is correct!
 
 interface UserDropdownProps {
@@ -28,8 +29,36 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
         aria-expanded={dropdownOpen}
         aria-controls="user-menu"
       >
-        <User size={18} />
-        {loading ? 'Loading...' : isAuthenticated ? (user?.username || 'Account') : 'Login'}
+        {loading ? (
+          <>
+            <User size={18} />
+            Loading...
+          </>
+        ) : isAuthenticated && user?.avatarUrl ? (
+          <>
+            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-accent">
+              <Image
+                src={user.avatarUrl}
+                alt={user.username || 'User avatar'}
+                width={32}
+                height={32}
+                className="object-cover"
+                unoptimized={user.avatarUrl.startsWith('data:')}
+              />
+            </div>
+            <span className="hidden md:inline">{user?.username || 'Account'}</span>
+          </>
+        ) : isAuthenticated ? (
+          <>
+            <User size={18} />
+            {user?.username || 'Account'}
+          </>
+        ) : (
+          <>
+            <User size={18} />
+            Login
+          </>
+        )}
         <ChevronDown
           size={16}
           className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}

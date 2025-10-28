@@ -2,6 +2,7 @@ import { PrismaClient, Difficulty, RecipeStatus } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import { readRecipeFolders } from "../lib/recipeStorage.js";
 import bcrypt from "bcrypt";
+import { getRandomProfileAvatar, getRandomRecipePlaceholder } from "../lib/cottagecorePlaceholders.js";
 
 const prisma = new PrismaClient({
   log: ["query", "info", "warn", "error"],
@@ -35,20 +36,15 @@ async function main() {
   // --- CREATE USERS ---
   console.log("Creating seed users...");
   const seedUsernames = ["HomeBaker", "ChefDad", "TheRealSpiceGirl"];
-  const seedAvatarUrls = [
-    "/users/HomeBaker.png",
-    "/users/chefdad.png",
-    "/users/spicegirl.png",
-  ];
   const users = [];
 
-  for (const [index, username] of seedUsernames.entries()) {
+  for (const username of seedUsernames) {
     const user = await prisma.user.create({
       data: {
         username,
         email: `${username.toLowerCase()}@example.com`,
         passwordHash: await bcrypt.hash("password123", 10),
-        avatarUrl: seedAvatarUrls[index],
+        avatarUrl: getRandomProfileAvatar(),
         bio: faker.lorem.sentence(),
       },
     });
@@ -147,7 +143,7 @@ async function main() {
           prepTimeMinutes: data.prepTimeMinutes,
           cookTimeMinutes: data.cookTimeMinutes,
           difficulty: (data.difficulty as DifficultyType) || Difficulty.MEDIUM,
-          imageUrl: data.imageUrl,
+          imageUrl: data.imageUrl || getRandomRecipePlaceholder(),
           sourceUrl: data.sourceUrl,
           sourceText: data.sourceText,
           cuisineId,

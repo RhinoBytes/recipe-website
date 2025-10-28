@@ -6,6 +6,7 @@ import ChefSpotlight from "@/components/ui/ChefSpotlight";
 import Button from "@/components/Button";
 import { Flame, Compass } from "lucide-react";
 import Link from "next/link";
+import { getCategoryImage } from "@/lib/cottagecorePlaceholders";
 
 // Make this page dynamic since it fetches from database
 export const dynamic = 'force-dynamic';
@@ -159,7 +160,7 @@ async function getCategories() {
     return {
       slug: slug,
       name: category.name,
-      image: `https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=150&fit=crop`,
+      image: getCategoryImage(category.name),
     };
   });
 }

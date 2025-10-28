@@ -105,3 +105,47 @@ export function getProfileAvatar(index: number): string {
 export function getAllProfileAvatars(): string[] {
   return [...COTTAGECORE_PROFILE_AVATARS];
 }
+
+/**
+ * Cottagecore Category Images
+ * Unique images for main recipe categories
+ */
+export const COTTAGECORE_CATEGORY_IMAGES: Record<string, string> = {
+  // Dessert - Sweet treats with pastel pinks and creams
+  "dessert": `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cdefs%3E%3ClinearGradient id='dessert' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23F5E0DC'/%3E%3Cstop offset='100%25' style='stop-color:%23EBC8C0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23dessert)' width='400' height='200'/%3E%3Ccircle cx='200' cy='120' r='40' fill='%23FAF8F5' opacity='0.8'/%3E%3Ccircle cx='200' cy='100' r='35' fill='%23EBC8C0' opacity='0.7'/%3E%3Ccircle cx='200' cy='80' r='30' fill='%23F2E2B9' opacity='0.6'/%3E%3Ccircle cx='185' cy='65' r='8' fill='%23C54B4B' opacity='0.8'/%3E%3Crect x='190' y='120' width='20' height='50' rx='3' fill='%23A8BBA0' opacity='0.5'/%3E%3Ctext x='200' y='185' font-family='serif' font-size='18' fill='%238C6B56' text-anchor='middle' font-weight='600'%3EDesserts%3C/text%3E%3C/svg%3E`,
+  
+  // Lunch - Fresh vegetables and greens
+  "lunch": `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cdefs%3E%3ClinearGradient id='lunch' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23C5D4BE'/%3E%3Cstop offset='100%25' style='stop-color:%23A8BBA0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23lunch)' width='400' height='200'/%3E%3Cellipse cx='200' cy='110' rx='80' ry='50' fill='%23FAF8F5' opacity='0.7'/%3E%3Ccircle cx='170' cy='100' r='25' fill='%23C54B4B' opacity='0.7'/%3E%3Ccircle cx='200' cy='105' r='22' fill='%23F2E2B9' opacity='0.7'/%3E%3Ccircle cx='230' cy='100' r='25' fill='%23A8BBA0' opacity='0.8'/%3E%3Cpath d='M200 75 Q200 60 195 55 L205 55 Q200 60 200 75' fill='%23566350'/%3E%3Ctext x='200' y='175' font-family='serif' font-size='18' fill='%233E3B36' text-anchor='middle' font-weight='600'%3ELunch%3C/text%3E%3C/svg%3E`,
+  
+  // Dinner - Warm hearty meal with earthy tones
+  "dinner": `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cdefs%3E%3ClinearGradient id='dinner' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23E5D4C1'/%3E%3Cstop offset='100%25' style='stop-color:%238C6B56'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23dinner)' width='400' height='200'/%3E%3Cellipse cx='200' cy='120' rx='90' ry='40' fill='%23A8BBA0' opacity='0.3'/%3E%3Cellipse cx='200' cy='95' rx='70' ry='50' fill='%23FAF8F5' opacity='0.8'/%3E%3Ccircle cx='200' cy='85' r='45' fill='%23C5915D' opacity='0.6'/%3E%3Ccircle cx='185' cy='75' r='12' fill='%23A8BBA0' opacity='0.7'/%3E%3Ccircle cx='215' cy='75' r='12' fill='%23EBC8C0' opacity='0.7'/%3E%3Ccircle cx='200' cy='95' r='10' fill='%23F2E2B9' opacity='0.8'/%3E%3Ctext x='200' y='175' font-family='serif' font-size='18' fill='%23FAF8F5' text-anchor='middle' font-weight='600'%3EDinner%3C/text%3E%3C/svg%3E`,
+  
+  // Breakfast - Morning sunshine with warm yellows
+  "breakfast": `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cdefs%3E%3ClinearGradient id='breakfast' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23FFF4E6'/%3E%3Cstop offset='100%25' style='stop-color:%23F2E2B9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23breakfast)' width='400' height='200'/%3E%3Ccircle cx='200' cy='90' r='35' fill='%23FFD966' opacity='0.8'/%3E%3Cline x1='200' y1='45' x2='200' y2='55' stroke='%23FFD966' stroke-width='3' opacity='0.7'/%3E%3Cline x1='200' y1='125' x2='200' y2='135' stroke='%23FFD966' stroke-width='3' opacity='0.7'/%3E%3Cline x1='155' y1='90' x2='165' y2='90' stroke='%23FFD966' stroke-width='3' opacity='0.7'/%3E%3Cline x1='235' y1='90' x2='245' y2='90' stroke='%23FFD966' stroke-width='3' opacity='0.7'/%3E%3Cline x1='168' y1='61' x2='176' y2='69' stroke='%23FFD966' stroke-width='3' opacity='0.7'/%3E%3Cline x1='224' y1='111' x2='232' y2='119' stroke='%23FFD966' stroke-width='3' opacity='0.7'/%3E%3Cellipse cx='200' cy='130' rx='60' ry='25' fill='%23FAF8F5' opacity='0.8'/%3E%3Ctext x='200' y='180' font-family='serif' font-size='18' fill='%238C6B56' text-anchor='middle' font-weight='600'%3EBreakfast%3C/text%3E%3C/svg%3E`,
+  
+  // Snack - Small bites with playful colors
+  "snack": `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cdefs%3E%3ClinearGradient id='snack' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23F5E8DC'/%3E%3Cstop offset='100%25' style='stop-color:%23E5C8B5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23snack)' width='400' height='200'/%3E%3Ccircle cx='170' cy='90' r='28' fill='%23EBC8C0' opacity='0.7'/%3E%3Ccircle cx='200' cy='95' r='30' fill='%23F2E2B9' opacity='0.7'/%3E%3Ccircle cx='230' cy='90' r='28' fill='%23A8BBA0' opacity='0.7'/%3E%3Ccircle cx='165' cy='85' r='8' fill='%23C54B4B' opacity='0.6'/%3E%3Ccircle cx='195' cy='88' r='8' fill='%23C54B4B' opacity='0.6'/%3E%3Ccircle cx='225' cy='85' r='8' fill='%23C54B4B' opacity='0.6'/%3E%3Cpath d='M150 115 Q150 105 155 105 L245 105 Q250 105 250 115 L250 130 Q250 135 245 135 L155 135 Q150 135 150 130 Z' fill='%23FAF8F5' opacity='0.6'/%3E%3Ctext x='200' y='175' font-family='serif' font-size='18' fill='%238C6B56' text-anchor='middle' font-weight='600'%3ESnacks%3C/text%3E%3C/svg%3E`,
+  
+  // Appetizer - Elegant starters with sophisticated tones
+  "appetizer": `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cdefs%3E%3ClinearGradient id='appetizer' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23E0D5C7'/%3E%3Cstop offset='100%25' style='stop-color:%23C5B5A5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23appetizer)' width='400' height='200'/%3E%3Cellipse cx='200' cy='110' rx='80' ry='15' fill='%238C6B56' opacity='0.2'/%3E%3Cellipse cx='200' cy='85' rx='75' ry='35' fill='%23FAF8F5' opacity='0.8'/%3E%3Crect x='175' y='75' width='15' height='25' rx='2' fill='%23A8BBA0' opacity='0.6'/%3E%3Crect x='210' y='75' width='15' height='25' rx='2' fill='%23EBC8C0' opacity='0.6'/%3E%3Ccircle cx='190' cy='70' r='8' fill='%23C54B4B' opacity='0.7'/%3E%3Ccircle cx='210' cy='70' r='8' fill='%23F2E2B9' opacity='0.7'/%3E%3Cpath d='M160 85 Q160 70 165 68 L170 85 Z' fill='%23A8BBA0' opacity='0.5'/%3E%3Ctext x='200' y='170' font-family='serif' font-size='18' fill='%238C6B56' text-anchor='middle' font-weight='600'%3EAppetizers%3C/text%3E%3C/svg%3E`,
+};
+
+/**
+ * Get category image by name
+ */
+export function getCategoryImage(categoryName: string): string {
+  const normalizedName = categoryName.toLowerCase();
+  const categoryImage = COTTAGECORE_CATEGORY_IMAGES[normalizedName];
+  
+  if (categoryImage) {
+    return categoryImage;
+  }
+  
+  // Fallback to first recipe placeholder if available
+  if (COTTAGECORE_RECIPE_PLACEHOLDERS.length > 0) {
+    return COTTAGECORE_RECIPE_PLACEHOLDERS[0];
+  }
+  
+  // Ultimate fallback: a simple cottagecore-themed SVG
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Crect fill='%23FAF8F5' width='400' height='200'/%3E%3Ctext x='200' y='100' font-family='serif' font-size='24' fill='%238C6B56' text-anchor='middle'%3ERecipe%3C/text%3E%3C/svg%3E`;
+}
