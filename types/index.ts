@@ -32,6 +32,8 @@ export interface Category {
 
 export interface FeaturedRecipe {
   id: string;
+  slug: string;
+  username: string;
   title: string;
   description: string;
   image: string;

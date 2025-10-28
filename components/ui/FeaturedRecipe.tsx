@@ -26,7 +26,7 @@ export default function FeaturedRecipe({ featured }: FeaturedRecipeProps) {
             {featured.title}
           </h3>
           <p className="text-text-secondary mb-8">{featured.description}</p>
-          <Button as="link" href={`/recipes/${featured.id}`} variant="primary" size="md">
+          <Button as="link" href={`/recipes/${featured.username}/${featured.slug}`} variant="primary" size="md">
             <Star size={20} /> View Featured Recipe
           </Button>
         </div>

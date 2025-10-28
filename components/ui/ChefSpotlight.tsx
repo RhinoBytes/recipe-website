@@ -29,10 +29,10 @@ export default function ChefSpotlight({ chef }: ChefSpotlightProps) {
           </div>
           <p className="text-text-secondary mb-6">{chef.quote}</p>
           <div className="flex gap-3">
-            <Button as="link" href={`/chefs/${chef.id}`} variant="secondary" size="md">
+            <Button as="link" href={`/profile/${chef.id}`} variant="secondary" size="md">
               <User size={18} /> View Profile
             </Button>
-            <Button as="link" href={`/chefs/${chef.id}/recipes`} variant="primary" size="md">
+            <Button as="link" href={`/browse?author=${encodeURIComponent(chef.name)}`} variant="primary" size="md">
               <Utensils size={18} /> See Recipes
             </Button>
           </div>

@@ -170,11 +170,17 @@ async function getFeaturedRecipe() {
     where: { status: "PUBLISHED", reviews: { some: {} } },
     select: {
       id: true,
+      slug: true,
       title: true,
       description: true,
       imageUrl: true,
       reviews: { select: { rating: true } },
       _count: { select: { reviews: true } },
+      author: {
+        select: {
+          username: true,
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
     take: 10,
@@ -200,6 +206,8 @@ async function getFeaturedRecipe() {
 
   return {
     id: featured.id,
+    slug: featured.slug,
+    username: featured.author.username,
     title: "Recipe of the Day",
     description:
       featured.description ||
@@ -336,7 +344,7 @@ export default async function HomePage() {
     <div className="flex gap-4 flex-wrap justify-center">
             <Button
               as="link"
-              href="/browse"
+              href="/browse?sort=popular"
               variant="primary"
               size="lg"
               className="btn-large"

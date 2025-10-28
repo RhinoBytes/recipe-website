@@ -9,7 +9,7 @@ interface CategoryCardProps {
 export default function CategoryCard({ category }: CategoryCardProps) {
   return (
     <Link
-      href={`/categories/${category.slug}`}
+      href={`/browse?category=${encodeURIComponent(category.name)}`}
       className="relative bg-bg-secondary rounded-2xl overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-1 transition group border border-border"
     >
       <div className="relative w-full h-36">

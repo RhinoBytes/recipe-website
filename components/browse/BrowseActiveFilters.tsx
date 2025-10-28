@@ -79,7 +79,7 @@ export default function BrowseActiveFilters({
                 key={cuisine}
                 label={`Cuisine: ${cuisine}`}
                 onRemove={() => onRemoveCuisine(cuisine)}
-                color="amber"
+                color="highlight"
               />
             ))}
             {selectedAllergens.map((allergen) => (
@@ -101,7 +101,7 @@ export default function BrowseActiveFilters({
         </div>
         <button
           onClick={onClearAll}
-          className="text-sm text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 font-medium whitespace-nowrap"
+          className="text-sm text-accent dark:text-accent hover:text-accent-hover dark:hover:text-accent-hover font-medium whitespace-nowrap"
         >
           Clear All
         </button>
@@ -113,7 +113,7 @@ export default function BrowseActiveFilters({
 interface FilterBadgeProps {
   label: string;
   onRemove: () => void;
-  color: "blue" | "purple" | "green" | "amber" | "red" | "gray";
+  color: "blue" | "purple" | "green" | "highlight" | "red" | "gray";
 }
 
 function FilterBadge({ label, onRemove, color }: FilterBadgeProps) {
@@ -121,7 +121,7 @@ function FilterBadge({ label, onRemove, color }: FilterBadgeProps) {
     blue: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50",
     purple: "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50",
     green: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50",
-    amber: "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50",
+    highlight: "bg-highlight/20 dark:bg-highlight/10 text-muted dark:text-highlight hover:bg-highlight/30 dark:hover:bg-highlight/20",
     red: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50",
     gray: "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600",
   };

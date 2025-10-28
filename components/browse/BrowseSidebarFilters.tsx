@@ -29,19 +29,24 @@ interface BrowseSidebarFiltersProps {
   onClearAll: () => void;
 }
 
+type SectionKey = "categories" | "tags" | "cuisines" | "difficulty" | "allergens";
+
 interface CollapsibleSectionProps {
   title: string;
+  sectionKey: SectionKey;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  openSection: SectionKey | null;
+  onToggle: (key: SectionKey) => void;
 }
 
-function CollapsibleSection({ title, children, defaultOpen = true }: CollapsibleSectionProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+function CollapsibleSection({ title, sectionKey, children, defaultOpen = false, openSection, onToggle }: CollapsibleSectionProps) {
+  const isOpen = openSection === sectionKey;
 
   return (
     <div className="border-b border-border pb-4 mb-4">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => onToggle(sectionKey)}
         className="flex items-center justify-between w-full text-left font-semibold font-heading text-text mb-2"
       >
         <span>{title}</span>
@@ -71,12 +76,18 @@ export default function BrowseSidebarFilters({
   onSortChange,
   onClearAll,
 }: BrowseSidebarFiltersProps) {
+  const [openSection, setOpenSection] = useState<SectionKey | null>("categories");
+  
   const hasActiveFilters = 
     selectedCategories.length > 0 ||
     selectedTags.length > 0 ||
     selectedCuisines.length > 0 ||
     selectedAllergens.length > 0 ||
     selectedDifficulty !== "";
+
+  const handleSectionToggle = (key: SectionKey) => {
+    setOpenSection(openSection === key ? null : key);
+  };
 
   return (
     <div className="bg-bg-secondary rounded-2xl shadow-md border-2 border-border p-5 sticky top-6 max-h-[calc(100vh-100px)] overflow-y-auto">
@@ -111,7 +122,12 @@ export default function BrowseSidebarFilters({
       </div>
 
       {/* Categories */}
-      <CollapsibleSection title="Categories">
+      <CollapsibleSection 
+        title="Categories" 
+        sectionKey="categories"
+        openSection={openSection}
+        onToggle={handleSectionToggle}
+      >
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {categories.map((category) => (
             <label
@@ -138,7 +154,12 @@ export default function BrowseSidebarFilters({
       </CollapsibleSection>
 
       {/* Tags */}
-      <CollapsibleSection title="Tags">
+      <CollapsibleSection 
+        title="Tags" 
+        sectionKey="tags"
+        openSection={openSection}
+        onToggle={handleSectionToggle}
+      >
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {tags.slice(0, 15).map((tag) => (
             <label
@@ -165,7 +186,12 @@ export default function BrowseSidebarFilters({
       </CollapsibleSection>
 
       {/* Cuisines */}
-      <CollapsibleSection title="Cuisines">
+      <CollapsibleSection 
+        title="Cuisines" 
+        sectionKey="cuisines"
+        openSection={openSection}
+        onToggle={handleSectionToggle}
+      >
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {cuisines.map((cuisine) => (
             <label
@@ -192,7 +218,12 @@ export default function BrowseSidebarFilters({
       </CollapsibleSection>
 
       {/* Difficulty */}
-      <CollapsibleSection title="Difficulty">
+      <CollapsibleSection 
+        title="Difficulty" 
+        sectionKey="difficulty"
+        openSection={openSection}
+        onToggle={handleSectionToggle}
+      >
         <div className="space-y-2">
           {["EASY", "MEDIUM", "HARD"].map((difficulty) => (
             <label
@@ -216,7 +247,12 @@ export default function BrowseSidebarFilters({
 
       {/* Allergens */}
       {allergens.length > 0 && (
-        <CollapsibleSection title="Allergens" defaultOpen={false}>
+        <CollapsibleSection 
+          title="Allergens" 
+          sectionKey="allergens"
+          openSection={openSection}
+          onToggle={handleSectionToggle}
+        >
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {allergens.map((allergen) => (
               <label
