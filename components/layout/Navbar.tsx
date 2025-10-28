@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Menu,
   X,
@@ -20,7 +21,9 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
   useAuth(); // Keep auth initialized for the app
 
   // Handle scroll shadow + blur
@@ -40,6 +43,15 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Handle search submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/browse?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <header
@@ -63,14 +75,16 @@ export default function Navbar() {
           </Link>
 
           {/* Search Bar */}
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-900 w-4 h-4" />
+          <form onSubmit={handleSearch} className="relative flex-1 max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-900 w-4 h-4 pointer-events-none" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search recipes, ingredients, or chefs..."
               className="w-full pl-10 pr-4 py-2 border-2 border-orange-200 rounded-full text-sm focus:outline-none focus:border-amber-700 focus-visible:ring-2 focus-visible:ring-amber-700 transition-colors"
             />
-          </div>
+          </form>
 
           {/* Nav Links */}
           <ul className="flex gap-8 items-center m-0 p-0 list-none">

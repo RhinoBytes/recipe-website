@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, Clock, Star, ChevronLeft, ChevronRight, Filter } from "lucide-react";
@@ -37,7 +38,8 @@ interface PaginationInfo {
   totalPages: number;
 }
 
-export default function BrowsePage() {
+function BrowsePageContent() {
+  const searchParams = useSearchParams();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,6 +53,15 @@ export default function BrowsePage() {
   });
   const [categories, setCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Initialize search query from URL on mount
+  useEffect(() => {
+    const query = searchParams.get('q');
+    if (query) {
+      setSearchQuery(query);
+      setShowFilters(true);
+    }
+  }, [searchParams]);
 
   const fetchRecipes = useCallback(async () => {
     setLoading(true);
@@ -316,4 +327,20 @@ export default function BrowsePage() {
       </div>
     </div>
   );
-} 
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 px-4 py-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <BrowsePageContent />
+    </Suspense>
+  );
+}
