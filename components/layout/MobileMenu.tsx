@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { Search, LogIn, UserPlus, Plus, User, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth'; // Make sure this path is correct!
 
 type NavLink = { label: string; href: string };
@@ -14,6 +16,8 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen }: MobileMenuProps) {
   const { isAuthenticated, loading, logout } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
   
   if (!mobileMenuOpen) return null;
 
@@ -24,17 +28,28 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
     setMobileMenuOpen(false);
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/browse?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+      setMobileMenuOpen(false);
+    }
+  };
+
   return (
     <div className="md:hidden border-t border-orange-200 py-4 space-y-4 animate-fadeIn">
       {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-900 w-4 h-4" />
+      <form onSubmit={handleSearch} className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-900 w-4 h-4 pointer-events-none" />
         <input
           type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search recipes..."
           className="w-full pl-10 pr-4 py-2 border-2 border-orange-200 rounded-full text-sm focus:outline-none focus:border-amber-700"
         />
-      </div>
+      </form>
 
       {/* Nav Links */}
       <ul className="space-y-2 list-none m-0 p-0">

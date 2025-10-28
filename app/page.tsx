@@ -359,7 +359,7 @@ export default async function HomePage() {
     <div className="flex gap-4 flex-wrap justify-center">
             <Button
               as="link"
-              href="/recipes/popular"
+              href="/browse"
               variant="primary"
               size="lg"
               className="btn-large"
@@ -368,7 +368,7 @@ export default async function HomePage() {
             </Button>
             <Button
               as="link"
-              href="/recipes"
+              href="/browse"
               variant="primary"
               size="lg"
               className="btn-large"
@@ -397,7 +397,7 @@ export default async function HomePage() {
           </div>
           <div className="text-center">
             <Link
-              href="/recipes/popular"
+              href="/browse"
               className="inline-flex items-center gap-2 text-[#d4735a] font-semibold hover:text-[#b85c42] transition"
             >
               View All Popular Recipes
@@ -446,7 +446,7 @@ export default async function HomePage() {
           </div>
           <div className="text-center">
             <Link
-              href="/recipes/recent"
+              href="/browse"
               className="inline-flex items-center gap-2 text-[#d4735a] font-semibold hover:text-[#b85c42] transition"
             >
               See All New Recipes
