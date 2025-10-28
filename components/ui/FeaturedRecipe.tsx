@@ -9,7 +9,7 @@ interface FeaturedRecipeProps {
 
 export default function FeaturedRecipe({ featured }: FeaturedRecipeProps) {
   return (
-    <section className="bg-gradient-to-br from-[#fef9f7] to-[#fdf1ea] py-16">
+    <section className="bg-gradient-to-br from-accent-light to-secondary-light py-16">
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
         <div>
           <Image
@@ -17,15 +17,15 @@ export default function FeaturedRecipe({ featured }: FeaturedRecipeProps) {
             alt={featured.title}
             width={500}
             height={300}
-            className="rounded-2xl object-cover w-full h-[300px]"
+            className="rounded-2xl object-cover w-full h-[300px] border-2 border-border shadow-lg"
             priority
           />
         </div>
         <div>
-          <h3 className="text-2xl font-bold text-[#b85c42] mb-4">
+          <h3 className="text-2xl font-bold font-heading text-accent mb-4">
             {featured.title}
           </h3>
-          <p className="text-gray-600 mb-8">{featured.description}</p>
+          <p className="text-text-secondary mb-8">{featured.description}</p>
           <Button as="link" href={`/recipes/${featured.id}`} variant="primary" size="md">
             <Star size={20} /> View Featured Recipe
           </Button>

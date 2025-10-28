@@ -315,17 +315,17 @@ export default async function HomePage() {
     <main>
       {/* Hero Section */}
       <section
-  className="bg-center bg-cover text-white py-24 text-center"
+  className="bg-center bg-cover text-bg py-24 text-center"
   style={{
     backgroundImage: `linear-gradient(
       to bottom right,
-      rgba(212,115,90,0.9),
-      rgba(184,92,66,0.9)
+      rgba(168, 187, 160, 0.9),
+      rgba(140, 107, 86, 0.9)
     ), url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=600&fit=crop')`
   }}
 >
   <div className="relative z-10 max-w-2xl mx-auto">
-    <h1 className="text-4xl sm:text-5xl font-bold mb-4 drop-shadow">
+    <h1 className="text-4xl sm:text-5xl font-bold font-heading mb-4 drop-shadow">
       Discover Amazing Recipes
     </h1>
     <p className="text-lg mb-8 opacity-95">
@@ -356,13 +356,13 @@ export default async function HomePage() {
       </section>
 
       {/* Popular Recipes */}
-      <section className="py-16">
+      <section className="py-16 bg-bg">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-2 text-gray-900">
+            <h2 className="text-3xl font-bold font-heading mb-2 text-text">
               Popular This Week
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-text-secondary">
               The most loved recipes by our community of home cooks
             </p>
           </div>
@@ -374,11 +374,11 @@ export default async function HomePage() {
           <div className="text-center">
             <Link
               href="/browse"
-              className="inline-flex items-center gap-2 text-[#d4735a] font-semibold hover:text-[#b85c42] transition"
+              className="inline-flex items-center gap-2 text-accent font-semibold hover:text-accent-hover transition"
             >
               View All Popular Recipes
               <span aria-hidden>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4735a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
               </span>
             </Link>
           </div>
@@ -386,13 +386,13 @@ export default async function HomePage() {
       </section>
 
       {/* Categories */}
-      <section className="py-16 bg-[#fef9f7]">
+      <section className="py-16 bg-accent-light/20">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-2 text-gray-900">
+            <h2 className="text-3xl font-bold font-heading mb-2 text-text">
               Browse by Category
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-text-secondary">
               Find the perfect recipe for any occasion or craving
             </p>
           </div>
@@ -405,13 +405,13 @@ export default async function HomePage() {
       </section>
 
       {/* Recently Added */}
-      <section className="py-16">
+      <section className="py-16 bg-bg">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-2 text-gray-900">
+            <h2 className="text-3xl font-bold font-heading mb-2 text-text">
               Recently Added
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-text-secondary">
               Fresh recipes from our community of passionate cooks
             </p>
           </div>
@@ -423,11 +423,11 @@ export default async function HomePage() {
           <div className="text-center">
             <Link
               href="/browse"
-              className="inline-flex items-center gap-2 text-[#d4735a] font-semibold hover:text-[#b85c42] transition"
+              className="inline-flex items-center gap-2 text-accent font-semibold hover:text-accent-hover transition"
             >
               See All New Recipes
               <span aria-hidden>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4735a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
               </span>
             </Link>
           </div>

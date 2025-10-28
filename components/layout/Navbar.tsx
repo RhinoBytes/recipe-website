@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth'; // Import your auth hook
 import UserDropdown from './UserDropdown';
 import MobileMenu from './MobileMenu';
 import Utensils from './Utensils';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const NAV_LINKS = [
   { label: 'Browse', href: '/browse' },
@@ -55,7 +56,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 backdrop-blur-md bg-white/80 transition-all ${
+      className={`sticky top-0 z-50 backdrop-blur-md bg-bg/80 transition-all ${
         isScrolled ? 'shadow-lg' : 'shadow-sm'
       }`}
     >
@@ -68,7 +69,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 text-2xl font-bold text-amber-700 hover:text-amber-800 transition-colors"
+            className="flex items-center gap-2 text-2xl font-bold font-heading text-accent hover:text-accent-hover transition-colors"
           >
             <Utensils size={24} />
             Cookbook
@@ -76,13 +77,13 @@ export default function Navbar() {
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-900 w-4 h-4 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary w-4 h-4 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search recipes, ingredients, or chefs..."
-              className="w-full pl-10 pr-4 py-2 border-2 border-orange-200 rounded-full text-sm focus:outline-none focus:border-amber-700 focus-visible:ring-2 focus-visible:ring-amber-700 transition-colors"
+              className="w-full pl-10 pr-4 py-2 border-2 border-border rounded-full text-sm bg-bg-secondary text-text focus:outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent transition-colors"
             />
           </form>
 
@@ -92,13 +93,16 @@ export default function Navbar() {
               <li key={href}>
                 <Link
                   href={href}
-                  className="text-gray-800 font-medium hover:text-amber-700 transition-colors"
+                  className="text-text font-medium hover:text-accent transition-colors"
                 >
                   {label}
                 </Link>
               </li>
             ))}
           </ul>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
           {/* User Actions Dropdown */}
           <UserDropdown
@@ -112,20 +116,23 @@ export default function Navbar() {
         <nav className="md:hidden flex items-center justify-between py-4">
           <Link
             href="/"
-            className="flex items-center gap-2 text-2xl font-bold text-amber-700"
+            className="flex items-center gap-2 text-2xl font-bold font-heading text-accent"
           >
             <Utensils size={24} />
             Cookbook
           </Link>
 
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1 text-amber-700 hover:text-amber-800 focus-visible:ring-2 focus-visible:ring-amber-700 rounded-md"
-            aria-label="Toggle menu"
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-1 text-accent hover:text-accent-hover focus-visible:ring-2 focus-visible:ring-accent rounded-md"
+              aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </nav>
 
         {/* Mobile Menu */}
