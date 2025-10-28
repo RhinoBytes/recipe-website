@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { Prisma, MeasurementUnit, Difficulty, RecipeStatus } from "@prisma/client";
+import {
+  Prisma,
+  MeasurementUnit,
+  Difficulty,
+  RecipeStatus,
+} from "@prisma/client";
 import { saveRecipeToFile } from "@/lib/recipeStorage";
 
 export async function GET(request: Request) {
@@ -90,7 +95,9 @@ export async function GET(request: Request) {
         time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
         prepTimeMinutes: recipe.prepTimeMinutes,
         cookTimeMinutes: recipe.cookTimeMinutes,
-        rating: recipe.averageRating ? parseFloat(recipe.averageRating.toString()) : 0,
+        rating: recipe.averageRating
+          ? parseFloat(recipe.averageRating.toString())
+          : 0,
         reviewCount: recipe.reviewCount,
         author: {
           id: recipe.author.id,
@@ -120,7 +127,6 @@ export async function GET(request: Request) {
     );
   }
 }
-
 /**
  * POST /api/recipes
  * Create a new recipe with all related data
@@ -128,7 +134,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const currentUser = await getCurrentUser();
-    
+
     if (!currentUser) {
       return NextResponse.json(
         { error: "Authentication required" },
@@ -162,10 +168,7 @@ export async function POST(request: Request) {
 
     // Validate required fields
     if (!title) {
-      return NextResponse.json(
-        { error: "Title is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
 
     // Validate difficulty if provided
@@ -211,6 +214,43 @@ export async function POST(request: Request) {
       );
     }
 
+    // Process steps: renumber within each group
+    let processedSteps: Array<{
+      stepNumber: number;
+      instruction: string;
+      groupName: string | null;
+      isOptional: boolean;
+    }> = [];
+
+    if (steps && Array.isArray(steps) && steps.length > 0) {
+      // First, sort by original stepNumber to maintain order
+      const sortedSteps = [...steps].sort(
+        (a, b) => a.stepNumber - b.stepNumber
+      );
+
+      // Group steps and renumber within each group
+      const groupCounts: Record<string, number> = {};
+
+      processedSteps = sortedSteps.map((step) => {
+        const group = step.groupName || "Main";
+
+        // Initialize counter for this group if not exists
+        if (!groupCounts[group]) {
+          groupCounts[group] = 0;
+        }
+
+        // Increment and assign step number within group
+        groupCounts[group]++;
+
+        return {
+          stepNumber: groupCounts[group],
+          instruction: step.instruction,
+          groupName: step.groupName || null,
+          isOptional: step.isOptional || false,
+        };
+      });
+    }
+
     // Create recipe with all relations in a transaction
     const recipe = await prisma.$transaction(async (tx) => {
       // Handle cuisine
@@ -252,15 +292,15 @@ export async function POST(request: Request) {
         },
       });
 
-      // Create steps
-      if (steps && Array.isArray(steps) && steps.length > 0) {
+      // Create steps with renumbered stepNumbers
+      if (processedSteps.length > 0) {
         await tx.recipeStep.createMany({
-          data: steps.map((step: { stepNumber: number; instruction: string; groupName?: string | null; isOptional?: boolean }) => ({
+          data: processedSteps.map((step) => ({
             recipeId: newRecipe.id,
             stepNumber: step.stepNumber,
             instruction: step.instruction,
-            groupName: step.groupName || null,
-            isOptional: step.isOptional || false,
+            groupName: step.groupName,
+            isOptional: step.isOptional,
           })),
         });
       }
@@ -268,24 +308,29 @@ export async function POST(request: Request) {
       // Create ingredients
       if (ingredients && Array.isArray(ingredients) && ingredients.length > 0) {
         await tx.recipeIngredient.createMany({
-          data: ingredients.map((ing: { 
-            amount?: string | null; 
-            unit?: MeasurementUnit | null; 
-            name: string; 
-            notes?: string | null;
-            groupName?: string | null;
-            isOptional?: boolean;
-            displayOrder?: number 
-          }, index: number) => ({
-            recipeId: newRecipe.id,
-            amount: ing.amount || null,
-            unit: ing.unit || null,
-            name: ing.name,
-            notes: ing.notes || null,
-            groupName: ing.groupName || null,
-            isOptional: ing.isOptional || false,
-            displayOrder: ing.displayOrder ?? index,
-          })),
+          data: ingredients.map(
+            (
+              ing: {
+                amount?: string | null;
+                unit?: MeasurementUnit | null;
+                name: string;
+                notes?: string | null;
+                groupName?: string | null;
+                isOptional?: boolean;
+                displayOrder?: number;
+              },
+              index: number
+            ) => ({
+              recipeId: newRecipe.id,
+              amount: ing.amount || null,
+              unit: ing.unit || null,
+              name: ing.name,
+              notes: ing.notes || null,
+              groupName: ing.groupName || null,
+              isOptional: ing.isOptional || false,
+              displayOrder: ing.displayOrder ?? index,
+            })
+          ),
         });
       }
 
@@ -359,19 +404,19 @@ export async function POST(request: Request) {
       where: { id: recipe.id },
       include: {
         ingredients: {
-          orderBy: { displayOrder: 'asc' }
+          orderBy: { displayOrder: "asc" },
         },
         steps: {
-          orderBy: { stepNumber: 'asc' }
+          orderBy: { stepNumber: "asc" },
         },
         tags: {
-          include: { tag: true }
+          include: { tag: true },
         },
         categories: {
-          include: { category: true }
+          include: { category: true },
         },
         allergens: {
-          include: { allergen: true }
+          include: { allergen: true },
         },
         cuisine: true,
       },
@@ -396,7 +441,7 @@ export async function POST(request: Request) {
         fatG: fullRecipe.fatG,
         carbsG: fullRecipe.carbsG,
         cuisine: fullRecipe.cuisine?.name || null,
-        ingredients: fullRecipe.ingredients.map(ing => ({
+        ingredients: fullRecipe.ingredients.map((ing) => ({
           amount: ing.amount,
           unit: ing.unit,
           name: ing.name,
@@ -405,15 +450,15 @@ export async function POST(request: Request) {
           isOptional: ing.isOptional,
           displayOrder: ing.displayOrder,
         })),
-        steps: fullRecipe.steps.map(step => ({
+        steps: fullRecipe.steps.map((step) => ({
           stepNumber: step.stepNumber,
           instruction: step.instruction,
           groupName: step.groupName,
           isOptional: step.isOptional,
         })),
-        tags: fullRecipe.tags.map(rt => rt.tag.name),
-        categories: fullRecipe.categories.map(rc => rc.category.name),
-        allergens: fullRecipe.allergens.map(ra => ra.allergen.name),
+        tags: fullRecipe.tags.map((rt) => rt.tag.name),
+        categories: fullRecipe.categories.map((rc) => rc.category.name),
+        allergens: fullRecipe.allergens.map((ra) => ra.allergen.name),
       };
 
       await saveRecipeToFile(recipe.slug!, recipeDataForFile);
@@ -422,14 +467,17 @@ export async function POST(request: Request) {
     // Get author username for response
     const author = await prisma.user.findUnique({
       where: { id: currentUser.userId },
-      select: { username: true }
+      select: { username: true },
     });
 
-    return NextResponse.json({
-      ...recipe,
-      slug: recipe.slug,
-      username: author?.username,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        ...recipe,
+        slug: recipe.slug,
+        username: author?.username,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Create recipe error:", error);
     return NextResponse.json(
@@ -442,7 +490,6 @@ export async function POST(request: Request) {
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
-

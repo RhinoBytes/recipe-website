@@ -1,8 +1,18 @@
-import { PrismaClient, Difficulty, RecipeStatus, MeasurementUnit } from "@prisma/client";
+import {
+  PrismaClient,
+  Difficulty,
+  RecipeStatus,
+  MeasurementUnit,
+} from "@prisma/client";
 import { faker } from "@faker-js/faker";
-import { readRecipeFolders } from "../lib/recipeStorage";
+import { readRecipeFolders } from "../lib/recipeStorage.js"; // notice the .js extension
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
+
+type DifficultyType = keyof typeof Difficulty;
+type RecipeStatusType = keyof typeof RecipeStatus;
+type MeasurementUnitType = keyof typeof MeasurementUnit;
 
 async function main() {
   console.log("Seeding database...");
@@ -28,8 +38,10 @@ async function main() {
         data: {
           username,
           email: `${username.toLowerCase()}@example.com`,
-          passwordHash: faker.internet.password(),
-          avatarUrl: `https://images.unsplash.com/photo-${faker.string.numeric(13)}?auto=format&fit=crop&w=400&h=400`,
+          passwordHash: "password123",
+          avatarUrl: `https://images.unsplash.com/photo-${faker.string.numeric(
+            13
+          )}?auto=format&fit=crop&w=400&h=400`,
           bio: faker.lorem.sentence(),
         },
       });
@@ -40,7 +52,15 @@ async function main() {
 
   // Create Categories if they don't exist
   console.log("Creating categories...");
-  const categoryNames = ["Breakfast", "Lunch", "Dinner", "Dessert", "Snack", "Appetizer", "Side Dish"];
+  const categoryNames = [
+    "Breakfast",
+    "Lunch",
+    "Dinner",
+    "Dessert",
+    "Snack",
+    "Appetizer",
+    "Side Dish",
+  ];
   const categories = [];
   for (const name of categoryNames) {
     let category = await prisma.category.findUnique({ where: { name } });
@@ -52,7 +72,16 @@ async function main() {
 
   // Create Tags if they don't exist
   console.log("Creating tags...");
-  const tagNames = ["Easy", "Quick", "Healthy", "Vegan", "Gluten-Free", "Vegetarian", "Low-Carb", "Kid-Friendly"];
+  const tagNames = [
+    "Easy",
+    "Quick",
+    "Healthy",
+    "Vegan",
+    "Gluten-Free",
+    "Vegetarian",
+    "Low-Carb",
+    "Kid-Friendly",
+  ];
   const tags = [];
   for (const name of tagNames) {
     let tag = await prisma.tag.findUnique({ where: { name } });
@@ -64,7 +93,16 @@ async function main() {
 
   // Create Allergens if they don't exist
   console.log("Creating allergens...");
-  const allergenNames = ["Peanuts", "Tree Nuts", "Dairy", "Gluten", "Eggs", "Soy", "Fish", "Shellfish"];
+  const allergenNames = [
+    "Peanuts",
+    "Tree Nuts",
+    "Dairy",
+    "Gluten",
+    "Eggs",
+    "Soy",
+    "Fish",
+    "Shellfish",
+  ];
   const allergens = [];
   for (const name of allergenNames) {
     let allergen = await prisma.allergen.findUnique({ where: { name } });
@@ -113,12 +151,12 @@ async function main() {
           servings: data.servings,
           prepTimeMinutes: data.prepTimeMinutes,
           cookTimeMinutes: data.cookTimeMinutes,
-          difficulty: data.difficulty as Difficulty | null,
+          difficulty: data.difficulty as DifficultyType | null,
           imageUrl: data.imageUrl,
           sourceUrl: data.sourceUrl,
           sourceText: data.sourceText,
           cuisineId,
-          status: (data.status as RecipeStatus) || RecipeStatus.PUBLISHED,
+          status: (data.status as RecipeStatusType) || RecipeStatus.PUBLISHED,
           calories: data.calories,
           proteinG: data.proteinG,
           fatG: data.fatG,
@@ -132,7 +170,7 @@ async function main() {
           data: data.ingredients.map((ing) => ({
             recipeId: recipe.id,
             amount: ing.amount,
-            unit: ing.unit as MeasurementUnit | null,
+            unit: ing.unit as MeasurementUnitType | null,
             name: ing.name,
             notes: ing.notes,
             groupName: ing.groupName,
@@ -170,7 +208,9 @@ async function main() {
       // Handle categories
       if (data.categories && Array.isArray(data.categories)) {
         for (const categoryName of data.categories) {
-          const category = await prisma.category.findUnique({ where: { name: categoryName } });
+          const category = await prisma.category.findUnique({
+            where: { name: categoryName },
+          });
           if (category) {
             await prisma.recipesCategories.create({
               data: { recipeId: recipe.id, categoryId: category.id },
@@ -182,7 +222,9 @@ async function main() {
       // Handle allergens
       if (data.allergens && Array.isArray(data.allergens)) {
         for (const allergenName of data.allergens) {
-          const allergen = await prisma.allergen.findUnique({ where: { name: allergenName } });
+          const allergen = await prisma.allergen.findUnique({
+            where: { name: allergenName },
+          });
           if (allergen) {
             await prisma.recipesAllergens.create({
               data: { recipeId: recipe.id, allergenId: allergen.id },
@@ -213,8 +255,10 @@ async function main() {
 
   // If no recipes were imported, create some fake ones for testing
   if (recipeFolders.length === 0) {
-    console.log("No recipe JSON files found. Creating sample recipes with fake data...");
-    
+    console.log(
+      "No recipe JSON files found. Creating sample recipes with fake data..."
+    );
+
     for (let i = 0; i < 10; i++) {
       const author = faker.helpers.arrayElement(users);
       const title = faker.lorem.words(3);
@@ -229,8 +273,14 @@ async function main() {
           servings: faker.number.int({ min: 2, max: 8 }),
           prepTimeMinutes: faker.number.int({ min: 10, max: 60 }),
           cookTimeMinutes: faker.number.int({ min: 15, max: 120 }),
-          difficulty: faker.helpers.arrayElement([Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD]),
-          imageUrl: `https://images.unsplash.com/photo-${faker.string.numeric(13)}?auto=format&fit=crop&w=800&h=600`,
+          difficulty: faker.helpers.arrayElement([
+            Difficulty.EASY,
+            Difficulty.MEDIUM,
+            Difficulty.HARD,
+          ]),
+          imageUrl: `https://images.unsplash.com/photo-${faker.string.numeric(
+            13
+          )}?auto=format&fit=crop&w=800&h=600`,
           status: RecipeStatus.PUBLISHED,
           calories: faker.number.int({ min: 150, max: 800 }),
           proteinG: faker.number.int({ min: 5, max: 50 }),
@@ -246,8 +296,17 @@ async function main() {
           data: {
             recipeId: recipe.id,
             name: faker.food.ingredient(),
-            amount: faker.number.float({ min: 0.5, max: 5, fractionDigits: 1 }).toString(),
-            unit: faker.helpers.arrayElement([MeasurementUnit.CUP, MeasurementUnit.TBSP, MeasurementUnit.TSP, MeasurementUnit.G, MeasurementUnit.ML, MeasurementUnit.PIECE]),
+            amount: faker.number
+              .float({ min: 0.5, max: 5, fractionDigits: 1 })
+              .toString(),
+            unit: faker.helpers.arrayElement([
+              MeasurementUnit.CUP,
+              MeasurementUnit.TBSP,
+              MeasurementUnit.TSP,
+              MeasurementUnit.G,
+              MeasurementUnit.ML,
+              MeasurementUnit.PIECE,
+            ]),
             displayOrder: j,
           },
         });
@@ -266,7 +325,10 @@ async function main() {
       }
 
       // Add 1-2 categories
-      const selectedCategories = faker.helpers.arrayElements(categories, faker.number.int({ min: 1, max: 2 }));
+      const selectedCategories = faker.helpers.arrayElements(
+        categories,
+        faker.number.int({ min: 1, max: 2 })
+      );
       for (const category of selectedCategories) {
         await prisma.recipesCategories.create({
           data: { recipeId: recipe.id, categoryId: category.id },
@@ -274,7 +336,10 @@ async function main() {
       }
 
       // Add 1-2 tags
-      const selectedTags = faker.helpers.arrayElements(tags, faker.number.int({ min: 1, max: 2 }));
+      const selectedTags = faker.helpers.arrayElements(
+        tags,
+        faker.number.int({ min: 1, max: 2 })
+      );
       for (const tag of selectedTags) {
         await prisma.recipesTags.create({
           data: { recipeId: recipe.id, tagId: tag.id },
@@ -318,4 +383,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

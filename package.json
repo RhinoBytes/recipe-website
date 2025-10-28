@@ -2,6 +2,7 @@
   "name": "recipe-builder",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
@@ -9,7 +10,7 @@
     "lint": "eslint"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+   "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
