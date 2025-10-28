@@ -1,9 +1,12 @@
 // Shared types for recipe forms and AI formatting
 
 export interface RecipeIngredient {
-  amount: number | null;
+  amount: string | null;
   unit: string | null;
   name: string;
+  notes?: string | null;
+  groupName?: string | null;
+  isOptional?: boolean;
   displayOrder?: number;
 }
 

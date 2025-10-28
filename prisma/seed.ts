@@ -2,7 +2,6 @@ import {
   PrismaClient,
   Difficulty,
   RecipeStatus,
-  MeasurementUnit,
 } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import { readRecipeFolders } from "../lib/recipeStorage.js"; // notice the .js extension
@@ -12,7 +11,6 @@ const prisma = new PrismaClient();
 
 type DifficultyType = keyof typeof Difficulty;
 type RecipeStatusType = keyof typeof RecipeStatus;
-type MeasurementUnitType = keyof typeof MeasurementUnit;
 
 async function main() {
   console.log("Seeding database...");
@@ -170,7 +168,7 @@ async function main() {
           data: data.ingredients.map((ing) => ({
             recipeId: recipe.id,
             amount: ing.amount,
-            unit: ing.unit as MeasurementUnitType | null,
+            unit: ing.unit as string | null,
             name: ing.name,
             notes: ing.notes,
             groupName: ing.groupName,
@@ -300,12 +298,12 @@ async function main() {
               .float({ min: 0.5, max: 5, fractionDigits: 1 })
               .toString(),
             unit: faker.helpers.arrayElement([
-              MeasurementUnit.CUP,
-              MeasurementUnit.TBSP,
-              MeasurementUnit.TSP,
-              MeasurementUnit.G,
-              MeasurementUnit.ML,
-              MeasurementUnit.PIECE,
+              "cup",
+              "tbsp",
+              "tsp",
+              "g",
+              "ml",
+              "piece",
             ]),
             displayOrder: j,
           },
