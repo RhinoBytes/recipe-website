@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedPage from "@/components/ProtectedPage";
-import { Plus, Trash2, Loader2, Sparkles, Upload } from "lucide-react";
+import { Plus, Trash2, Loader2, Sparkles, Upload, AlertCircle } from "lucide-react";
 import Button from "@/components/Button";
 import AIRecipeModal from "@/components/ui/AIRecipeModal";
+import CollapsibleSection from "@/components/ui/CollapsibleSection";
+import DraggableItem from "@/components/ui/DraggableItem";
 import { FormattedRecipeResponse, RecipeIngredient } from "@/types/recipe";
 import { MeasurementUnit, Difficulty, RecipeStatus } from "@prisma/client";
 
@@ -82,6 +84,9 @@ export default function NewRecipePage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState("");
+  const [imageError, setImageError] = useState(false);
+  const [draggedIngredient, setDraggedIngredient] = useState<number | null>(null);
+  const [draggedStep, setDraggedStep] = useState<number | null>(null);
 
   useEffect(() => {
     // Fetch categories and allergens
@@ -113,12 +118,26 @@ export default function NewRecipePage() {
     // Prefer steps array from AI if available, otherwise fall back to instructions string
     let finalSteps: RecipeStep[];
     if (formatted.steps && formatted.steps.length > 0) {
-      // AI provided structured steps
-      finalSteps = formatted.steps.map((step, idx) => ({
-        stepNumber: step.stepNumber || idx + 1,
-        instruction: step.instruction,
-        groupName: step.groupName || null,
-        isOptional: step.isOptional || false,
+      // AI provided structured steps - merge duplicates and clean
+      const uniqueSteps = new Map<string, RecipeStep>();
+      
+      formatted.steps.forEach((step, idx) => {
+        const key = step.instruction.toLowerCase().trim();
+        // Only add if not duplicate or if it's a better version (has group name)
+        if (!uniqueSteps.has(key) || (step.groupName && !uniqueSteps.get(key)?.groupName)) {
+          uniqueSteps.set(key, {
+            stepNumber: idx + 1,
+            instruction: step.instruction,
+            groupName: step.groupName || null,
+            isOptional: step.isOptional || false,
+          });
+        }
+      });
+      
+      // Renumber steps sequentially
+      finalSteps = Array.from(uniqueSteps.values()).map((step, idx) => ({
+        ...step,
+        stepNumber: idx + 1,
       }));
     } else if (formatted.instructions) {
       // Fall back to parsing instructions string
@@ -321,6 +340,58 @@ export default function NewRecipePage() {
     }
   };
 
+  // Drag and drop handlers for ingredients
+  const handleIngredientDragStart = (index: number) => {
+    setDraggedIngredient(index);
+  };
+
+  const handleIngredientDragEnter = (index: number) => {
+    if (draggedIngredient === null || draggedIngredient === index) return;
+    
+    const newIngredients = [...formData.ingredients];
+    const draggedItem = newIngredients[draggedIngredient];
+    newIngredients.splice(draggedIngredient, 1);
+    newIngredients.splice(index, 0, draggedItem);
+    
+    // Update displayOrder
+    newIngredients.forEach((ing, idx) => {
+      ing.displayOrder = idx;
+    });
+    
+    setFormData({ ...formData, ingredients: newIngredients });
+    setDraggedIngredient(index);
+  };
+
+  const handleIngredientDragEnd = () => {
+    setDraggedIngredient(null);
+  };
+
+  // Drag and drop handlers for steps
+  const handleStepDragStart = (index: number) => {
+    setDraggedStep(index);
+  };
+
+  const handleStepDragEnter = (index: number) => {
+    if (draggedStep === null || draggedStep === index) return;
+    
+    const newSteps = [...formData.steps];
+    const draggedItem = newSteps[draggedStep];
+    newSteps.splice(draggedStep, 1);
+    newSteps.splice(index, 0, draggedItem);
+    
+    // Update stepNumber for display (1-based sequential)
+    newSteps.forEach((step, idx) => {
+      step.stepNumber = idx + 1;
+    });
+    
+    setFormData({ ...formData, steps: newSteps });
+    setDraggedStep(index);
+  };
+
+  const handleStepDragEnd = () => {
+    setDraggedStep(null);
+  };
+
   return (
     <ProtectedPage>
       <AIRecipeModal
@@ -329,13 +400,14 @@ export default function NewRecipePage() {
         onRecipeFormatted={handleAIFormattedRecipe}
       />
 
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen bg-gray-50 py-4 md:py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-4xl font-bold text-gray-900">Create New Recipe</h1>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Create New Recipe</h1>
             <Button
               variant="secondary"
               onClick={() => setShowAIModal(true)}
+              className="w-full sm:w-auto"
             >
               <Sparkles size={18} />
               Use AI Formatter
@@ -349,13 +421,12 @@ export default function NewRecipePage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4 text-gray-900">Basic Information</h2>
-                
+              <CollapsibleSection title="Basic Information" defaultOpen={true}>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Recipe Title *
+                      Recipe Title <span className="text-red-500">*</span>
+                      <span className="ml-2 text-xs text-gray-500">Required</span>
                     </label>
                     <input
                       type="text"
@@ -370,6 +441,7 @@ export default function NewRecipePage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Description
+                      <span className="ml-2 text-xs text-gray-500">Optional - A brief overview of your recipe</span>
                     </label>
                     <textarea
                       value={formData.description}
@@ -380,22 +452,25 @@ export default function NewRecipePage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Servings
+                        <span className="ml-2 text-xs text-gray-500">How many people?</span>
                       </label>
                       <input
                         type="number"
                         value={formData.servings}
-                        onChange={(e) => setFormData({ ...formData, servings: parseInt(e.target.value) || 0 })}
+                        onChange={(e) => setFormData({ ...formData, servings: parseInt(e.target.value) || 1 })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                         min="1"
+                        max="100"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Prep Time (min)
+                        <span className="ml-2 text-xs text-gray-500">Setup time</span>
                       </label>
                       <input
                         type="number"
@@ -403,11 +478,13 @@ export default function NewRecipePage() {
                         onChange={(e) => setFormData({ ...formData, prepTimeMinutes: parseInt(e.target.value) || 0 })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                         min="0"
+                        max="1440"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Cook Time (min)
+                        <span className="ml-2 text-xs text-gray-500">Active cooking</span>
                       </label>
                       <input
                         type="number"
@@ -415,6 +492,7 @@ export default function NewRecipePage() {
                         onChange={(e) => setFormData({ ...formData, cookTimeMinutes: parseInt(e.target.value) || 0 })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                         min="0"
+                        max="1440"
                       />
                     </div>
                   </div>
@@ -422,28 +500,33 @@ export default function NewRecipePage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Difficulty
+                      <span className="ml-2 text-xs text-gray-500">How complex is this recipe?</span>
                     </label>
                     <select
                       value={formData.difficulty}
                       onChange={(e) => setFormData({ ...formData, difficulty: e.target.value as Difficulty })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     >
-                      <option value={Difficulty.EASY}>Easy</option>
-                      <option value={Difficulty.MEDIUM}>Medium</option>
-                      <option value={Difficulty.HARD}>Hard</option>
+                      <option value={Difficulty.EASY}>Easy - Quick and simple</option>
+                      <option value={Difficulty.MEDIUM}>Medium - Some experience helpful</option>
+                      <option value={Difficulty.HARD}>Hard - Advanced techniques</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Recipe Image
+                      <span className="ml-2 text-xs text-gray-500">Optional - Add a photo to make your recipe more appealing</span>
                     </label>
                     <div className="space-y-2">
                       <div className="flex gap-2">
                         <input
                           type="url"
                           value={formData.imageUrl}
-                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                          onChange={(e) => {
+                            setFormData({ ...formData, imageUrl: e.target.value });
+                            setImageError(false);
+                          }}
                           className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                           placeholder="Enter image URL or upload a file below"
                         />
@@ -465,16 +548,20 @@ export default function NewRecipePage() {
                           />
                         </label>
                       </div>
-                      {formData.imageUrl && (
+                      {formData.imageUrl && !imageError && (
                         <div className="mt-2">
                           <img
                             src={formData.imageUrl}
                             alt="Recipe preview"
                             className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "/images/recipes/default.jpg";
-                            }}
+                            onError={() => setImageError(true)}
                           />
+                        </div>
+                      )}
+                      {imageError && formData.imageUrl && (
+                        <div className="flex items-center gap-2 text-amber-600 text-sm">
+                          <AlertCircle size={16} />
+                          <span>Image failed to load. Using default placeholder.</span>
                         </div>
                       )}
                     </div>
@@ -483,6 +570,7 @@ export default function NewRecipePage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Cuisine
+                      <span className="ml-2 text-xs text-gray-500">Optional - e.g., Italian, Mexican, Thai</span>
                     </label>
                     <input
                       type="text"
@@ -495,20 +583,22 @@ export default function NewRecipePage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Source URL (Optional)
+                      Source URL
+                      <span className="ml-2 text-xs text-gray-500">Optional - If adapted from another recipe</span>
                     </label>
                     <input
                       type="url"
                       value={formData.sourceUrl}
                       onChange={(e) => setFormData({ ...formData, sourceUrl: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                      placeholder="https://... (if adapted from another recipe)"
+                      placeholder="https://..."
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Source Text (Optional)
+                      Source Text
+                      <span className="ml-2 text-xs text-gray-500">Optional - e.g., &ldquo;From Grandma&apos;s cookbook&rdquo;</span>
                     </label>
                     <input
                       type="text"
@@ -519,181 +609,215 @@ export default function NewRecipePage() {
                     />
                   </div>
                 </div>
-              </div>
+              </CollapsibleSection>
 
               {/* Ingredients */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4 text-gray-900">Ingredients</h2>
-                
+              <CollapsibleSection 
+                title="Ingredients" 
+                badge={formData.ingredients.length}
+                defaultOpen={true}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  <span className="font-medium">Tip:</span> Drag items to reorder. Group related ingredients together.
+                </p>
                 <div className="space-y-3">
                   {formData.ingredients.map((ingredient, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-3 space-y-2">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={ingredient.amount || ""}
-                          onChange={(e) => updateIngredient(index, "amount", e.target.value || null)}
-                          className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                          placeholder="1/2, 2-3"
-                        />
-                        <select
-                          value={ingredient.unit || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            // Validate that value is a valid MeasurementUnit enum or empty
-                            if (!value || Object.values(MeasurementUnit).includes(value as MeasurementUnit)) {
-                              updateIngredient(index, "unit", value ? value as MeasurementUnit : null);
-                            }
-                          }}
-                          className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                        >
-                          <option value="">None</option>
-                          <option value={MeasurementUnit.CUP}>Cup</option>
-                          <option value={MeasurementUnit.TBSP}>Tbsp</option>
-                          <option value={MeasurementUnit.TSP}>Tsp</option>
-                          <option value={MeasurementUnit.FL_OZ}>Fl oz</option>
-                          <option value={MeasurementUnit.ML}>mL</option>
-                          <option value={MeasurementUnit.L}>L</option>
-                          <option value={MeasurementUnit.PINT}>Pint</option>
-                          <option value={MeasurementUnit.QUART}>Quart</option>
-                          <option value={MeasurementUnit.GALLON}>Gallon</option>
-                          <option value={MeasurementUnit.OZ}>oz</option>
-                          <option value={MeasurementUnit.LB}>lb</option>
-                          <option value={MeasurementUnit.G}>g</option>
-                          <option value={MeasurementUnit.KG}>kg</option>
-                          <option value={MeasurementUnit.MG}>mg</option>
-                          <option value={MeasurementUnit.PIECE}>Piece</option>
-                          <option value={MeasurementUnit.WHOLE}>Whole</option>
-                          <option value={MeasurementUnit.SLICE}>Slice</option>
-                          <option value={MeasurementUnit.CLOVE}>Clove</option>
-                          <option value={MeasurementUnit.PINCH}>Pinch</option>
-                          <option value={MeasurementUnit.DASH}>Dash</option>
-                          <option value={MeasurementUnit.HANDFUL}>Handful</option>
-                          <option value={MeasurementUnit.TO_TASTE}>To taste</option>
-                          <option value={MeasurementUnit.AS_NEEDED}>As needed</option>
-                        </select>
-                        <input
-                          type="text"
-                          value={ingredient.name}
-                          onChange={(e) => updateIngredient(index, "name", e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                          placeholder="Ingredient name"
-                          required
-                        />
-                        {formData.ingredients.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeIngredient(index)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={ingredient.groupName || ""}
-                          onChange={(e) => updateIngredient(index, "groupName", e.target.value || null)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                          placeholder="Group (e.g., For the dough)"
-                        />
-                        <input
-                          type="text"
-                          value={ingredient.notes || ""}
-                          onChange={(e) => updateIngredient(index, "notes", e.target.value || null)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                          placeholder="Notes (e.g., or substitute)"
-                        />
-                        <label className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <DraggableItem
+                      key={index}
+                      index={index}
+                      onDragStart={handleIngredientDragStart}
+                      onDragEnter={handleIngredientDragEnter}
+                      onDragEnd={handleIngredientDragEnd}
+                      isDragging={draggedIngredient === index}
+                    >
+                      <div className="border border-gray-200 rounded-lg p-3 space-y-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <input
-                            type="checkbox"
-                            checked={ingredient.isOptional}
-                            onChange={(e) => updateIngredient(index, "isOptional", e.target.checked)}
-                            className="rounded focus:ring-2 focus:ring-amber-500"
+                            type="text"
+                            value={ingredient.amount || ""}
+                            onChange={(e) => updateIngredient(index, "amount", e.target.value || null)}
+                            className="w-full sm:w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                            placeholder="Amount (e.g., 1/2, 2-3)"
                           />
-                          Optional
-                        </label>
+                          <select
+                            value={ingredient.unit || ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (!value || Object.values(MeasurementUnit).includes(value as MeasurementUnit)) {
+                                updateIngredient(index, "unit", value ? value as MeasurementUnit : null);
+                              }
+                            }}
+                            className="w-full sm:w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                          >
+                            <option value="">None</option>
+                            <option value={MeasurementUnit.CUP}>Cup</option>
+                            <option value={MeasurementUnit.TBSP}>Tbsp</option>
+                            <option value={MeasurementUnit.TSP}>Tsp</option>
+                            <option value={MeasurementUnit.FL_OZ}>Fl oz</option>
+                            <option value={MeasurementUnit.ML}>mL</option>
+                            <option value={MeasurementUnit.L}>L</option>
+                            <option value={MeasurementUnit.PINT}>Pint</option>
+                            <option value={MeasurementUnit.QUART}>Quart</option>
+                            <option value={MeasurementUnit.GALLON}>Gallon</option>
+                            <option value={MeasurementUnit.OZ}>oz</option>
+                            <option value={MeasurementUnit.LB}>lb</option>
+                            <option value={MeasurementUnit.G}>g</option>
+                            <option value={MeasurementUnit.KG}>kg</option>
+                            <option value={MeasurementUnit.MG}>mg</option>
+                            <option value={MeasurementUnit.PIECE}>Piece</option>
+                            <option value={MeasurementUnit.WHOLE}>Whole</option>
+                            <option value={MeasurementUnit.SLICE}>Slice</option>
+                            <option value={MeasurementUnit.CLOVE}>Clove</option>
+                            <option value={MeasurementUnit.PINCH}>Pinch</option>
+                            <option value={MeasurementUnit.DASH}>Dash</option>
+                            <option value={MeasurementUnit.HANDFUL}>Handful</option>
+                            <option value={MeasurementUnit.TO_TASTE}>To taste</option>
+                            <option value={MeasurementUnit.AS_NEEDED}>As needed</option>
+                          </select>
+                          <input
+                            type="text"
+                            value={ingredient.name}
+                            onChange={(e) => updateIngredient(index, "name", e.target.value)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                            placeholder="Ingredient name *"
+                            required
+                          />
+                          {formData.ingredients.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeIngredient(index)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                              title="Remove ingredient"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="text"
+                            value={ingredient.groupName || ""}
+                            onChange={(e) => updateIngredient(index, "groupName", e.target.value || null)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                            placeholder="Group (e.g., For the dough)"
+                          />
+                          <input
+                            type="text"
+                            value={ingredient.notes || ""}
+                            onChange={(e) => updateIngredient(index, "notes", e.target.value || null)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                            placeholder="Notes (e.g., or substitute)"
+                          />
+                          <label className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={ingredient.isOptional}
+                              onChange={(e) => updateIngredient(index, "isOptional", e.target.checked)}
+                              className="rounded focus:ring-2 focus:ring-amber-500"
+                            />
+                            Optional
+                          </label>
+                        </div>
                       </div>
-                    </div>
+                    </DraggableItem>
                   ))}
                 </div>
 
                 <button
                   type="button"
                   onClick={addIngredient}
-                  className="mt-4 flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium"
+                  className="mt-4 flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium transition-colors"
                 >
                   <Plus size={18} />
                   Add Ingredient
                 </button>
-              </div>
+              </CollapsibleSection>
 
               {/* Instructions/Steps */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4 text-gray-900">Instructions</h2>
-                
+              <CollapsibleSection 
+                title="Instructions" 
+                badge={formData.steps.length}
+                defaultOpen={true}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  <span className="font-medium">Tip:</span> Drag steps to reorder. Steps are automatically numbered.
+                </p>
                 <div className="space-y-3">
                   {formData.steps.map((step, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-3">
-                      <div className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center font-semibold">
-                          {step.stepNumber}
-                        </div>
-                        <textarea
-                          value={step.instruction}
-                          onChange={(e) => updateStep(index, "instruction", e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                          rows={3}
-                          placeholder="Describe this step..."
-                          required
-                        />
-                        {formData.steps.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeStep(index)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        )}
-                      </div>
-                      <div className="mt-2 ml-11 space-y-2">
-                        <input
-                          type="text"
-                          value={step.groupName || ""}
-                          onChange={(e) => updateStep(index, "groupName", e.target.value || null)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
-                          placeholder="Group name (e.g., For the cake, For the frosting)"
-                        />
-                        <label className="flex items-center gap-2 text-sm">
-                          <input
-                            type="checkbox"
-                            checked={step.isOptional}
-                            onChange={(e) => updateStep(index, "isOptional", e.target.checked)}
-                            className="rounded focus:ring-2 focus:ring-amber-500"
+                    <DraggableItem
+                      key={index}
+                      index={index}
+                      onDragStart={handleStepDragStart}
+                      onDragEnter={handleStepDragEnter}
+                      onDragEnd={handleStepDragEnd}
+                      isDragging={draggedStep === index}
+                    >
+                      <div className="border border-gray-200 rounded-lg p-3">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center font-semibold text-sm">
+                            {index + 1}
+                          </div>
+                          <textarea
+                            value={step.instruction}
+                            onChange={(e) => updateStep(index, "instruction", e.target.value)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                            rows={3}
+                            placeholder="Describe this step... *"
+                            required
                           />
-                          Optional step
-                        </label>
+                          {formData.steps.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeStep(index)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                              title="Remove step"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </div>
+                        <div className="mt-2 ml-11 space-y-2">
+                          <input
+                            type="text"
+                            value={step.groupName || ""}
+                            onChange={(e) => updateStep(index, "groupName", e.target.value || null)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                            placeholder="Group name (e.g., For the cake, For the frosting)"
+                          />
+                          <label className="flex items-center gap-2 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={step.isOptional}
+                              onChange={(e) => updateStep(index, "isOptional", e.target.checked)}
+                              className="rounded focus:ring-2 focus:ring-amber-500"
+                            />
+                            Optional step
+                          </label>
+                        </div>
                       </div>
-                    </div>
+                    </DraggableItem>
                   ))}
                 </div>
 
                 <button
                   type="button"
                   onClick={addStep}
-                  className="mt-4 flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium"
+                  className="mt-4 flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium transition-colors"
                 >
                   <Plus size={18} />
                   Add Step
                 </button>
-              </div>
+              </CollapsibleSection>
 
               {/* Tags */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4 text-gray-900">Tags</h2>
-                
+              <CollapsibleSection 
+                title="Tags" 
+                badge={formData.tags.length || undefined}
+                defaultOpen={false}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  Tags help users find your recipe. Press Enter or click Add to add tags.
+                </p>
                 <div className="flex gap-2 mb-4">
                   <input
                     type="text"
@@ -701,40 +825,49 @@ export default function NewRecipePage() {
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    placeholder="Add a tag..."
+                    placeholder="Add a tag (e.g., Vegetarian, Quick, Healthy)"
                   />
                   <button
                     type="button"
                     onClick={addTag}
-                    className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                    className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors whitespace-nowrap"
                   >
                     Add
                   </button>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {formData.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm"
-                    >
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => removeTag(tag)}
-                        className="hover:text-amber-900"
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm"
                       >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="hover:text-amber-900 font-bold"
+                          title="Remove tag"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </CollapsibleSection>
 
               {/* Categories */}
               {categories.length > 0 && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-xl font-bold mb-4 text-gray-900">Categories</h2>
+                <CollapsibleSection 
+                  title="Categories" 
+                  badge={formData.categories.length || undefined}
+                  defaultOpen={false}
+                >
+                  <p className="text-sm text-gray-600 mb-4">
+                    Select one or more categories that best describe your recipe.
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {categories.map((category) => (
                       <button
@@ -743,7 +876,7 @@ export default function NewRecipePage() {
                         onClick={() => toggleCategory(category.name)}
                         className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                           formData.categories.includes(category.name)
-                            ? "border-amber-600 bg-amber-50 text-amber-800"
+                            ? "border-amber-600 bg-amber-50 text-amber-800 font-medium"
                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                         }`}
                       >
@@ -751,13 +884,19 @@ export default function NewRecipePage() {
                       </button>
                     ))}
                   </div>
-                </div>
+                </CollapsibleSection>
               )}
 
               {/* Allergens */}
               {allergens.length > 0 && (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-xl font-bold mb-4 text-gray-900">Allergens</h2>
+                <CollapsibleSection 
+                  title="Allergen Warnings" 
+                  badge={formData.allergens.length || undefined}
+                  defaultOpen={false}
+                >
+                  <p className="text-sm text-gray-600 mb-4">
+                    <span className="font-medium">Important:</span> Select all allergens present in your recipe to help keep users safe.
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {allergens.map((allergen) => (
                       <button
@@ -766,7 +905,7 @@ export default function NewRecipePage() {
                         onClick={() => toggleAllergen(allergen.name)}
                         className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                           formData.allergens.includes(allergen.name)
-                            ? "border-red-600 bg-red-50 text-red-800"
+                            ? "border-red-600 bg-red-50 text-red-800 font-medium"
                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                         }`}
                       >
@@ -774,13 +913,19 @@ export default function NewRecipePage() {
                       </button>
                     ))}
                   </div>
-                </div>
+                </CollapsibleSection>
               )}
 
               {/* Submit Actions */}
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <CollapsibleSection 
+                title="Publish" 
+                defaultOpen={true}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  Choose to save as a draft or publish your recipe immediately.
+                </p>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Status
                   </label>
                   <select
@@ -788,15 +933,16 @@ export default function NewRecipePage() {
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as RecipeStatus })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   >
-                    <option value={RecipeStatus.DRAFT}>Save as Draft</option>
-                    <option value={RecipeStatus.PUBLISHED}>Publish Recipe</option>
+                    <option value={RecipeStatus.DRAFT}>Save as Draft - Not visible to others</option>
+                    <option value={RecipeStatus.PUBLISHED}>Publish Recipe - Visible to everyone</option>
                   </select>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <Button
                     type="submit"
                     disabled={loading}
                     variant="primary"
+                    className="flex-1 justify-center"
                   >
                     {loading ? (
                       <>
@@ -807,8 +953,17 @@ export default function NewRecipePage() {
                       formData.status === RecipeStatus.PUBLISHED ? "Publish Recipe" : "Save Draft"
                     )}
                   </Button>
+                  <Button
+                    type="button"
+                    onClick={() => router.back()}
+                    variant="outline"
+                    disabled={loading}
+                    className="sm:flex-none"
+                  >
+                    Cancel
+                  </Button>
                 </div>
-              </div>
+              </CollapsibleSection>
             </form>
         </div>
       </div>
