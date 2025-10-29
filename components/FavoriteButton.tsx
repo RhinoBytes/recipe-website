@@ -77,10 +77,11 @@ export default function FavoriteButton({ recipeId }: FavoriteButtonProps) {
     return (
       <button
         disabled
-        className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-400 rounded-lg"
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-border text-text-muted rounded-lg cursor-not-allowed"
+        aria-label="Loading favorite status"
       >
         <Loader2 className="animate-spin" size={20} />
-        Loading...
+        <span className="hidden sm:inline">Loading...</span>
       </button>
     );
   }
@@ -89,21 +90,27 @@ export default function FavoriteButton({ recipeId }: FavoriteButtonProps) {
     <button
       onClick={toggleFavorite}
       disabled={loading}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+      className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors focus-visible:ring-2 focus-visible:ring-accent ${
         isFavorited
-          ? "bg-red-100 text-red-700 hover:bg-red-200"
-          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          ? "bg-secondary text-bg hover:bg-secondary-hover"
+          : "bg-bg-secondary text-text hover:bg-accent-light border-2 border-border"
       }`}
+      aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
     >
       {loading ? (
-        <Loader2 className="animate-spin" size={20} />
+        <>
+          <Loader2 className="animate-spin" size={20} />
+          <span className="hidden sm:inline">Loading...</span>
+        </>
       ) : (
-        <Heart
-          size={20}
-          className={isFavorited ? "fill-current" : ""}
-        />
+        <>
+          <Heart
+            size={20}
+            className={isFavorited ? "fill-current" : ""}
+          />
+          <span className="hidden sm:inline">{isFavorited ? "Favorited" : "Favorite"}</span>
+        </>
       )}
-      {isFavorited ? "Favorited" : "Add to Favorites"}
     </button>
   );
 }

@@ -119,8 +119,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
   return (
     <div className="min-h-screen bg-bg">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-accent-light to-secondary-light py-12">
+      {/* Hero Section - Fixed Height */}
+      <div className="bg-gradient-to-br from-accent-light to-secondary-light py-12 min-h-[280px] flex items-center">
         <div className="container mx-auto px-4 max-w-7xl">
           <h1 className="text-4xl md:text-5xl font-bold text-text mb-4">
             {recipe.title}
@@ -287,8 +287,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
             {/* Instructions/Steps */}
             <div className="bg-bg-secondary rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <ListOrdered className="text-amber-600" size={28} />
+              <h2 className="text-2xl font-bold text-text mb-4 flex items-center gap-2">
+                <ListOrdered className="text-accent" size={28} />
                 Instructions
               </h2>
               {recipe.steps && recipe.steps.length > 0 ? (
@@ -309,10 +309,13 @@ export default async function RecipePage({ params }: RecipePageProps) {
                             {groupName}
                           </h3>
                         )}
-                        <div className="space-y-4">
+                        <ol className="space-y-4 list-none" role="list">
                           {steps.map((step) => (
-                            <div key={step.id} className="flex gap-4">
-                              <div className="flex-shrink-0 w-10 h-10 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                            <li key={step.id} className="flex gap-4">
+                              <div 
+                                className="flex-shrink-0 w-10 h-10 bg-accent text-bg rounded-full flex items-center justify-center font-bold text-lg"
+                                aria-label={`Step ${step.stepNumber}`}
+                              >
                                 {step.stepNumber}
                               </div>
                               <div className="flex-1 pt-1">
@@ -323,9 +326,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                   </span>
                                 )}
                               </div>
-                            </div>
+                            </li>
                           ))}
-                        </div>
+                        </ol>
                       </div>
                     ));
                   })()}

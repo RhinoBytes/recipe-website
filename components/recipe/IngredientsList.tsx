@@ -139,27 +139,29 @@ export default function IngredientsList({ ingredients }: IngredientsListProps) {
   const scaleOptions = [0.5, 1, 2, 3];
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-bg-secondary rounded-lg shadow-md p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <ListCheck className="text-amber-600" size={28} />
+        <h2 className="text-2xl font-bold text-text flex items-center gap-2">
+          <ListCheck className="text-accent" size={28} />
           Ingredients
         </h2>
       </div>
 
       {/* Scale Controls */}
-      <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50 rounded-lg">
-        <label className="text-sm font-semibold text-gray-700">Scale Recipe:</label>
+      <div className="flex items-center gap-3 mb-6 p-3 bg-bg rounded-lg border border-border">
+        <label className="text-sm font-semibold text-text">Scale Recipe:</label>
         <div className="flex gap-2">
           {scaleOptions.map((option) => (
             <button
               key={option}
               onClick={() => setScale(option)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`px-4 py-2 rounded-lg font-medium transition-all focus-visible:ring-2 focus-visible:ring-accent ${
                 scale === option
-                  ? 'bg-amber-600 text-white shadow-md'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                  ? 'bg-accent text-bg shadow-md'
+                  : 'bg-bg-secondary text-text hover:bg-accent-light border border-border'
               }`}
+              aria-label={`Scale recipe to ${option === 0.5 ? 'half' : option} times`}
+              aria-pressed={scale === option}
             >
               {option === 0.5 ? '½' : option}x
             </button>
@@ -172,11 +174,11 @@ export default function IngredientsList({ ingredients }: IngredientsListProps) {
         {Object.entries(groupedIngredients).map(([groupName, ings]) => (
           <div key={groupName}>
             {Object.keys(groupedIngredients).length > 1 && (
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              <h3 className="text-lg font-semibold text-text mb-3">
                 {groupName}
               </h3>
             )}
-            <ul className="space-y-3">
+            <ul className="space-y-3" role="list">
               {ings.map((ingredient) => {
                 const scaledIngredient = scaleIngredient(ingredient);
                 const isChecked = checkedItems.has(ingredient.id);
@@ -187,11 +189,12 @@ export default function IngredientsList({ ingredients }: IngredientsListProps) {
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => toggleCheck(ingredient.id)}
-                      className="mt-1 w-5 h-5 text-amber-600 rounded border-gray-300 focus:ring-amber-500 cursor-pointer"
+                      className="mt-1 w-5 h-5 text-accent rounded border-border focus:ring-accent cursor-pointer"
+                      aria-label={`Check off ${ingredient.name}`}
                     />
                     <span
-                      className={`flex-1 text-gray-700 transition-all ${
-                        isChecked ? 'line-through text-gray-400' : ''
+                      className={`flex-1 text-text transition-all ${
+                        isChecked ? 'line-through text-text-muted' : ''
                       }`}
                     >
                       {scaledIngredient.amount && (
@@ -204,10 +207,10 @@ export default function IngredientsList({ ingredients }: IngredientsListProps) {
                       )}
                       {ingredient.name}
                       {ingredient.isOptional && (
-                        <span className="text-sm text-gray-500 italic"> (optional)</span>
+                        <span className="text-sm text-text-muted italic"> (optional)</span>
                       )}
                       {ingredient.notes && (
-                        <span className="text-sm text-gray-600 block ml-8 mt-1">
+                        <span className="text-sm text-text-secondary block ml-8 mt-1">
                           {ingredient.notes}
                         </span>
                       )}

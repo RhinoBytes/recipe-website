@@ -56,14 +56,14 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 backdrop-blur-md bg-bg/80 transition-all ${
+      className={`sticky top-0 z-50 backdrop-blur-md bg-bg/80 transition-all h-20 flex items-center ${
         isScrolled ? 'shadow-lg' : 'shadow-sm'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-5">
+      <div className="max-w-7xl mx-auto px-5 w-full">
         {/* Desktop Navigation */}
         <nav
-          className="hidden md:flex items-center justify-between py-4 gap-8"
+          className="hidden md:flex items-center justify-between gap-8"
           aria-label="Main Navigation"
         >
           {/* Logo */}
@@ -115,7 +115,7 @@ export default function Navbar() {
         </nav>
 
         {/* Mobile Navigation */}
-        <nav className="md:hidden flex items-center justify-between py-4">
+        <nav className="md:hidden flex items-center justify-between h-20">
           <Link
             href="/"
             className="flex items-center gap-2 text-2xl font-bold font-heading text-accent"

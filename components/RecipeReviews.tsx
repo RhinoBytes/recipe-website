@@ -48,7 +48,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
 
           if (user) {
             const userReview = data.reviews.find(
-              (r: Review) => r.user.id === user.userId
+              (r: Review) => r.user.id === user.id
             );
             if (userReview) {
               setRating(userReview.rating);
@@ -155,7 +155,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
             onClick={() => setShowReviewForm(!showReviewForm)}
             variant="primary"
           >
-            {reviews.some((r) => r.user.id === user?.userId) ? "Update Review" : "Write a Review"}
+            {reviews.some((r) => r.user.id === user?.id) ? "Update Review" : "Write a Review"}
           </Button>
         )}
       </div>

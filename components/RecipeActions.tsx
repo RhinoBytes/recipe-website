@@ -43,50 +43,62 @@ export default function RecipeActions({ slug, isAuthor }: RecipeActionsProps) {
   };
 
   return (
-    <div className="flex gap-3 mb-6">
-      <Button
-        onClick={handleEdit}
-        variant="secondary"
-        className="flex items-center gap-2"
-      >
-        <Edit size={18} />
-        Edit Recipe
-      </Button>
+    <div className="bg-bg-secondary rounded-lg shadow-md p-6">
+      <h3 className="text-lg font-semibold text-text mb-4">Recipe Management</h3>
       
       {!showDeleteConfirm ? (
-        <Button
-          onClick={() => setShowDeleteConfirm(true)}
-          variant="secondary"
-          className="flex items-center gap-2 bg-red-100 text-red-700 hover:bg-red-200"
-        >
-          <Trash2 size={18} />
-          Delete Recipe
-        </Button>
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={handleEdit}
+            variant="primary"
+            className="flex items-center justify-center gap-2 w-full"
+            aria-label="Edit recipe"
+          >
+            <Edit size={18} />
+            <span className="hidden sm:inline">Edit</span>
+          </Button>
+          
+          <Button
+            onClick={() => setShowDeleteConfirm(true)}
+            variant="secondary"
+            className="flex items-center justify-center gap-2 w-full bg-red-100 text-red-700 hover:bg-red-200 border-red-200"
+            aria-label="Delete recipe"
+          >
+            <Trash2 size={18} />
+            <span className="hidden sm:inline">Delete</span>
+          </Button>
+        </div>
       ) : (
-        <div className="flex items-center gap-2 bg-red-50 border border-red-200 px-4 py-2 rounded-lg">
-          <span className="text-red-800 font-medium">Are you sure?</span>
-          <Button
-            onClick={handleDelete}
-            disabled={deleting}
-            variant="secondary"
-            className="bg-red-600 text-white hover:bg-red-700 px-3 py-1 text-sm"
-          >
-            {deleting ? (
-              <>
-                <Loader2 className="animate-spin" size={14} />
-                Deleting...
-              </>
-            ) : (
-              "Yes, Delete"
-            )}
-          </Button>
-          <Button
-            onClick={() => setShowDeleteConfirm(false)}
-            variant="secondary"
-            className="px-3 py-1 text-sm"
-          >
-            Cancel
-          </Button>
+        <div className="space-y-3">
+          <div className="text-center">
+            <p className="text-text font-medium mb-3">Are you sure you want to delete this recipe?</p>
+            <p className="text-sm text-text-muted">This action cannot be undone.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={handleDelete}
+              disabled={deleting}
+              variant="secondary"
+              className="bg-red-600 text-white hover:bg-red-700 border-red-600"
+              aria-label="Confirm delete"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="animate-spin" size={14} />
+                  <span className="hidden sm:inline">Deleting...</span>
+                </>
+              ) : (
+                "Yes, Delete"
+              )}
+            </Button>
+            <Button
+              onClick={() => setShowDeleteConfirm(false)}
+              variant="outline"
+              aria-label="Cancel delete"
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       )}
     </div>
