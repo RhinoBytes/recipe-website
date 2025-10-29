@@ -6,7 +6,7 @@ import ChefSpotlight from "@/components/ui/ChefSpotlight";
 import Button from "@/components/Button";
 import { Flame, Compass } from "lucide-react";
 import Link from "next/link";
-import { getCategoryImage } from "@/lib/cottagecorePlaceholders";
+import { getCategoryImage } from "@/lib/placeholders";
 import { getStoredTheme, THEMES } from "@/components/ThemeToggle";
 // Make this page dynamic since it fetches from database
 export const dynamic = 'force-dynamic';

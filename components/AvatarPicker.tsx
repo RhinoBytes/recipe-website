@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { getAllProfileAvatars } from '@/lib/cottagecorePlaceholders';
+import { getAllProfileAvatars } from '@/lib/placeholders';
 import { Check } from 'lucide-react';
 
 interface AvatarPickerProps {
