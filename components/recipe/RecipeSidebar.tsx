@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, ShoppingCart } from "lucide-react";
+import { Star } from "lucide-react";
 import FavoriteButton from "@/components/FavoriteButton";
 import SocialShare from "@/components/SocialShare";
 import PrintButton from "@/components/PrintButton";
@@ -31,7 +31,7 @@ export default function RecipeSidebar({
   const renderStars = (rating: number) => {
     const roundedRating = Math.round(rating);
     return (
-      <div className="flex gap-1">
+      <div className="flex gap-1 justify-center">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
@@ -47,75 +47,67 @@ export default function RecipeSidebar({
     );
   };
 
-  const handlePrintIngredients = () => {
-    // Create a printable view of just ingredients
-    window.print();
-  };
-
   const hasNutrition = calories || proteinG || fatG || carbsG;
 
   return (
     <div className="space-y-6">
-      {/* Recipe Actions */}
-      <div className="bg-bg-secondary rounded-lg shadow-md p-6 space-y-3">
-        <h3 className="text-lg font-semibold text-text mb-4">Recipe Actions</h3>
-        <FavoriteButton recipeId={recipeId} />
-        <SocialShare title={title} description={description} />
-        <PrintButton />
-        <button
-          onClick={handlePrintIngredients}
-          className="w-full flex items-center gap-2 px-4 py-2 bg-bg text-text hover:bg-accent-light rounded-lg font-medium transition-colors print:hidden"
-        >
-          <ShoppingCart size={20} />
-          Print Ingredients
-        </button>
+      {/* Recipe Actions - 2x2 Grid */}
+      <div className="bg-bg-secondary rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-semibold text-text mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="col-span-2">
+            <FavoriteButton recipeId={recipeId} />
+          </div>
+          <SocialShare title={title} description={description} />
+          <PrintButton />
+        </div>
       </div>
 
       {/* Rating Section */}
       {(averageRating > 0 || reviewCount > 0) && (
         <div className="bg-bg-secondary rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-text mb-4">Rating</h3>
-          <div className="text-center">
+          <div className="text-center space-y-3">
             {renderStars(averageRating)}
-            <div className="mt-2 text-2xl font-bold text-text">
+            <div className="text-3xl font-bold text-text">
               {averageRating.toFixed(1)}
             </div>
-            <div className="text-sm text-text-secondary mt-1">
+            <div className="text-sm text-text-secondary">
               {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
             </div>
           </div>
         </div>
       )}
 
-      {/* Nutrition Info */}
+      {/* Nutrition Info - Enhanced Styling */}
       {hasNutrition && (
-        <div className="bg-bg-secondary rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-text mb-4">
+        <div className="bg-gradient-to-br from-accent-light to-secondary-light rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-text mb-4 text-center">
             Nutrition Per Serving
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {calories && (
-              <div className="text-center p-3 bg-bg rounded-lg">
-                <div className="text-2xl font-bold text-text">{calories}</div>
-                <div className="text-xs text-text-secondary mt-1">Calories</div>
+              <div className="bg-bg-secondary rounded-lg p-4 text-center border-2 border-accent/20 hover:border-accent/40 transition-colors">
+                <div className="text-3xl font-bold text-accent">{calories}</div>
+                <div className="text-xs text-text-secondary mt-1 font-medium">Calories</div>
               </div>
             )}
             {proteinG && (
-              <div className="text-center p-3 bg-bg rounded-lg">
-                <div className="text-2xl font-bold text-text">{proteinG}g</div>
-                <div className="text-xs text-text-secondary mt-1">Protein</div>
+              <div className="bg-bg-secondary rounded-lg p-4 text-center border-2 border-secondary/20 hover:border-secondary/40 transition-colors">
+                <div className="text-3xl font-bold text-secondary">{proteinG}g</div>
+                <div className="text-xs text-text-secondary mt-1 font-medium">Protein</div>
               </div>
             )}
             {fatG && (
-              <div className="text-center p-3 bg-bg rounded-lg">
-                <div className="text-2xl font-bold text-text">{fatG}g</div>
-                <div className="text-xs text-text-secondary mt-1">Fat</div>
+              <div className="bg-bg-secondary rounded-lg p-4 text-center border-2 border-muted/20 hover:border-muted/40 transition-colors">
+                <div className="text-3xl font-bold text-muted">{fatG}g</div>
+                <div className="text-xs text-text-secondary mt-1 font-medium">Fat</div>
               </div>
             )}
             {carbsG && (
-              <div className="text-center p-3 bg-bg rounded-lg">
-                <div className="text-2xl font-bold text-text">{carbsG}g</div>
-                <div className="text-xs text-text-secondary mt-1">Carbs</div>
+              <div className="bg-bg-secondary rounded-lg p-4 text-center border-2 border-highlight/20 hover:border-highlight/40 transition-colors">
+                <div className="text-3xl font-bold text-highlight">{carbsG}g</div>
+                <div className="text-xs text-text-secondary mt-1 font-medium">Carbs</div>
               </div>
             )}
           </div>

@@ -66,26 +66,28 @@ export default function SocialShare({ title, description, url }: SocialShareProp
             setShowMenu(!showMenu);
           }
         }}
-        className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-accent text-bg hover:bg-accent-hover rounded-lg font-medium transition-colors focus-visible:ring-2 focus-visible:ring-accent"
+        aria-label="Share recipe"
       >
         <Share2 size={20} />
-        Share
+        <span className="hidden sm:inline">Share</span>
       </button>
 
       {showMenu && !supportsNativeShare && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+        <div className="absolute left-0 right-0 mt-2 bg-bg-secondary rounded-lg shadow-lg border-2 border-border z-10">
           <div className="py-2">
             <button
               onClick={() => {
                 handleCopyLink();
                 setShowMenu(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2 text-left text-text hover:bg-accent-light transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+              aria-label="Copy link to clipboard"
             >
               {copied ? (
                 <>
-                  <Check size={18} className="text-green-600" />
-                  <span className="text-green-600">Copied!</span>
+                  <Check size={18} className="text-success" />
+                  <span className="text-success">Copied!</span>
                 </>
               ) : (
                 <>
@@ -99,7 +101,8 @@ export default function SocialShare({ title, description, url }: SocialShareProp
                 handleFacebookShare();
                 setShowMenu(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2 text-left text-text hover:bg-accent-light transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+              aria-label="Share on Facebook"
             >
               <Facebook size={18} />
               <span>Facebook</span>
@@ -109,7 +112,8 @@ export default function SocialShare({ title, description, url }: SocialShareProp
                 handleTwitterShare();
                 setShowMenu(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2 text-left text-text hover:bg-accent-light transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+              aria-label="Share on Twitter"
             >
               <Twitter size={18} />
               <span>Twitter</span>
