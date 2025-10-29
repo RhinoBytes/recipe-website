@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hashPassword, createToken, setAuthCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sanitizeInput, isValidEmail } from "@/utils/validation";
-import { getRandomProfileAvatar } from "@/lib/cottagecorePlaceholders";
+import { getRandomProfileAvatar } from "@/lib/placeholders";
 
 /**
  * POST /api/auth/register

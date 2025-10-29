@@ -76,11 +76,24 @@ export function useAuth() {
     }
   }, [router]);
 
+  const updateUser = useCallback((updates: Partial<User>) => {
+    setUser((prevUser) => {
+      if (!prevUser) return null;
+      const updatedUser = { ...prevUser, ...updates };
+      // Persist to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedUser));
+      }
+      return updatedUser;
+    });
+  }, []);
+
   return {
     user,
     loading: !mounted || loading,
     isAuthenticated: !!user,
     logout,
     refreshUser: loadUser,
+    updateUser,
   };
 }

@@ -49,7 +49,7 @@ interface ProfilePageProps {
 
 export default function ProfilePage({ params }: ProfilePageProps) {
   const resolvedParams = use(params);
-  const { user: currentUser, logout, refreshUser } = useAuth();
+  const { user: currentUser, logout, updateUser } = useAuth();
   const router = useRouter();
   const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("recipes");
@@ -158,10 +158,13 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       });
 
       if (response.ok) {
-        await refreshUser();
+        // Update context immediately for instant feedback across all components
+        updateUser({ username: newUsername });
         setEditingUsername(false);
-        // Update profile user to reflect changes immediately
-        setProfileUser(prev => prev ? { ...prev, username: newUsername } : null);
+        // Update profile user if viewing own profile (needed for this page's display)
+        if (isOwnProfile) {
+          setProfileUser(prev => prev ? { ...prev, username: newUsername } : null);
+        }
       } else {
         const data = await response.json();
         setUsernameError(data.error || "Failed to update username");
@@ -186,10 +189,13 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       });
 
       if (response.ok) {
-        await refreshUser();
+        // Update context immediately for instant feedback across all components
+        updateUser({ avatarUrl });
         setShowAvatarModal(false);
-        // Update profile user to reflect changes immediately
-        setProfileUser(prev => prev ? { ...prev, avatarUrl } : null);
+        // Update profile user if viewing own profile (needed for this page's display)
+        if (isOwnProfile) {
+          setProfileUser(prev => prev ? { ...prev, avatarUrl } : null);
+        }
       } else {
         const data = await response.json();
         alert(data.error || "Failed to update avatar");

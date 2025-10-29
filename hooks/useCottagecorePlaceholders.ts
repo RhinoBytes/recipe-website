@@ -1,4 +1,4 @@
-import { getRandomRecipePlaceholder, getRandomProfileAvatar } from '@/lib/cottagecorePlaceholders';
+import { getRandomRecipePlaceholder, getRandomProfileAvatar } from '@/lib/placeholders';
 
 /**
  * Custom hook for cottagecore placeholders
