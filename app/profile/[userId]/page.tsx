@@ -174,6 +174,34 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     }
   };
 
+  const handleAvatarSelect = async (avatarUrl: string) => {
+    if (!isOwnProfile) return;
+
+    setSaving(true);
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl }),
+      });
+
+      if (response.ok) {
+        await refreshUser();
+        setShowAvatarModal(false);
+        // Update profile user to reflect changes immediately
+        setProfileUser(prev => prev ? { ...prev, avatarUrl } : null);
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to update avatar");
+      }
+    } catch (error) {
+      console.error("Failed to update avatar:", error);
+      alert("Failed to update avatar");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-bg dark:bg-gray-900 flex items-center justify-center">
