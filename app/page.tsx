@@ -7,7 +7,7 @@ import Button from "@/components/Button";
 import { Flame, Compass } from "lucide-react";
 import Link from "next/link";
 import { getCategoryImage } from "@/lib/cottagecorePlaceholders";
-
+import { getStoredTheme, THEMES } from "@/components/ThemeToggle";
 // Make this page dynamic since it fetches from database
 export const dynamic = 'force-dynamic';
 
@@ -323,46 +323,52 @@ export default async function HomePage() {
   return (
     <main>
       {/* Hero Section */}
-      <section
-  className="bg-center bg-cover text-bg py-24 text-center"
-  style={{
-    backgroundImage: `linear-gradient(
-      to bottom right,
-      rgba(168, 187, 160, 0.9),
-      rgba(140, 107, 86, 0.9)
-    ), url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=600&fit=crop')`
-  }}
->
-  <div className="relative z-10 max-w-2xl mx-auto">
+     {/* Hero Section */}
+<section className="relative text-center py-24 text-bg">
+  {/* Background image + gradient overlay */}
+  <div className="absolute inset-0 w-full h-full bg-center bg-cover">
+    <img
+      src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=600&fit=crop"
+      alt="Hero Background"
+      className="w-full h-full object-cover"
+    />
+    {/* Theme-aware gradient overlay */}
+    <div
+      className="absolute inset-0"
+      style={{ backgroundImage: "var(--card-gradient)" }}
+    />
+  </div>
+
+  {/* Content */}
+  <div className="relative z-10 max-w-2xl mx-auto px-4">
     <h1 className="text-4xl sm:text-5xl font-bold font-heading mb-4 drop-shadow">
       Discover Amazing Recipes
     </h1>
     <p className="text-lg mb-8 opacity-95">
-      Join thousands of home cooks sharing their favorite recipes and culinary
-      adventures
+      Join thousands of home cooks sharing their favorite recipes and culinary adventures
     </p>
     <div className="flex gap-4 flex-wrap justify-center">
-            <Button
-              as="link"
-              href="/browse?sort=popular"
-              variant="primary"
-              size="lg"
-              className="btn-large"
-            >
-              <Flame size={22} /> Start Cooking
-            </Button>
-            <Button
-              as="link"
-              href="/browse"
-              variant="primary"
-              size="lg"
-              className="btn-large"
-            >
-              <Compass size={22} /> Browse Recipes
-            </Button>
-          </div>
-        </div>
-      </section>
+      <Button
+        as="link"
+        href="/browse?sort=popular"
+        variant="primary"
+        size="lg"
+        className="btn-large"
+      >
+        <Flame size={22} /> Start Cooking
+      </Button>
+      <Button
+        as="link"
+        href="/browse"
+        variant="primary"
+        size="lg"
+        className="btn-large"
+      >
+        <Compass size={22} /> Browse Recipes
+      </Button>
+    </div>
+  </div>
+</section>
 
       {/* Popular Recipes */}
       <section className="py-16 bg-bg">

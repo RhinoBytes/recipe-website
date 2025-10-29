@@ -8,6 +8,7 @@ interface ChefSpotlightProps {
 }
 
 export default function ChefSpotlight({ chef }: ChefSpotlightProps) {
+   console.log(`Chef ID: ${chef.id}`);
   return (
     <section className="py-16 bg-bg">
       <div className="max-w-2xl mx-auto px-4">
@@ -29,7 +30,8 @@ export default function ChefSpotlight({ chef }: ChefSpotlightProps) {
           </div>
           <p className="text-text-secondary mb-6">{chef.quote}</p>
           <div className="flex gap-3">
-            <Button as="link" href={`/profile/${chef.id}`} variant="secondary" size="md">
+            <Button as="link" href={`/profile/${chef.id}`} variant="primary" size="md">
+
               <User size={18} /> View Profile
             </Button>
             <Button as="link" href={`/browse?author=${encodeURIComponent(chef.name)}`} variant="primary" size="md">

@@ -64,7 +64,9 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const [error, setError] = useState("");
   const [sortOption, setSortOption] = useState<"newest" | "oldest" | "popular">("newest");
 
-  const isOwnProfile = currentUser?.userId === resolvedParams.userId;
+  const isOwnProfile = currentUser?.id === resolvedParams.userId;
+  console.log("currentUser?.userId:", currentUser?.id);
+  console.log("isOwnProfile:", isOwnProfile);
 
   // Fetch profile user data
   useEffect(() => {
@@ -89,17 +91,6 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
     fetchProfileUser();
   }, [resolvedParams.userId]);
-
-  // Fetch recipes when tab changes or sort changes
-  useEffect(() => {
-    if (profileUser) {
-      if (activeTab === "recipes") {
-        fetchUserRecipes();
-      } else if (activeTab === "favorites" && isOwnProfile) {
-        fetchFavorites();
-      }
-    }
-  }, [activeTab, profileUser, isOwnProfile, sortOption, fetchUserRecipes, fetchFavorites]);
 
   const fetchUserRecipes = useCallback(async () => {
     setLoading(true);
@@ -133,33 +124,16 @@ export default function ProfilePage({ params }: ProfilePageProps) {
     }
   }, [isOwnProfile]);
 
-  const handleAvatarSelect = async (avatarUrl: string) => {
-    if (!isOwnProfile) return;
-    
-    setSaving(true);
-    try {
-      const response = await fetch("/api/user/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarUrl }),
-      });
-
-      if (response.ok) {
-        await refreshUser();
-        setShowAvatarModal(false);
-        // Update profile user to reflect changes immediately
-        setProfileUser(prev => prev ? { ...prev, avatarUrl } : null);
-      } else {
-        const data = await response.json();
-        alert(data.error || "Failed to update avatar");
+  // Fetch recipes when tab changes or sort changes
+  useEffect(() => {
+    if (profileUser) {
+      if (activeTab === "recipes") {
+        fetchUserRecipes();
+      } else if (activeTab === "favorites" && isOwnProfile) {
+        fetchFavorites();
       }
-    } catch (error) {
-      console.error("Failed to update avatar:", error);
-      alert("Failed to update avatar");
-    } finally {
-      setSaving(false);
     }
-  };
+  }, [activeTab, profileUser, isOwnProfile, sortOption, fetchUserRecipes, fetchFavorites]);
 
   const handleUsernameUpdate = async () => {
     if (!isOwnProfile) return;
@@ -259,7 +233,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     {profileUser?.username?.charAt(0).toUpperCase()}
                   </span>
                 )}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
                   <Edit className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
                 </div>
               </button>

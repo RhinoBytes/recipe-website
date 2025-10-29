@@ -15,9 +15,10 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen }: MobileMenuProps) {
-  const { isAuthenticated, loading, logout } = useAuth();
+  const { user, isAuthenticated, loading, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+
   
   if (!mobileMenuOpen) return null;
 
@@ -74,7 +75,7 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
           // Authenticated user options
           <>
             <Link
-              href="/profile"
+              href={`/profile/${user?.id}`}
               onClick={handleLinkClick}
               className="flex items-center gap-3 text-text font-medium hover:text-accent transition-colors py-1"
             >

@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Palette } from 'lucide-react';
 
 // Available themes
 export const THEMES = {
   LIGHT: 'light-cottagecore',
   DARK: 'dark-cottagecore',
+  TERRACOTTA: 'terracotta',
 } as const;
 
 export type ThemeName = typeof THEMES[keyof typeof THEMES];
@@ -23,20 +24,21 @@ export function setTheme(theme: ThemeName) {
 
 /**
  * Gets the current theme from localStorage or returns default
+ * ✅ Default is now TERRACOTTA
  */
 export function getStoredTheme(): ThemeName {
-  if (typeof window === 'undefined') return THEMES.LIGHT;
-  
+  if (typeof window === 'undefined') return THEMES.TERRACOTTA;
+
   const stored = localStorage.getItem(THEME_STORAGE_KEY) as ThemeName | null;
-  return stored || THEMES.LIGHT;
+  return stored || THEMES.TERRACOTTA;
 }
 
 /**
  * Theme toggle button component
- * Cycles between light and dark Cottagecore themes
+ * Cycles between light, dark, and terracotta themes
  */
 export default function ThemeToggle() {
-  const [currentTheme, setCurrentTheme] = useState<ThemeName>(THEMES.LIGHT);
+  const [currentTheme, setCurrentTheme] = useState<ThemeName>(THEMES.TERRACOTTA); // default Terracotta
   const [mounted, setMounted] = useState(false);
 
   // Initialize theme on mount
@@ -47,10 +49,17 @@ export default function ThemeToggle() {
     setMounted(true);
   }, []);
 
+  // Cycle through the available themes in order
   const toggleTheme = () => {
-    const newTheme = currentTheme === THEMES.LIGHT ? THEMES.DARK : THEMES.LIGHT;
-    setCurrentTheme(newTheme);
-    setTheme(newTheme);
+    const nextTheme =
+      currentTheme === THEMES.LIGHT
+        ? THEMES.DARK
+        : currentTheme === THEMES.DARK
+        ? THEMES.TERRACOTTA
+        : THEMES.LIGHT;
+
+    setCurrentTheme(nextTheme);
+    setTheme(nextTheme);
   };
 
   // Prevent hydration mismatch by not rendering until mounted
@@ -65,20 +74,29 @@ export default function ThemeToggle() {
     );
   }
 
-  const isDark = currentTheme === THEMES.DARK;
+  // Determine icon and labels
+  let Icon = Sun;
+  let nextThemeName = 'dark';
+
+  if (currentTheme === THEMES.LIGHT) {
+    Icon = Moon;
+    nextThemeName = 'dark';
+  } else if (currentTheme === THEMES.DARK) {
+    Icon = Palette; // shows terracotta next
+    nextThemeName = 'terracotta';
+  } else if (currentTheme === THEMES.TERRACOTTA) {
+    Icon = Sun;
+    nextThemeName = 'light';
+  }
 
   return (
     <button
       onClick={toggleTheme}
       className="p-2 rounded-full bg-bg-secondary border border-border hover:bg-accent-light transition-colors"
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
-      title={`Switch to ${isDark ? 'light' : 'dark'} theme`}
+      aria-label={`Switch to ${nextThemeName} theme`}
+      title={`Switch to ${nextThemeName} theme`}
     >
-      {isDark ? (
-        <Sun size={20} className="text-text" />
-      ) : (
-        <Moon size={20} className="text-text" />
-      )}
+      <Icon size={20} className="text-text" />
     </button>
   );
 }

@@ -36,8 +36,9 @@ export default function Button(props: ButtonProps) {
     loading = false,
     className = "",
     children,
+    as,
     ...rest
-  } = props as ButtonProps & { className?: string };
+  } = props as ButtonProps & { className?: string; as?: "button" | "link" };
 
   const base =
     "inline-flex items-center justify-center gap-2 font-medium rounded-2xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-60 disabled:pointer-events-none";
@@ -58,10 +59,9 @@ export default function Button(props: ButtonProps) {
   const finalClass = cn(base, variants[variant], sizes[size], className);
 
   // Link variant
-  if ((props as ButtonAsLink).as === "link") {
-    const { href, ...linkRest } = rest as Omit<ButtonAsLink, "as">;
+  if (as === "link") {
+    const { href, ...linkRest } = rest as ButtonAsLink;
     return (
-      // Next Link in Next 13+ accepts className and passes anchor props
       <Link href={href} className={finalClass} {...linkRest}>
         {loading && <Loader2 className="animate-spin w-5 h-5" />}
         {children}

@@ -83,7 +83,7 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
               Logged in as {user?.email || user?.username}
             </div>
             <Link
-              href={`/profile/${user?.userId}`}
+              href={`/profile/${user?.id}`}
               onClick={() => setDropdownOpen(false)}
               className="flex items-center gap-3 px-4 py-3 text-text hover:bg-accent-light/30 hover:text-accent transition-colors"
             >

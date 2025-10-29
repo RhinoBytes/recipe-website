@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { RecipeStatus } from "@prisma/client";
 
 export async function GET() {
   try {
@@ -8,7 +9,7 @@ export async function GET() {
       where: {
         recipes: {
           some: {
-            status: "PUBLISHED",
+            status: RecipeStatus.PUBLISHED,
           },
         },
       },
@@ -26,14 +27,14 @@ export async function GET() {
             },
           },
           where: {
-            status: "PUBLISHED",
+            status: RecipeStatus.PUBLISHED,
           },
         },
         _count: {
           select: {
             recipes: {
               where: {
-                status: "PUBLISHED",
+                status: RecipeStatus.PUBLISHED,
               },
             },
           },

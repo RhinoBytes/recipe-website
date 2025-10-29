@@ -1,101 +1,138 @@
 /**
  * Cottagecore Theme System
- * CSS custom properties for light and dark Cottagecore themes
+ * CSS custom properties for light, dark, and terracotta themes
  */
 
 /* Light Cottagecore Theme (Default) */
 :root,
-:root[data-theme='light-cottagecore'] {
+:root[data-theme="light-cottagecore"] {
   /* Background colors */
-  --bg: #FAF8F5;
-  --bg-secondary: #FFFFFF;
-  --bg-elevated: #FFFFFF;
-  
+  --bg: #faf8f5;
+  --bg-secondary: #ffffff;
+  --bg-elevated: #ffffff;
+
   /* Text colors */
-  --text: #3E3B36;
-  --text-secondary: #8C6B56;
-  --text-muted: #A89B8F;
-  
+  --text: #3e3b36;
+  --text-secondary: #8c6b56;
+  --text-muted: #a89b8f;
+
   /* Accent colors */
-  --accent: #A8BBA0;
-  --accent-hover: #92A589;
-  --accent-light: #C5D4BE;
-  
+  --accent: #a8bba0;
+  --accent-hover: #92a589;
+  --accent-light: #c5d4be;
+
   /* Secondary accent */
-  --secondary: #EBC8C0;
-  --secondary-hover: #DDB3AA;
-  --secondary-light: #F5E0DC;
-  
+  --secondary: #ebc8c0;
+  --secondary-hover: #ddb3aa;
+  --secondary-light: #f5e0dc;
+
   /* Highlight color */
-  --highlight: #F2E2B9;
-  --highlight-hover: #E6D4A3;
-  
+  --highlight: #f2e2b9;
+  --highlight-hover: #e6d4a3;
+
   /* Border colors */
-  --border: #E5E1DA;
-  --border-light: #F0EDE6;
-  --border-dark: #D1CCC0;
-  
+  --border: #e5e1da;
+  --border-light: #f0ede6;
+  --border-dark: #d1ccc0;
+
   /* Muted/brown tones */
-  --muted: #8C6B56;
-  --muted-light: #B5967D;
-  
+  --muted: #8c6b56;
+  --muted-light: #b5967d;
+
   /* Shadow colors */
   --shadow-sm: rgba(62, 59, 54, 0.05);
   --shadow-md: rgba(62, 59, 54, 0.1);
   --shadow-lg: rgba(62, 59, 54, 0.15);
-  
+
   /* State colors */
-  --success: #A8BBA0;
-  --error: #C97C6C;
-  --warning: #E6C577;
-  --info: #9DAFBD;
+  --success: #a8bba0;
+  --error: #c97c6c;
+  --warning: #e6c577;
+  --info: #9dafbd;
 }
 
 /* Dark Cottagecore Theme */
-:root[data-theme='dark-cottagecore'] {
+:root[data-theme="dark-cottagecore"] {
   /* Background colors */
-  --bg: #3D4A3F;
-  --bg-secondary: #4A5A4D;
+  --bg: #3d4a3f;
+  --bg-secondary: #4a5a4d;
   --bg-elevated: #556856;
-  
+
   /* Text colors */
-  --text: #E5E1DA;
-  --text-secondary: #C5BDB0;
-  --text-muted: #A8BBA0;
-  
+  --text: #e5e1da;
+  --text-secondary: #c5bdb0;
+  --text-muted: #a8bba0;
+
   /* Accent colors */
   --accent: #566350;
-  --accent-hover: #6A7863;
-  --accent-light: #7A8B76;
-  
+  --accent-hover: #6a7863;
+  --accent-light: #7a8b76;
+
   /* Secondary accent */
-  --secondary: #C9A6A0;
-  --secondary-hover: #DDB8B2;
-  --secondary-light: #E0C3BE;
-  
+  --secondary: #c9a6a0;
+  --secondary-hover: #ddb8b2;
+  --secondary-light: #e0c3be;
+
   /* Highlight color */
-  --highlight: #DCD2B2;
-  --highlight-hover: #E8DFC4;
-  
+  --highlight: #dcd2b2;
+  --highlight-hover: #e8dfc4;
+
   /* Border colors */
-  --border: #5B4634;
-  --border-light: #6E5942;
-  --border-dark: #4A3828;
-  
+  --border: #5b4634;
+  --border-light: #6e5942;
+  --border-dark: #4a3828;
+
   /* Muted/sage tones */
-  --muted: #A8BBA0;
-  --muted-light: #B8C7B0;
-  
+  --muted: #a8bba0;
+  --muted-light: #b8c7b0;
+
   /* Shadow colors */
   --shadow-sm: rgba(0, 0, 0, 0.2);
   --shadow-md: rgba(0, 0, 0, 0.3);
   --shadow-lg: rgba(0, 0, 0, 0.4);
-  
+
   /* State colors */
-  --success: #A8BBA0;
-  --error: #C97C6C;
-  --warning: #E6C577;
-  --info: #9DAFBD;
+  --success: #a8bba0;
+  --error: #c97c6c;
+  --warning: #e6c577;
+  --info: #9dafbd;
+}
+
+/* Terracotta Theme */
+:root[data-theme="terracotta"] {
+  /* Primary colors */
+  --accent: #d4735a; /* Warm terracotta */
+  --accent-hover: #b85c42; /* Dark terracotta */
+  --accent-light: #fef9f7; /* Soft accent background */
+
+  /* Background and text */
+  --bg: #f8f9fa; /* Page background */
+  --bg-secondary: #ffffff;
+  --bg-elevated: #fef9f7;
+
+  --text: #333; /* Main text */
+  --text-secondary: #666; /* Muted text */
+  --text-muted: #999;
+
+  /* Border */
+  --border: #f0d5cf; /* Standard border */
+  --border-light: #fef9f7;
+  --border-dark: #b85c42;
+
+  /* Muted tones */
+  --muted: #666;
+  --muted-light: #999;
+
+  /* Shadow colors */
+  --shadow-sm: rgba(0, 0, 0, 0.05);
+  --shadow-md: rgba(0, 0, 0, 0.1);
+  --shadow-lg: rgba(0, 0, 0, 0.15);
+
+  /* State colors */
+  --success: #28a745;
+  --warning: #ffc107;
+  --error: #dc3545;
+  --info: #6c757d;
 }
 
 /* Base typography styles */
@@ -113,4 +150,30 @@ body {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 0.2s;
+}
+/* Light Cottagecore */
+:root[data-theme="light-cottagecore"] {
+  --card-gradient: linear-gradient(
+    to bottom right,
+    rgba(168, 187, 160, 0.9),
+    rgba(140, 107, 86, 0.9)
+  );
+}
+
+/* Dark Cottagecore */
+:root[data-theme="dark-cottagecore"] {
+  --card-gradient: linear-gradient(
+    to bottom right,
+    rgba(61, 74, 63, 0.85),
+    rgba(30, 30, 30, 0.9)
+  );
+}
+
+/* Terracotta */
+:root[data-theme="terracotta"] {
+  --card-gradient: linear-gradient(
+    to bottom right,
+    rgba(212, 115, 90, 0.85),
+    rgba(184, 92, 66, 0.9)
+  );
 }
