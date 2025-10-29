@@ -133,11 +133,13 @@ export const COTTAGECORE_CATEGORY_IMAGES: Record<string, string> = {
 /**
  * Get category image by name
  * Returns path to actual category image in public/img/categories/
+ * Falls back to SVG placeholders for categories without JPG images
  */
 export function getCategoryImage(categoryName: string): string {
   const normalizedName = categoryName.toLowerCase();
   
-  // Map category names to their corresponding image files
+  // Map category names to their corresponding JPG image files
+  // Only categories with actual image files in public/img/categories/
   const categoryImageMap: Record<string, string> = {
     'appetizer': '/img/categories/Appetizer.jpg',
     'breakfast': '/img/categories/Breakfast.jpg',
@@ -147,12 +149,12 @@ export function getCategoryImage(categoryName: string): string {
     'snack': '/img/categories/Snack.jpg',
   };
   
-  // Return the image path if it exists, otherwise fallback to first placeholder
+  // Return the JPG image path if it exists
   if (categoryImageMap[normalizedName]) {
     return categoryImageMap[normalizedName];
   }
   
-  // Fallback to SVG placeholder if category not found
+  // Fallback to SVG placeholder for categories without JPG images (e.g., dessert)
   const svgImage = COTTAGECORE_CATEGORY_IMAGES[normalizedName];
   if (svgImage) {
     return svgImage;
