@@ -161,8 +161,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         // Update context immediately for instant feedback across all components
         updateUser({ username: newUsername });
         setEditingUsername(false);
-        // Update profile user to reflect changes immediately
-        setProfileUser(prev => prev ? { ...prev, username: newUsername } : null);
+        // Update profile user if viewing own profile (needed for this page's display)
+        if (isOwnProfile) {
+          setProfileUser(prev => prev ? { ...prev, username: newUsername } : null);
+        }
       } else {
         const data = await response.json();
         setUsernameError(data.error || "Failed to update username");
@@ -190,8 +192,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         // Update context immediately for instant feedback across all components
         updateUser({ avatarUrl });
         setShowAvatarModal(false);
-        // Update profile user to reflect changes immediately
-        setProfileUser(prev => prev ? { ...prev, avatarUrl } : null);
+        // Update profile user if viewing own profile (needed for this page's display)
+        if (isOwnProfile) {
+          setProfileUser(prev => prev ? { ...prev, avatarUrl } : null);
+        }
       } else {
         const data = await response.json();
         alert(data.error || "Failed to update avatar");
