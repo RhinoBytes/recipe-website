@@ -49,7 +49,7 @@ interface ProfilePageProps {
 
 export default function ProfilePage({ params }: ProfilePageProps) {
   const resolvedParams = use(params);
-  const { user: currentUser, logout, refreshUser } = useAuth();
+  const { user: currentUser, logout, updateUser } = useAuth();
   const router = useRouter();
   const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("recipes");
@@ -158,7 +158,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       });
 
       if (response.ok) {
-        await refreshUser();
+        // Update context immediately for instant feedback across all components
+        updateUser({ username: newUsername });
         setEditingUsername(false);
         // Update profile user to reflect changes immediately
         setProfileUser(prev => prev ? { ...prev, username: newUsername } : null);
@@ -186,7 +187,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       });
 
       if (response.ok) {
-        await refreshUser();
+        // Update context immediately for instant feedback across all components
+        updateUser({ avatarUrl });
         setShowAvatarModal(false);
         // Update profile user to reflect changes immediately
         setProfileUser(prev => prev ? { ...prev, avatarUrl } : null);
