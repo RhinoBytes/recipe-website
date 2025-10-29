@@ -40,8 +40,8 @@ interface Allergen {
 
 export default function EditRecipePage() {
   const router = useRouter();
-  const params = useParams();
-  const slug = params.slug as string;
+  const params = useParams() as any;
+  const slug = params?.slug as string | undefined;
   
   const [formData, setFormData] = useState<RecipeFormData>({
     title: "",
@@ -67,45 +67,126 @@ export default function EditRecipePage() {
   useEffect(() => {
     // Fetch recipe data, categories, and allergens
     async function fetchData() {
+      if (!slug) {
+        setError("Missing recipe slug");
+        setInitialLoading(false);
+        return;
+      }
+
       try {
         const [recipeRes, categoriesRes, allergensRes] = await Promise.all([
-          fetch(`/api/recipes/${slug}`),
+          fetch(`/api/recipes/${encodeURIComponent(slug)}`),
           fetch("/api/categories"),
           fetch("/api/allergens"),
         ]);
         
         if (!recipeRes.ok) {
-          throw new Error("Recipe not found");
+          const txt = await recipeRes.text().catch(() => "");
+          throw new Error(`Recipe fetch failed: ${recipeRes.status} ${txt}`);
         }
 
         const recipe = await recipeRes.json();
+        console.log("Fetched recipe:", recipe);
+        // Normalize instructions -> string
+       const instructionsStr = (() => {
+  console.group("Instructions normalization");
+  try {
+    // Accept either recipe.instructions OR recipe.steps (fallback)
+    const instr = recipe.instructions ?? recipe.steps;
+
+    // Raw inputs for debugging
+    console.log("recipe.instructions (raw):", recipe.instructions);
+    console.log("recipe.steps (raw):", recipe.steps);
+    console.log("resolved instr value:", instr);
+    console.log("resolved instr type:", typeof instr, "isArray:", Array.isArray(instr));
+
+    let result = "";
+
+    if (typeof instr === "string") {
+      result = instr;
+    } else if (Array.isArray(instr)) {
+      console.log("array length:", instr.length, "first item:", instr[0]);
+      result = instr
+        .slice()
+        .sort((a: any, b: any) => Number(a.stepNumber ?? 0) - Number(b.stepNumber ?? 0))
+        .map((s: any) => s.instruction ?? s.text ?? (typeof s === "string" ? s : JSON.stringify(s)))
+        .join("\n\n");
+    } else if (instr && typeof instr === "object") {
+      if (typeof instr.text === "string") {
+        result = instr.text;
+      } else if (Array.isArray(instr.steps)) {
+        console.log("instr.steps length:", instr.steps.length);
+        result = instr.steps
+          .map((s: any) => (typeof s === "string" ? s : s.text ?? JSON.stringify(s)))
+          .join("\n\n");
+      } else {
+        result = JSON.stringify(instr);
+      }
+    } else {
+      result = "";
+    }
+
+    console.log("normalized instructions length:", result.length);
+    console.log("normalized instructions preview:", result.slice(0, 1000));
+    return result;
+  } catch (err) {
+    console.error("Error normalizing instructions:", err);
+    return "";
+  } finally {
+    console.groupEnd();
+  }
+})();
         
-        // Populate form with recipe data
+
+        console.group(`Parsed instructions ${instructionsStr}`);
+       
+
+        // Helper to map arrays that might be strings or objects
+        const toNameArray = (arr: any) =>
+          Array.isArray(arr)
+            ? arr.map((it: any) => (typeof it === "string" ? it : it.name ?? it.title ?? String(it)))
+            : [];
+
+        const normalizeIngredients = (arr: any) =>
+          Array.isArray(arr)
+            ? arr.map((ing: any, idx: number) => ({
+                amount: typeof ing.amount === "number" ? ing.amount : ing.amount ? Number(ing.amount) : null,
+                unit: ing.unit ?? ing.measure ?? null,
+                name: ing.name ?? ing.ingredient ?? ing.item ?? "",
+                displayOrder: typeof ing.displayOrder === "number" ? ing.displayOrder : idx,
+              }))
+            : [];
+
         setFormData({
-          title: recipe.title || "",
-          description: recipe.description || "",
-          instructions: recipe.instructions || "",
-          servings: recipe.servings || 4,
-          prepTimeMinutes: recipe.prepTimeMinutes || 15,
-          cookTimeMinutes: recipe.cookTimeMinutes || 30,
-          difficulty: recipe.difficulty || "Medium",
-          imageUrl: recipe.imageUrl || "",
-          ingredients: recipe.ingredients || [],
-          tags: recipe.tags.map((t: { name: string }) => t.name) || [],
-          categories: recipe.categories.map((c: { name: string }) => c.name) || [],
-          allergens: recipe.allergens.map((a: { name: string }) => a.name) || [],
+          title: recipe.title ?? "",
+          description: recipe.description ?? "",
+          instructions: instructionsStr,
+          servings: typeof recipe.servings === "number" ? recipe.servings : Number(recipe.servings) || 4,
+          prepTimeMinutes: typeof recipe.prepTimeMinutes === "number" ? recipe.prepTimeMinutes : Number(recipe.prepTimeMinutes) || 15,
+          cookTimeMinutes: typeof recipe.cookTimeMinutes === "number" ? recipe.cookTimeMinutes : Number(recipe.cookTimeMinutes) || 30,
+          difficulty: recipe.difficulty ?? "Medium",
+          imageUrl: recipe.imageUrl ?? recipe.image ?? "",
+          ingredients: normalizeIngredients(recipe.ingredients),
+          tags: toNameArray(recipe.tags),
+          categories: toNameArray(recipe.categories),
+          allergens: toNameArray(recipe.allergens),
         });
         
         if (categoriesRes.ok) {
-          const categoriesData = await categoriesRes.json();
-          setCategories(categoriesData);
+          const categoriesData = await categoriesRes.json().catch(() => []);
+          setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+        } else {
+          console.warn("Categories fetch failed:", categoriesRes.status);
         }
         
         if (allergensRes.ok) {
-          const allergensData = await allergensRes.json();
-          setAllergens(allergensData);
+          const allergensData = await allergensRes.json().catch(() => []);
+          setAllergens(Array.isArray(allergensData) ? allergensData : []);
+        } else {
+          console.warn("Allergens fetch failed:", allergensRes.status);
         }
       } catch (err) {
+        console.error("Failed to load recipe:", err);
         setError(err instanceof Error ? err.message : "Failed to load recipe");
       } finally {
         setInitialLoading(false);
@@ -132,20 +213,20 @@ export default function EditRecipePage() {
 
       const formatted = await response.json();
       
-      // Update form with AI-formatted data
+      // Update form with AI-formatted data (defensive)
       setFormData({
-        title: formatted.title || formData.title,
-        description: formatted.description || formData.description,
-        instructions: formatted.instructions || formData.instructions,
-        servings: formatted.servings || formData.servings,
-        prepTimeMinutes: formatted.prepTimeMinutes || formData.prepTimeMinutes,
-        cookTimeMinutes: formatted.cookTimeMinutes || formData.cookTimeMinutes,
-        difficulty: formatted.difficulty || formData.difficulty,
-        imageUrl: formatted.imageUrl || formData.imageUrl,
-        ingredients: formatted.ingredients || formData.ingredients,
-        tags: formatted.tags || formData.tags,
-        categories: formatted.categories || formData.categories,
-        allergens: formatted.allergens || formData.allergens,
+        title: formatted.title ?? formData.title,
+        description: formatted.description ?? formData.description,
+        instructions: typeof formatted.instructions === "string" ? formatted.instructions : formData.instructions,
+        servings: typeof formatted.servings === "number" ? formatted.servings : formData.servings,
+        prepTimeMinutes: typeof formatted.prepTimeMinutes === "number" ? formatted.prepTimeMinutes : formData.prepTimeMinutes,
+        cookTimeMinutes: typeof formatted.cookTimeMinutes === "number" ? formatted.cookTimeMinutes : formData.cookTimeMinutes,
+        difficulty: formatted.difficulty ?? formData.difficulty,
+        imageUrl: formatted.imageUrl ?? formData.imageUrl,
+        ingredients: Array.isArray(formatted.ingredients) ? formatted.ingredients : formData.ingredients,
+        tags: Array.isArray(formatted.tags) ? formatted.tags : formData.tags,
+        categories: Array.isArray(formatted.categories) ? formatted.categories : formData.categories,
+        allergens: Array.isArray(formatted.allergens) ? formatted.allergens : formData.allergens,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to format recipe");
@@ -161,14 +242,15 @@ export default function EditRecipePage() {
     setError(null);
     
     try {
-      const response = await fetch(`/api/recipes/${slug}`, {
+      if (!slug) throw new Error("Missing slug");
+      const response = await fetch(`/api/recipes/${encodeURIComponent(slug)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
         throw new Error(errorData.error || "Failed to update recipe");
       }
 
@@ -194,7 +276,7 @@ export default function EditRecipePage() {
   const removeIngredient = (index: number) => {
     setFormData({
       ...formData,
-      ingredients: formData.ingredients.filter((_, i) => i !== index),
+      ingredients: formData.ingredients.filter((_, i) => i !== index).map((ing, i) => ({ ...ing, displayOrder: i })),
     });
   };
 
@@ -205,10 +287,11 @@ export default function EditRecipePage() {
   };
 
   const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+    const trimmed = tagInput.trim();
+    if (trimmed && !formData.tags.includes(trimmed)) {
       setFormData({
         ...formData,
-        tags: [...formData.tags, tagInput.trim()],
+        tags: [...formData.tags, trimmed],
       });
       setTagInput("");
     }
@@ -380,14 +463,14 @@ export default function EditRecipePage() {
                   <input
                     type="number"
                     step="0.01"
-                    value={ingredient.amount || ""}
+                    value={ingredient.amount ?? ""}
                     onChange={(e) => updateIngredient(index, "amount", e.target.value ? parseFloat(e.target.value) : null)}
                     className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                     placeholder="Amount"
                   />
                   <input
                     type="text"
-                    value={ingredient.unit || ""}
+                    value={ingredient.unit ?? ""}
                     onChange={(e) => updateIngredient(index, "unit", e.target.value || null)}
                     className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                     placeholder="Unit"
@@ -439,7 +522,7 @@ export default function EditRecipePage() {
                   type="text"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                   placeholder="Add a tag (e.g., Vegetarian, Quick)"
                 />

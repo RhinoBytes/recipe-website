@@ -1,7 +1,11 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
-import { AUTH_COOKIE_NAME, AUTH_COOKIE_MAX_AGE, JWT_EXPIRES_IN } from "@/config/constants";
+import {
+  AUTH_COOKIE_NAME,
+  AUTH_COOKIE_MAX_AGE,
+  JWT_EXPIRES_IN,
+} from "@/config/constants";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this";
 const SALT_ROUNDS = 10;
@@ -56,7 +60,7 @@ export async function setAuthCookie(token: string) {
 export async function getCurrentUser(): Promise<JWTPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
-
+  console.log("Auth token from cookie:", token);
   if (!token) return null;
 
   return verifyToken(token);
