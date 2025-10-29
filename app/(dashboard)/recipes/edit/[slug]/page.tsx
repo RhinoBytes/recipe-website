@@ -40,7 +40,7 @@ interface Allergen {
 
 export default function EditRecipePage() {
   const router = useRouter();
-  const params = useParams() as any;
+  const params = useParams() as { slug?: string };
   const slug = params?.slug as string | undefined;
   
   const [formData, setFormData] = useState<RecipeFormData>({
@@ -108,8 +108,8 @@ export default function EditRecipePage() {
       console.log("array length:", instr.length, "first item:", instr[0]);
       result = instr
         .slice()
-        .sort((a: any, b: any) => Number(a.stepNumber ?? 0) - Number(b.stepNumber ?? 0))
-        .map((s: any) => s.instruction ?? s.text ?? (typeof s === "string" ? s : JSON.stringify(s)))
+        .sort((a: { stepNumber?: number }, b: { stepNumber?: number }) => Number(a.stepNumber ?? 0) - Number(b.stepNumber ?? 0))
+        .map((s: { instruction?: string; text?: string } | string) => typeof s === "string" ? s : s.instruction ?? s.text ?? JSON.stringify(s))
         .join("\n\n");
     } else if (instr && typeof instr === "object") {
       if (typeof instr.text === "string") {
@@ -117,7 +117,7 @@ export default function EditRecipePage() {
       } else if (Array.isArray(instr.steps)) {
         console.log("instr.steps length:", instr.steps.length);
         result = instr.steps
-          .map((s: any) => (typeof s === "string" ? s : s.text ?? JSON.stringify(s)))
+          .map((s: { text?: string } | string) => (typeof s === "string" ? s : s.text ?? JSON.stringify(s)))
           .join("\n\n");
       } else {
         result = JSON.stringify(instr);
@@ -142,14 +142,14 @@ export default function EditRecipePage() {
        
 
         // Helper to map arrays that might be strings or objects
-        const toNameArray = (arr: any) =>
+        const toNameArray = (arr: unknown) =>
           Array.isArray(arr)
-            ? arr.map((it: any) => (typeof it === "string" ? it : it.name ?? it.title ?? String(it)))
+            ? arr.map((it: { name?: string; title?: string } | string) => (typeof it === "string" ? it : it.name ?? it.title ?? String(it)))
             : [];
 
-        const normalizeIngredients = (arr: any) =>
+        const normalizeIngredients = (arr: unknown) =>
           Array.isArray(arr)
-            ? arr.map((ing: any, idx: number) => ({
+            ? arr.map((ing: { amount?: number | string; unit?: string; measure?: string; name?: string; ingredient?: string; item?: string; displayOrder?: number }, idx: number) => ({
                 amount: typeof ing.amount === "number" ? ing.amount : ing.amount ? Number(ing.amount) : null,
                 unit: ing.unit ?? ing.measure ?? null,
                 name: ing.name ?? ing.ingredient ?? ing.item ?? "",
