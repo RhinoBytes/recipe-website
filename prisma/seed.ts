@@ -1,4 +1,4 @@
-import { PrismaClient, Difficulty, RecipeStatus } from "@prisma/client";
+import { PrismaClient, Difficulty, RecipeStatus, MeasurementSystem } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import { readRecipeFolders } from "../lib/recipeStorage.js";
 import bcrypt from "bcrypt";
@@ -280,7 +280,7 @@ async function main() {
           // Create measurements for this ingredient
           if (ing.measurements && ing.measurements.length > 0) {
             await prisma.ingredientMeasurement.createMany({
-              data: ing.measurements.map((m: any) => ({
+              data: ing.measurements.map((m: { system: MeasurementSystem; amount: string; unit: string }) => ({
                 recipeIngredientId: ingredient.id,
                 system: m.system,
                 amount: m.amount,

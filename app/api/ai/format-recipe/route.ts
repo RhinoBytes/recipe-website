@@ -106,19 +106,22 @@ const RecipeSchema = z.object({
       (val) => (Array.isArray(val) ? val.map(String) : []),
       z.array(z.string().max(50))
     )
-    .optional(),
+    .optional()
+    .default([]),
   categories: z
     .preprocess(
       (val) => (Array.isArray(val) ? val.map(String) : []),
       z.array(z.string().max(50))
     )
-    .optional(),
+    .optional()
+    .default([]),
   allergens: z
     .preprocess(
       (val) => (Array.isArray(val) ? val.map(String) : []),
       z.array(z.string().max(50))
     )
-    .optional(),
+    .optional()
+    .default([]),
   cuisineName: z.string().optional(),
   sourceUrl: z.string().url().optional(),
   sourceText: z.string().optional(),
@@ -212,8 +215,7 @@ title, description, servings, prepTimeMinutes, cookTimeMinutes,
 calories, proteinG, fatG, carbsG, cuisineName,
 difficulty (must be one of: EASY, MEDIUM, HARD),
 steps (array of objects with stepNumber, instruction, groupName, isOptional),
-ingredients (array with name, size (e.g., "large", "medium"), preparation (e.g., "diced", "melted", "sifted"), notes (for substitutions/options), groupName, isOptional, displayOrder, and measurements array),
-tags, categories, allergens.
+ingredients (array with name, size (e.g., "large", "medium"), preparation (e.g., "diced", "melted", "sifted"), notes (for substitutions/options), groupName, isOptional, displayOrder, and measurements array).
 
 **CRITICAL MEASUREMENT SYSTEM REQUIREMENTS:**
 You are an expert unit converter. Each ingredient MUST have a "measurements" array containing BOTH measurement systems:
@@ -272,9 +274,7 @@ CRITICAL REQUIREMENTS:
 - If not grouped, leave groupName as null
 - ingredients should have groupName set if they're in groups (e.g., "Cake Ingredients", "Frosting Ingredients")
 - If cuisineName is not in the recipe, intelligently determine it from the recipe content
-- If tags are not provided, generate relevant tags based on recipe characteristics
-- If categories are not provided, determine appropriate categories
-- If allergens are not explicitly mentioned, identify them from ingredients
+- DO NOT generate tags, categories, or allergens - these will be added by the user
 - difficulty should be EASY, MEDIUM, or HARD based on complexity
 - servings and nutrition should be reasonable estimates if not provided
 - displayOrder for ingredients starts from 0
@@ -288,7 +288,7 @@ ${text}`;
       {
         role: "system",
         content:
-          "You are an expert recipe parser, nutritionist, culinary expert, and unit conversion specialist. Extract ALL recipe information including instructions. Generate missing cuisine, tags, categories, and allergens. CRITICALLY: For each ingredient, generate BOTH Imperial and Metric measurements with accurate conversions. EXCEPTION: For unit-counted ingredients (eggs, fruits, vegetables counted by piece), use the SAME unit-based measurement in both systems - NEVER convert to weight. Distinguish between preparation methods (goes in preparation field) and substitution notes (goes in notes field). Respond with valid JSON only.",
+          "You are an expert recipe parser, nutritionist, culinary expert, and unit conversion specialist. Extract ALL recipe information including instructions. Generate missing cuisine information if not provided. CRITICALLY: For each ingredient, generate BOTH Imperial and Metric measurements with accurate conversions. EXCEPTION: For unit-counted ingredients (eggs, fruits, vegetables counted by piece), use the SAME unit-based measurement in both systems - NEVER convert to weight. Distinguish between preparation methods (goes in preparation field) and substitution notes (goes in notes field). DO NOT generate tags, categories, or allergens - these will be added by the user. Respond with valid JSON only.",
       },
       { role: "user", content: prompt },
     ],
@@ -327,9 +327,7 @@ Return JSON with all required fields. Ensure:
     * CRITICAL: For unit-counted ingredients (eggs, fruits, vegetables by piece), use the SAME unit measurement in both systems - NEVER convert to weight
     * Example: eggs should be "2 eggs" in both systems, not converted to grams
 - If cuisineName is missing, intelligently determine it from the recipe content
-- If tags are missing, generate relevant tags based on recipe characteristics
-- If categories are missing, determine appropriate categories
-- If allergens are missing, identify them from ingredients
+- DO NOT generate tags, categories, or allergens - these will be added by the user
 - servings and nutrition are numbers
 
 CRITICAL: Generate accurate unit conversions between Imperial and Metric systems for measured ingredients. For counted ingredients (eggs, whole fruits/vegetables, etc.), keep the same unit-based measurement in both systems.`;
@@ -340,7 +338,7 @@ CRITICAL: Generate accurate unit conversions between Imperial and Metric systems
       {
         role: "system",
         content:
-          "You are a nutrition expert, recipe validator, culinary expert, and unit conversion specialist. Generate missing metadata intelligently. CRITICALLY: For each ingredient, provide BOTH Imperial and Metric measurements with accurate conversions. EXCEPTION: For unit-counted ingredients (eggs, fruits, vegetables counted by piece), use the SAME unit-based measurement in both systems - NEVER convert to weight. Respond with valid JSON only.",
+          "You are a nutrition expert, recipe validator, culinary expert, and unit conversion specialist. Generate missing metadata intelligently. CRITICALLY: For each ingredient, provide BOTH Imperial and Metric measurements with accurate conversions. EXCEPTION: For unit-counted ingredients (eggs, fruits, vegetables counted by piece), use the SAME unit-based measurement in both systems - NEVER convert to weight. DO NOT generate tags, categories, or allergens - these will be added by the user. Respond with valid JSON only.",
       },
       { role: "user", content: prompt },
     ],
