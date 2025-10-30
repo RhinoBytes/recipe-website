@@ -2,7 +2,10 @@ import { PrismaClient, Difficulty, RecipeStatus } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import { readRecipeFolders } from "../lib/recipeStorage.js";
 import bcrypt from "bcrypt";
-import { getRandomProfileAvatar, getRandomRecipePlaceholder } from "../lib/placeholders.js";
+import {
+  getRandomProfileAvatar,
+  getRandomRecipePlaceholder,
+} from "../lib/placeholders.js";
 
 const prisma = new PrismaClient({
   log: ["query", "info", "warn", "error"],
@@ -60,8 +63,7 @@ async function main() {
     "Dinner",
     "Dessert",
     "Snack",
-    "Appetizer",
-    "Side Dish",
+    "Salad",
   ];
   const categories = [];
   for (const name of categoryNames) {
