@@ -5,6 +5,7 @@ import {
   Prisma,
   Difficulty,
   RecipeStatus,
+  MeasurementSystem,
 } from "@prisma/client";
 import { saveRecipeToFile } from "@/lib/recipeStorage";
 
@@ -373,31 +374,36 @@ export async function POST(request: Request) {
 
       // Create ingredients
       if (ingredients && Array.isArray(ingredients) && ingredients.length > 0) {
-        await tx.recipeIngredient.createMany({
-          data: ingredients.map(
-            (
-              ing: {
-                amount?: string | null;
-                unit?: string | null;
-                name: string;
-                notes?: string | null;
-                groupName?: string | null;
-                isOptional?: boolean;
-                displayOrder?: number;
-              },
-              index: number
-            ) => ({
+        for (const ing of ingredients) {
+          const ingredient = await tx.recipeIngredient.create({
+            data: {
               recipeId: newRecipe.id,
-              amount: ing.amount || null,
-              unit: ing.unit || null,
               name: ing.name,
+              size: ing.size || null,
+              preparation: ing.preparation || null,
               notes: ing.notes || null,
               groupName: ing.groupName || null,
               isOptional: ing.isOptional || false,
-              displayOrder: ing.displayOrder ?? index,
-            })
-          ),
-        });
+              displayOrder: ing.displayOrder ?? ingredients.indexOf(ing),
+            },
+          });
+
+          // Create measurements for this ingredient
+          if (ing.measurements && Array.isArray(ing.measurements) && ing.measurements.length > 0) {
+            await tx.ingredientMeasurement.createMany({
+              data: ing.measurements.map((measurement: {
+                system: MeasurementSystem;
+                amount: string;
+                unit: string;
+              }) => ({
+                recipeIngredientId: ingredient.id,
+                system: measurement.system,
+                amount: measurement.amount,
+                unit: measurement.unit,
+              })),
+            });
+          }
+        }
       }
 
       // Handle tags
@@ -470,6 +476,9 @@ export async function POST(request: Request) {
       where: { id: recipe.id },
       include: {
         ingredients: {
+          include: {
+            measurements: true,
+          },
           orderBy: { displayOrder: "asc" },
         },
         steps: {
@@ -508,13 +517,14 @@ export async function POST(request: Request) {
         carbsG: fullRecipe.carbsG,
         cuisine: fullRecipe.cuisine?.name || null,
         ingredients: fullRecipe.ingredients.map((ing) => ({
-          amount: ing.amount,
-          unit: ing.unit,
           name: ing.name,
+          size: ing.size,
+          preparation: ing.preparation,
           notes: ing.notes,
           groupName: ing.groupName,
           isOptional: ing.isOptional,
           displayOrder: ing.displayOrder,
+          measurements: ing.measurements,
         })),
         steps: fullRecipe.steps.map((step) => ({
           stepNumber: step.stepNumber,

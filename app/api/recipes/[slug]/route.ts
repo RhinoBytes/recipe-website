@@ -26,6 +26,9 @@ export async function GET(
         },
         cuisine: true,
         ingredients: {
+          include: {
+            measurements: true,
+          },
           orderBy: {
             displayOrder: 'asc',
           },
@@ -233,33 +236,43 @@ export async function PATCH(
 
       // Update ingredients if provided
       if (ingredients !== undefined && Array.isArray(ingredients)) {
-        // Delete existing ingredients
+        // Delete existing ingredients (cascade will delete measurements)
         await tx.recipeIngredient.deleteMany({
           where: { recipeId: recipe.id },
         });
 
-        // Create new ingredients
+        // Create new ingredients with measurements
         if (ingredients.length > 0) {
-          await tx.recipeIngredient.createMany({
-            data: ingredients.map((ing: { 
-              amount?: string | null; 
-              unit?: string | null; 
-              name: string; 
-              notes?: string | null;
-              groupName?: string | null;
-              isOptional?: boolean;
-              displayOrder?: number 
-            }, index: number) => ({
-              recipeId: recipe.id,
-              amount: ing.amount || null,
-              unit: ing.unit || null,
-              name: ing.name,
-              notes: ing.notes || null,
-              groupName: ing.groupName || null,
-              isOptional: ing.isOptional || false,
-              displayOrder: ing.displayOrder ?? index,
-            })),
-          });
+          for (const ing of ingredients) {
+            const ingredient = await tx.recipeIngredient.create({
+              data: {
+                recipeId: recipe.id,
+                name: ing.name,
+                size: ing.size || null,
+                preparation: ing.preparation || null,
+                notes: ing.notes || null,
+                groupName: ing.groupName || null,
+                isOptional: ing.isOptional || false,
+                displayOrder: ing.displayOrder ?? ingredients.indexOf(ing),
+              },
+            });
+
+            // Create measurements for this ingredient
+            if (ing.measurements && Array.isArray(ing.measurements) && ing.measurements.length > 0) {
+              await tx.ingredientMeasurement.createMany({
+                data: ing.measurements.map((measurement: {
+                  system: import("@prisma/client").MeasurementSystem;
+                  amount: string;
+                  unit: string;
+                }) => ({
+                  recipeIngredientId: ingredient.id,
+                  system: measurement.system,
+                  amount: measurement.amount,
+                  unit: measurement.unit,
+                })),
+              });
+            }
+          }
         }
       }
 

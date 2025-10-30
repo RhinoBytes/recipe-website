@@ -2,22 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 import ProtectedPage from '@/components/auth/ProtectedPage';
 import { Loader2, Upload, AlertCircle } from "lucide-react";
 import Button from '@/components/ui/Button';
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
-import { Difficulty, RecipeStatus } from "@prisma/client";
-import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
-
-interface Ingredient {
-  amount: string | null;
-  unit: string | null;
-  name: string;
-  notes: string | null;
-  groupName: string | null;
-  isOptional: boolean;
-  displayOrder: number;
-}
+import { Difficulty, RecipeStatus, MeasurementSystem } from "@prisma/client";
+import { parseIngredients, parseSteps, ingredientsToText, stepsToText, convertToNewFormat, ParsedIngredient } from "@/lib/recipeParser";
+import { RecipeIngredient as NewRecipeIngredient } from "@/types/recipe";
 
 interface RecipeStep {
   stepNumber: number;
@@ -38,7 +30,7 @@ interface RecipeFormData {
   sourceUrl: string;
   sourceText: string;
   cuisineName: string;
-  ingredients: Ingredient[];
+  ingredients: NewRecipeIngredient[];
   tags: string[];
   categories: string[];
   allergens: string[];
@@ -122,25 +114,34 @@ export default function EditRecipePage() {
             : [];
 
         // Normalize ingredients from API response
-        const normalizeIngredients = (arr: unknown): Ingredient[] =>
+        const normalizeIngredients = (arr: unknown): ParsedIngredient[] =>
           Array.isArray(arr)
             ? arr.map((ing: {
-                amount?: string | null;
-                unit?: string | null;
                 name?: string;
+                size?: string | null;
+                preparation?: string | null;
                 notes?: string | null;
                 groupName?: string | null;
                 isOptional?: boolean;
                 displayOrder?: number;
-              }, idx: number) => ({
-                amount: ing.amount ?? null,
-                unit: ing.unit ?? null,
-                name: ing.name ?? "",
-                notes: ing.notes ?? null,
-                groupName: ing.groupName ?? null,
-                isOptional: ing.isOptional ?? false,
-                displayOrder: typeof ing.displayOrder === "number" ? ing.displayOrder : idx,
-              }))
+                measurements?: Array<{
+                  system: MeasurementSystem;
+                  amount: string;
+                  unit: string;
+                }>;
+              }, idx: number) => {
+                // Extract first measurement for display
+                const firstMeasurement = ing.measurements && ing.measurements[0];
+                return {
+                  amount: firstMeasurement?.amount || null,
+                  unit: firstMeasurement?.unit || null,
+                  name: ing.name ?? "",
+                  notes: ing.notes ?? null,
+                  groupName: ing.groupName ?? null,
+                  isOptional: ing.isOptional ?? false,
+                  displayOrder: typeof ing.displayOrder === "number" ? ing.displayOrder : idx,
+                };
+              })
             : [];
 
         // Normalize steps from API response
@@ -195,7 +196,7 @@ export default function EditRecipePage() {
           sourceUrl: recipe.sourceUrl ?? "",
           sourceText: recipe.sourceText ?? "",
           cuisineName: recipe.cuisine?.name ?? "",
-          ingredients: normalizedIngredients,
+          ingredients: recipe.ingredients || [], // Store full new format with measurements
           tags: toNameArray(recipe.tags),
           categories: toNameArray(recipe.categories),
           allergens: toNameArray(recipe.allergens),
@@ -275,7 +276,7 @@ export default function EditRecipePage() {
 
       const submissionData = {
         ...formData,
-        ingredients: parsedIngredients,
+        ingredients: parsedIngredients.map(ing => convertToNewFormat(ing)),
         steps: parsedSteps,
       };
 
@@ -499,9 +500,11 @@ export default function EditRecipePage() {
                       </div>
                       {formData.imageUrl && !imageError && (
                         <div className="mt-2">
-                          <img
+                          <Image
                             src={formData.imageUrl}
                             alt="Recipe preview"
+                            width={128}
+                            height={128}
                             className="w-32 h-32 object-cover rounded-lg border border-gray-300"
                             onError={() => setImageError(true)}
                           />

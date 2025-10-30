@@ -1,5 +1,7 @@
 // Utility functions for parsing recipe input
 
+import { MeasurementSystem } from "@prisma/client";
+
 export interface ParsedIngredient {
   amount: string | null;
   unit: string | null;
@@ -10,11 +12,100 @@ export interface ParsedIngredient {
   displayOrder: number;
 }
 
+export interface NewIngredientFormat {
+  name: string;
+  size: string | null;
+  preparation: string | null;
+  notes: string | null;
+  groupName: string | null;
+  isOptional: boolean;
+  displayOrder: number;
+  measurements: Array<{
+    system: MeasurementSystem;
+    amount: string;
+    unit: string;
+  }>;
+}
+
 export interface ParsedStep {
   stepNumber: number;
   instruction: string;
   groupName: string | null;
   isOptional: boolean;
+}
+
+/**
+ * Convert old ingredient format to new measurement system format
+ * This creates a single measurement entry (either IMPERIAL, METRIC, or OTHER based on the unit)
+ */
+export function convertToNewFormat(oldIngredient: ParsedIngredient): NewIngredientFormat {
+  const measurements = [];
+  
+  if (oldIngredient.amount && oldIngredient.unit) {
+    // Determine system based on unit
+    let system: MeasurementSystem;
+    const unit = oldIngredient.unit.toLowerCase();
+    
+    // Imperial units
+    if (['cup', 'cups', 'tbsp', 'tablespoon', 'tablespoons', 'tsp', 'teaspoon', 'teaspoons',
+         'oz', 'ounce', 'ounces', 'lb', 'pound', 'pounds', 'fl oz'].includes(unit)) {
+      system = MeasurementSystem.IMPERIAL;
+    }
+    // Metric units
+    else if (['g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms', 'ml', 'milliliter', 'milliliters',
+              'l', 'liter', 'liters'].includes(unit)) {
+      system = MeasurementSystem.METRIC;
+    }
+    // Other units (pieces, cloves, etc.)
+    else {
+      system = MeasurementSystem.OTHER;
+    }
+    
+    measurements.push({
+      system,
+      amount: oldIngredient.amount,
+      unit: oldIngredient.unit,
+    });
+  }
+  
+  return {
+    name: oldIngredient.name,
+    size: null,
+    preparation: null,
+    notes: oldIngredient.notes,
+    groupName: oldIngredient.groupName,
+    isOptional: oldIngredient.isOptional,
+    displayOrder: oldIngredient.displayOrder,
+    measurements,
+  };
+}
+
+/**
+ * Convert new ingredient format to text for display
+ * Uses the first available measurement (or specific system if provided)
+ */
+export function newIngredientToText(
+  ingredient: NewIngredientFormat,
+  preferredSystem: MeasurementSystem = MeasurementSystem.IMPERIAL
+): string {
+  let line = '';
+  
+  // Find preferred measurement or fallback to first available
+  const measurement = ingredient.measurements.find(m => m.system === preferredSystem) 
+                   || ingredient.measurements[0];
+  
+  if (measurement) {
+    if (measurement.amount) line += `${measurement.amount} `;
+    if (measurement.unit) line += `${measurement.unit} `;
+  }
+  
+  if (ingredient.size) line += `${ingredient.size} `;
+  line += ingredient.name;
+  if (ingredient.preparation) line += `, ${ingredient.preparation}`;
+  if (ingredient.notes) line += ` (${ingredient.notes})`;
+  if (ingredient.isOptional) line += ' (optional)';
+  
+  return line.trim();
 }
 
 /**
