@@ -3,11 +3,10 @@ import RecipeCard from "@/components/ui/RecipeCard";
 import CategoryCard from "@/components/ui/CategoryCard";
 import FeaturedRecipe from "@/components/ui/FeaturedRecipe";
 import ChefSpotlight from "@/components/ui/ChefSpotlight";
-import Button from "@/components/Button";
+import Button from '@/components/ui/Button';
 import { Flame, Compass } from "lucide-react";
 import Link from "next/link";
 import { getCategoryImage } from "@/lib/placeholders";
-import { getStoredTheme, THEMES } from "@/components/ThemeToggle";
 // Make this page dynamic since it fetches from database
 export const dynamic = 'force-dynamic';
 
@@ -154,7 +153,6 @@ async function getCategories() {
     },
     take: 6,
   });
-
 
   return categories.map((category) => {
     const slug = category.name.toLowerCase().replace(/\s+/g, "-");
