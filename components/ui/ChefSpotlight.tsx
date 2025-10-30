@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Button from "../Button";
+import Button from "@/components/ui/Button";
 import { User, Utensils } from "lucide-react";
 import type { Chef } from "@/types";
 

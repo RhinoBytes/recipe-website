@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import ProtectedPage from "@/components/ProtectedPage";
+import ProtectedPage from '@/components/auth/ProtectedPage';
 import { Loader2, Sparkles, Upload, AlertCircle } from "lucide-react";
-import Button from "@/components/Button";
+import Button from '@/components/ui/Button';
 import AIRecipeModal from "@/components/ui/AIRecipeModal";
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
 import { FormattedRecipeResponse, RecipeIngredient } from "@/types/recipe";

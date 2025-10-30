@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth'; // Import your auth hook
 import UserDropdown from './UserDropdown';
 import MobileMenu from './MobileMenu';
 import Utensils from './Utensils';
-import ThemeToggle from '@/components/ThemeToggle';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const NAV_LINKS = [
   { label: 'Browse', href: '/browse' },

@@ -1,9 +1,9 @@
 "use client";
 
 import { Star } from "lucide-react";
-import FavoriteButton from "@/components/FavoriteButton";
-import SocialShare from "@/components/SocialShare";
-import PrintButton from "@/components/PrintButton";
+import FavoriteButton from '@/components/recipe/FavoriteButton';
+import SocialShare from '@/components/recipe/SocialShare';
+import PrintButton from '@/components/recipe/PrintButton';
 
 interface RecipeSidebarProps {
   recipeId: string;

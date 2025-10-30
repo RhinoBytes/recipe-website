@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Star, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import Button from "@/components/Button";
+import Button from '@/components/ui/Button';
 
 interface Review {
   id: string;

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Edit, Trash2, Loader2 } from "lucide-react";
-import Button from "@/components/Button";
+import Button from '@/components/ui/Button';
 
 interface RecipeActionsProps {
   slug: string;
