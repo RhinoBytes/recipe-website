@@ -211,7 +211,7 @@ export default function NewRecipePage() {
       status: RecipeStatus.PUBLISHED,
     });
   };
-
+  console.log(`formData =`, formData);
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

@@ -164,7 +164,8 @@ export default function IngredientsList({ ingredients }: IngredientsListProps) {
   };
 
   const scaleOptions = [0.5, 1, 2, 3];
-
+console.log(`ingredients =`, ingredients);
+  
   return (
     <div className="bg-bg-secondary rounded-lg shadow-md p-6">
       <div className="flex items-center justify-between mb-4">

@@ -90,6 +90,8 @@ export default function EditRecipePage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  console.log(`formData =`, formData);
+
   useEffect(() => {
     // Fetch recipe data, categories, and allergens
     async function fetchData() {
