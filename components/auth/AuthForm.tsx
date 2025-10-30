@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Button from "./Button";
+import Button from "@/components/ui/Button";
 import { validateAuthForm } from "@/utils/validation";
 import { useAuth } from "@/hooks/useAuth";
 

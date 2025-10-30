@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import AuthForm from "@/components/AuthForm";
+import AuthForm from '@/components/auth/AuthForm';
 import { AUTH_COOKIE_NAME } from "@/config/constants";
 
 export default async function AuthPage() {

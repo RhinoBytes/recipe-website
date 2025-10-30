@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
-import Button from "@/components/Button";
+import Button from '@/components/ui/Button';
 import { Sparkles, Loader2 } from "lucide-react";
 import { FormattedRecipeResponse } from "@/types/recipe";
 

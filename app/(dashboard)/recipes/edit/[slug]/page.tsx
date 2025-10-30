@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import ProtectedPage from "@/components/ProtectedPage";
+import ProtectedPage from '@/components/auth/ProtectedPage';
 import { Plus, Trash2, Loader2, Sparkles } from "lucide-react";
-import Button from "@/components/Button";
+import Button from '@/components/ui/Button';
 
 interface Ingredient {
   amount: number | null;

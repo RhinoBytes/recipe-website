@@ -5,8 +5,8 @@ import { useState, useEffect, use, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { ChefHat, Heart, Settings, Loader2, Edit, X, ArrowLeft } from "lucide-react";
-import Button from "@/components/Button";
-import AvatarPicker from "@/components/AvatarPicker";
+import Button from '@/components/ui/Button';
+import AvatarPicker from '@/components/user/AvatarPicker';
 import Image from "next/image";
 import Link from "next/link";
 
