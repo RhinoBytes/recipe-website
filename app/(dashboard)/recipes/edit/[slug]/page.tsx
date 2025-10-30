@@ -8,33 +8,14 @@ import { Loader2, Upload, AlertCircle } from "lucide-react";
 import Button from '@/components/ui/Button';
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
 import { Difficulty, RecipeStatus, MeasurementSystem } from "@prisma/client";
-import { parseIngredients, parseSteps, ingredientsToText, stepsToText, convertToNewFormat, ParsedIngredient } from "@/lib/recipeParser";
-import { RecipeIngredient as NewRecipeIngredient } from "@/types/recipe";
+import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
+import { RecipeIngredient, RecipeFormData } from "@/types/recipe";
 
 interface RecipeStep {
   stepNumber: number;
   instruction: string;
   groupName: string | null;
   isOptional: boolean;
-}
-
-interface RecipeFormData {
-  title: string;
-  description: string;
-  steps: RecipeStep[];
-  servings: number;
-  prepTimeMinutes: number;
-  cookTimeMinutes: number;
-  difficulty: Difficulty;
-  imageUrl: string;
-  sourceUrl: string;
-  sourceText: string;
-  cuisineName: string;
-  ingredients: NewRecipeIngredient[];
-  tags: string[];
-  categories: string[];
-  allergens: string[];
-  status: RecipeStatus;
 }
 
 interface Category {
@@ -51,6 +32,14 @@ interface Tag {
   id: string;
   name: string;
   count?: number;
+}
+
+// Helper function to capitalize each word in a tag
+function capitalizeWords(str: string): string {
+  return str
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 
 export default function EditRecipePage() {
@@ -79,6 +68,10 @@ export default function EditRecipePage() {
     categories: [],
     allergens: [],
     status: RecipeStatus.PUBLISHED,
+    calories: undefined,
+    proteinG: undefined,
+    fatG: undefined,
+    carbsG: undefined,
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [allergens, setAllergens] = useState<Allergen[]>([]);
@@ -89,6 +82,7 @@ export default function EditRecipePage() {
   const [tagInput, setTagInput] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showAllTags, setShowAllTags] = useState(false);
 
   console.log(`formData =`, formData);
 
@@ -115,43 +109,15 @@ export default function EditRecipePage() {
 
         const recipe = await recipeRes.json();
         
+        // Normalize ingredients from API response
+        const normalizedIngredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
+
         // Helper to map arrays that might be objects with name property
         const toNameArray = (arr: unknown) =>
           Array.isArray(arr)
             ? arr.map((it: { name?: string } | string) => 
                 typeof it === "string" ? it : (it.name ?? String(it))
               )
-            : [];
-
-        // Normalize ingredients from API response
-        const normalizeIngredients = (arr: unknown): ParsedIngredient[] =>
-          Array.isArray(arr)
-            ? arr.map((ing: {
-                name?: string;
-                size?: string | null;
-                preparation?: string | null;
-                notes?: string | null;
-                groupName?: string | null;
-                isOptional?: boolean;
-                displayOrder?: number;
-                measurements?: Array<{
-                  system: MeasurementSystem;
-                  amount: string;
-                  unit: string;
-                }>;
-              }, idx: number) => {
-                // Extract first measurement for display
-                const firstMeasurement = ing.measurements && ing.measurements[0];
-                return {
-                  amount: firstMeasurement?.amount || null,
-                  unit: firstMeasurement?.unit || null,
-                  name: ing.name ?? "",
-                  notes: ing.notes ?? null,
-                  groupName: ing.groupName ?? null,
-                  isOptional: ing.isOptional ?? false,
-                  displayOrder: typeof ing.displayOrder === "number" ? ing.displayOrder : idx,
-                };
-              })
             : [];
 
         // Normalize steps from API response
@@ -187,10 +153,9 @@ export default function EditRecipePage() {
           else statusEnum = RecipeStatus.PUBLISHED;
         }
 
-        const normalizedIngredients = normalizeIngredients(recipe.ingredients);
         const normalizedSteps = normalizeSteps(recipe.steps);
 
-        // Convert to textarea format
+        // Convert to textarea format (ingredientsToText works with RecipeIngredient directly)
         setIngredientsText(ingredientsToText(normalizedIngredients));
         setStepsText(stepsToText(normalizedSteps));
 
@@ -206,11 +171,15 @@ export default function EditRecipePage() {
           sourceUrl: recipe.sourceUrl ?? "",
           sourceText: recipe.sourceText ?? "",
           cuisineName: recipe.cuisine?.name ?? "",
-          ingredients: recipe.ingredients || [], // Store full new format with measurements
+          ingredients: normalizedIngredients, // Store full format with measurements
           tags: toNameArray(recipe.tags),
           categories: toNameArray(recipe.categories),
           allergens: toNameArray(recipe.allergens),
           status: statusEnum,
+          calories: typeof recipe.calories === "number" ? recipe.calories : undefined,
+          proteinG: typeof recipe.proteinG === "number" ? recipe.proteinG : undefined,
+          fatG: typeof recipe.fatG === "number" ? recipe.fatG : undefined,
+          carbsG: typeof recipe.carbsG === "number" ? recipe.carbsG : undefined,
         });
         
         if (categoriesRes.ok) {
@@ -289,9 +258,10 @@ export default function EditRecipePage() {
         throw new Error("Please add at least one instruction step");
       }
 
+      // Parsed ingredients already have dual measurements from parseIngredients()
       const submissionData = {
         ...formData,
-        ingredients: parsedIngredients.map(ing => convertToNewFormat(ing)),
+        ingredients: parsedIngredients,
         steps: parsedSteps,
       };
 
@@ -317,11 +287,16 @@ export default function EditRecipePage() {
 
   const addTag = () => {
     const trimmed = tagInput.trim();
-    if (trimmed && !formData.tags.includes(trimmed)) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, trimmed],
-      });
+    if (trimmed) {
+      const capitalizedTag = capitalizeWords(trimmed);
+      // Check if tag already exists (case-insensitive)
+      const tagExists = formData.tags.some(t => t.toLowerCase() === capitalizedTag.toLowerCase());
+      if (!tagExists) {
+        setFormData({
+          ...formData,
+          tags: [...formData.tags, capitalizedTag],
+        });
+      }
       setTagInput("");
     }
   };
@@ -592,6 +567,86 @@ export default function EditRecipePage() {
                 </div>
               </CollapsibleSection>
 
+              {/* Nutrition Information */}
+              <CollapsibleSection 
+                title="Nutrition Information" 
+                defaultOpen={false}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  Optional - Add nutritional information per serving. These values will be displayed on the recipe page.
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Calories
+                      <span className="ml-2 text-xs text-gray-500">Per serving</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.calories || ''}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        calories: e.target.value ? parseInt(e.target.value) : undefined 
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Protein (g)
+                      <span className="ml-2 text-xs text-gray-500">Grams</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.proteinG || ''}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        proteinG: e.target.value ? parseInt(e.target.value) : undefined 
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Fat (g)
+                      <span className="ml-2 text-xs text-gray-500">Grams</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.fatG || ''}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        fatG: e.target.value ? parseInt(e.target.value) : undefined 
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Carbs (g)
+                      <span className="ml-2 text-xs text-gray-500">Grams</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.carbsG || ''}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        carbsG: e.target.value ? parseInt(e.target.value) : undefined 
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </CollapsibleSection>
+
               {/* Ingredients */}
               <CollapsibleSection 
                 title="Ingredients" 
@@ -651,7 +706,7 @@ export default function EditRecipePage() {
                   <div className="mb-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Popular Tags</h4>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {availableTags.slice(0, 20).map((tag) => (
+                      {availableTags.slice(0, showAllTags ? undefined : 8).map((tag) => (
                         <button
                           key={tag.id}
                           type="button"
@@ -669,6 +724,15 @@ export default function EditRecipePage() {
                         </button>
                       ))}
                     </div>
+                    {availableTags.length > 8 && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllTags(!showAllTags)}
+                        className="text-amber-600 hover:text-amber-700 text-sm font-medium mb-4"
+                      >
+                        {showAllTags ? 'Show Less' : `Show ${availableTags.length - 8} More Tags`}
+                      </button>
+                    )}
                   </div>
                 )}
 
