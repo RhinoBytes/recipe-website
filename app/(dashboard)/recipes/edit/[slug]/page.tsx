@@ -47,6 +47,12 @@ interface Allergen {
   name: string;
 }
 
+interface Tag {
+  id: string;
+  name: string;
+  count?: number;
+}
+
 export default function EditRecipePage() {
   const router = useRouter();
   const params = useParams() as { slug?: string };
@@ -76,6 +82,7 @@ export default function EditRecipePage() {
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [allergens, setAllergens] = useState<Allergen[]>([]);
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,10 +100,11 @@ export default function EditRecipePage() {
       }
 
       try {
-        const [recipeRes, categoriesRes, allergensRes] = await Promise.all([
+        const [recipeRes, categoriesRes, allergensRes, tagsRes] = await Promise.all([
           fetch(`/api/recipes/${encodeURIComponent(slug)}`),
           fetch("/api/categories"),
           fetch("/api/allergens"),
+          fetch("/api/tags"),
         ]);
         
         if (!recipeRes.ok) {
@@ -212,6 +220,11 @@ export default function EditRecipePage() {
           const allergensData = await allergensRes.json();
           setAllergens(Array.isArray(allergensData) ? allergensData : []);
         }
+
+        if (tagsRes.ok) {
+          const tagsData = await tagsRes.json();
+          setAvailableTags(Array.isArray(tagsData) ? tagsData : []);
+        }
       } catch (err) {
         console.error("Failed to load recipe:", err);
         setError(err instanceof Error ? err.message : "Failed to load recipe");
@@ -308,6 +321,20 @@ export default function EditRecipePage() {
         tags: [...formData.tags, trimmed],
       });
       setTagInput("");
+    }
+  };
+
+  const toggleTag = (tagName: string) => {
+    if (formData.tags.includes(tagName)) {
+      setFormData({
+        ...formData,
+        tags: formData.tags.filter(t => t !== tagName),
+      });
+    } else {
+      setFormData({
+        ...formData,
+        tags: [...formData.tags, tagName],
+      });
     }
   };
 
@@ -614,44 +641,79 @@ export default function EditRecipePage() {
                 defaultOpen={false}
               >
                 <p className="text-sm text-gray-600 mb-4">
-                  Tags help users find your recipe. Press Enter or click Add to add tags.
+                  Select from existing tags or add custom tags to help users find your recipe.
                 </p>
-                <div className="flex gap-2 mb-4">
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    placeholder="Add a tag (e.g., Vegetarian, Quick, Healthy)"
-                  />
-                  <button
-                    type="button"
-                    onClick={addTag}
-                    className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors whitespace-nowrap"
-                  >
-                    Add
-                  </button>
+
+                {/* Existing Tags */}
+                {availableTags.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Popular Tags</h4>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {availableTags.slice(0, 20).map((tag) => (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => toggleTag(tag.name)}
+                          className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                            formData.tags.includes(tag.name)
+                              ? "border-amber-600 bg-amber-50 text-amber-800 font-medium"
+                              : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                          }`}
+                        >
+                          {tag.name}
+                          {tag.count && tag.count > 0 && (
+                            <span className="ml-1 text-xs opacity-70">({tag.count})</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Custom Tag Input */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Add Custom Tag</h4>
+                  <div className="flex gap-2 mb-4">
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="Add a custom tag (e.g., Weeknight Dinner)"
+                    />
+                    <button
+                      type="button"
+                      onClick={addTag}
+                      className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors whitespace-nowrap"
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
 
+                {/* Selected Tags */}
                 {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="hover:text-amber-900 font-bold"
-                          title="Remove tag"
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm"
                         >
-                          ×
-                        </button>
-                      </span>
-                    ))}
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            className="hover:text-amber-900 font-bold"
+                            title="Remove tag"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </CollapsibleSection>
