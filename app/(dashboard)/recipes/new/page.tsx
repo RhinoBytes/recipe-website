@@ -478,7 +478,7 @@ export default function NewRecipePage() {
                     <div className="space-y-2">
                       <div className="flex gap-2">
                         <input
-                          type="url"
+                          type="text"
                           value={formData.imageUrl}
                           onChange={(e) => {
                             setFormData({ ...formData, imageUrl: e.target.value });
