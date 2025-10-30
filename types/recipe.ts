@@ -1,16 +1,24 @@
 // Shared types for recipe forms and API communication
 
-import { Difficulty, RecipeStatus } from "@prisma/client";
+import { Difficulty, RecipeStatus, MeasurementSystem } from "@prisma/client";
+
+// Measurement interface for ingredient measurements
+export interface IngredientMeasurement {
+  system: MeasurementSystem;
+  amount: string;
+  unit: string;
+}
 
 // Ingredient interface used across all recipe forms and APIs
 export interface RecipeIngredient {
-  amount: string | null;
-  unit: string | null;
   name: string;
+  size?: string | null;
+  preparation?: string | null;
   notes?: string | null;
   groupName?: string | null;
   isOptional?: boolean;
   displayOrder?: number;
+  measurements: IngredientMeasurement[];
 }
 
 // Recipe step interface used across all recipe forms and APIs
@@ -61,4 +69,15 @@ export interface FormattedRecipeResponse {
   tags?: string[];
   categories?: string[];
   allergens?: string[];
+}
+
+// Legacy ingredient format for backward compatibility during migration
+export interface LegacyRecipeIngredient {
+  amount: string | null;
+  unit: string | null;
+  name: string;
+  notes?: string | null;
+  groupName?: string | null;
+  isOptional?: boolean;
+  displayOrder?: number;
 }
