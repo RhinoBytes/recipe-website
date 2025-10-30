@@ -7,7 +7,7 @@ import ProtectedPage from '@/components/auth/ProtectedPage';
 import { Loader2, Upload, AlertCircle } from "lucide-react";
 import Button from '@/components/ui/Button';
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
-import { Difficulty, RecipeStatus, MeasurementSystem } from "@prisma/client";
+import { Difficulty, RecipeStatus } from "@prisma/client";
 import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
 import { RecipeIngredient, RecipeFormData } from "@/types/recipe";
 
@@ -83,8 +83,6 @@ export default function EditRecipePage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [showAllTags, setShowAllTags] = useState(false);
-
-  console.log(`formData =`, formData);
 
   useEffect(() => {
     // Fetch recipe data, categories, and allergens

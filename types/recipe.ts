@@ -1,24 +1,18 @@
 // Shared types for recipe forms and API communication
 
-import { Difficulty, RecipeStatus, MeasurementSystem } from "@prisma/client";
-
-// Measurement interface for ingredient measurements
-export interface IngredientMeasurement {
-  system: MeasurementSystem;
-  amount: string;
-  unit: string;
-}
+import { Difficulty, RecipeStatus } from "@prisma/client";
 
 // Ingredient interface used across all recipe forms and APIs
 export interface RecipeIngredient {
   name: string;
+  amount?: string | null;
+  unit?: string | null;
   size?: string | null;
   preparation?: string | null;
   notes?: string | null;
   groupName?: string | null;
   isOptional?: boolean;
   displayOrder?: number;
-  measurements: IngredientMeasurement[];
 }
 
 // Recipe step interface used across all recipe forms and APIs

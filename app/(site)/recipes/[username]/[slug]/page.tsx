@@ -37,9 +37,6 @@ export default async function RecipePage({ params }: RecipePageProps) {
       },
       cuisine: true,
       ingredients: {
-        include: {
-          measurements: true,
-        },
         orderBy: {
           displayOrder: 'asc',
         },

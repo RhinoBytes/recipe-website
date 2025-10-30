@@ -26,9 +26,6 @@ export async function GET(
         },
         cuisine: true,
         ingredients: {
-          include: {
-            measurements: true,
-          },
           orderBy: {
             displayOrder: 'asc',
           },
@@ -236,43 +233,27 @@ export async function PATCH(
 
       // Update ingredients if provided
       if (ingredients !== undefined && Array.isArray(ingredients)) {
-        // Delete existing ingredients (cascade will delete measurements)
+        // Delete existing ingredients
         await tx.recipeIngredient.deleteMany({
           where: { recipeId: recipe.id },
         });
 
-        // Create new ingredients with measurements
+        // Create new ingredients
         if (ingredients.length > 0) {
-          for (const ing of ingredients) {
-            const ingredient = await tx.recipeIngredient.create({
-              data: {
-                recipeId: recipe.id,
-                name: ing.name,
-                size: ing.size || null,
-                preparation: ing.preparation || null,
-                notes: ing.notes || null,
-                groupName: ing.groupName || null,
-                isOptional: ing.isOptional || false,
-                displayOrder: ing.displayOrder ?? ingredients.indexOf(ing),
-              },
-            });
-
-            // Create measurements for this ingredient
-            if (ing.measurements && Array.isArray(ing.measurements) && ing.measurements.length > 0) {
-              await tx.ingredientMeasurement.createMany({
-                data: ing.measurements.map((measurement: {
-                  system: import("@prisma/client").MeasurementSystem;
-                  amount: string;
-                  unit: string;
-                }) => ({
-                  recipeIngredientId: ingredient.id,
-                  system: measurement.system,
-                  amount: measurement.amount,
-                  unit: measurement.unit,
-                })),
-              });
-            }
-          }
+          await tx.recipeIngredient.createMany({
+            data: ingredients.map((ing, idx) => ({
+              recipeId: recipe.id,
+              name: ing.name,
+              amount: ing.amount || null,
+              unit: ing.unit || null,
+              size: ing.size || null,
+              preparation: ing.preparation || null,
+              notes: ing.notes || null,
+              groupName: ing.groupName || null,
+              isOptional: ing.isOptional || false,
+              displayOrder: ing.displayOrder ?? idx,
+            })),
+          });
         }
       }
 
