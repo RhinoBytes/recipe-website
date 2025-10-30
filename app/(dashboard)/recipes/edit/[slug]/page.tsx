@@ -53,6 +53,14 @@ interface Tag {
   count?: number;
 }
 
+// Helper function to capitalize each word in a tag
+function capitalizeWords(str: string): string {
+  return str
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 export default function EditRecipePage() {
   const router = useRouter();
   const params = useParams() as { slug?: string };
@@ -79,6 +87,10 @@ export default function EditRecipePage() {
     categories: [],
     allergens: [],
     status: RecipeStatus.PUBLISHED,
+    calories: undefined,
+    proteinG: undefined,
+    fatG: undefined,
+    carbsG: undefined,
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [allergens, setAllergens] = useState<Allergen[]>([]);
@@ -89,6 +101,7 @@ export default function EditRecipePage() {
   const [tagInput, setTagInput] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showAllTags, setShowAllTags] = useState(false);
 
   console.log(`formData =`, formData);
 
@@ -211,6 +224,10 @@ export default function EditRecipePage() {
           categories: toNameArray(recipe.categories),
           allergens: toNameArray(recipe.allergens),
           status: statusEnum,
+          calories: typeof recipe.calories === "number" ? recipe.calories : undefined,
+          proteinG: typeof recipe.proteinG === "number" ? recipe.proteinG : undefined,
+          fatG: typeof recipe.fatG === "number" ? recipe.fatG : undefined,
+          carbsG: typeof recipe.carbsG === "number" ? recipe.carbsG : undefined,
         });
         
         if (categoriesRes.ok) {
@@ -317,11 +334,16 @@ export default function EditRecipePage() {
 
   const addTag = () => {
     const trimmed = tagInput.trim();
-    if (trimmed && !formData.tags.includes(trimmed)) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, trimmed],
-      });
+    if (trimmed) {
+      const capitalizedTag = capitalizeWords(trimmed);
+      // Check if tag already exists (case-insensitive)
+      const tagExists = formData.tags.some(t => t.toLowerCase() === capitalizedTag.toLowerCase());
+      if (!tagExists) {
+        setFormData({
+          ...formData,
+          tags: [...formData.tags, capitalizedTag],
+        });
+      }
       setTagInput("");
     }
   };
@@ -592,6 +614,86 @@ export default function EditRecipePage() {
                 </div>
               </CollapsibleSection>
 
+              {/* Nutrition Information */}
+              <CollapsibleSection 
+                title="Nutrition Information" 
+                defaultOpen={false}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  Optional - Add nutritional information per serving. These values will be displayed on the recipe page.
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Calories
+                      <span className="ml-2 text-xs text-gray-500">Per serving</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.calories || ''}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        calories: e.target.value ? parseInt(e.target.value) : undefined 
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Protein (g)
+                      <span className="ml-2 text-xs text-gray-500">Grams</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.proteinG || ''}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        proteinG: e.target.value ? parseInt(e.target.value) : undefined 
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Fat (g)
+                      <span className="ml-2 text-xs text-gray-500">Grams</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.fatG || ''}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        fatG: e.target.value ? parseInt(e.target.value) : undefined 
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Carbs (g)
+                      <span className="ml-2 text-xs text-gray-500">Grams</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.carbsG || ''}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        carbsG: e.target.value ? parseInt(e.target.value) : undefined 
+                      })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="0"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </CollapsibleSection>
+
               {/* Ingredients */}
               <CollapsibleSection 
                 title="Ingredients" 
@@ -651,7 +753,7 @@ export default function EditRecipePage() {
                   <div className="mb-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Popular Tags</h4>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {availableTags.slice(0, 20).map((tag) => (
+                      {availableTags.slice(0, showAllTags ? undefined : 8).map((tag) => (
                         <button
                           key={tag.id}
                           type="button"
@@ -669,6 +771,15 @@ export default function EditRecipePage() {
                         </button>
                       ))}
                     </div>
+                    {availableTags.length > 8 && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllTags(!showAllTags)}
+                        className="text-amber-600 hover:text-amber-700 text-sm font-medium mb-4"
+                      >
+                        {showAllTags ? 'Show Less' : `Show ${availableTags.length - 8} More Tags`}
+                      </button>
+                    )}
                   </div>
                 )}
 
