@@ -189,8 +189,13 @@ export default function NewRecipePage() {
       categories: formatted.categories || [],
       allergens: formatted.allergens || [],
       status: RecipeStatus.PUBLISHED,
+      calories: formatted.calories || undefined,
+      proteinG: formatted.proteinG || undefined,
+      fatG: formatted.fatG || undefined,
+      carbsG: formatted.carbsG || undefined,
     });
   };
+  console.log("formData:", formData);
   
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

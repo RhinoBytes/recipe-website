@@ -311,25 +311,58 @@ async function getSpotlightChef() {
   return spotlight;
 }
 
+const CATEGORIES = [
+  {
+    name: "Breakfast",
+    slug: "breakfast",
+    image: "/img/categories/Breakfast.jpg",
+  },
+  {
+    name: "Lunch",
+    slug: "lunch",
+    image: "/img/categories/Lunch.jpg",
+  },
+  {
+    name: "Dinner",
+    slug: "dinner",
+    image: "/img/categories/Dinner.jpg",
+  },
+  {
+    name: "Dessert",
+    slug: "dessert",
+    image: "/img/categories/Dessert.jpg",
+  },
+  {
+    name: "Snack",
+    slug: "snack",
+    image: "/img/categories/Snack.jpg",
+  },
+  {
+    name: "Salad",
+    slug: "salad",
+    image: "/img/categories/Salad.jpg",
+  },
+];
+
 export default async function HomePage() {
-  const [popularRecipes, recentRecipes, categories, featuredRecipe, spotlightChef] = await Promise.all([
+  const [popularRecipes, recentRecipes, featuredRecipe, spotlightChef] = await Promise.all([
     getPopularRecipes(),
     getRecentRecipes(),
-    getCategories(),
     getFeaturedRecipe(),
     getSpotlightChef(),
   ]);
 
   return (
-    <main>
-      {/* Hero Section */}
-     {/* Hero Section */}
-<section className="relative text-center py-24 text-bg">
+    <main   >
+
+{/* Hero Section */}
+<section className="relative text-center text-bg min-h-[500px] flex items-center">
   {/* Background image + gradient overlay */}
   <div className="absolute inset-0 w-full h-full bg-center bg-cover">
     <Image
-      src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=600&fit=crop"
+      src="/img/hero/Hero.jpeg"
       alt="Hero Background"
+      
       fill
       className="object-cover"
       priority
@@ -414,7 +447,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {categories.map((category) => (
+            {CATEGORIES.map((category) => (
               <CategoryCard key={category.slug} category={category} />
             ))}
           </div>

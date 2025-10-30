@@ -13,7 +13,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, initialUser }: AuthProviderProps) {
-  const auth = useAuthHook();
+  const auth = useAuthHook(initialUser); // Pass initialUser to the hook
   
   return (
     <AuthContext.Provider value={auth}>
@@ -22,7 +22,6 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
   );
 }
 
-// This becomes your new useAuth hook
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === null) {

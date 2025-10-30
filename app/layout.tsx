@@ -1,20 +1,10 @@
 import type { Metadata } from "next";
-// import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/context/AuthContext";
+import { Playfair_Display, Lora, Dancing_Script } from 'next/font/google';
 
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
 
 export const metadata: Metadata = {
   title: "CookBook - Discover Amazing Recipes",
@@ -28,18 +18,39 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-family-heading',
+  display: 'swap',
+});
+
+const lora = Lora({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-family-body',
+  display: 'swap',
+});
+
+const dancing = Dancing_Script({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-family-handwritten',
+  display: 'swap',
+});
+
+export default function RootLayout({ 
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="terracotta">
-      <body
-        className="antialiased"
-      >
+    <html lang="en" data-theme="terracotta" className={`${playfair.variable} ${lora.variable} ${dancing.variable}`}>
+      <body className="antialiased">
         <AuthProvider>
-          <Navbar />
+          <Navbar /> 
+
           {children}
           <Footer />
         </AuthProvider>

@@ -1,34 +1,41 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import {
-  Prisma,
-  Difficulty,
-  RecipeStatus,
-} from "@prisma/client";
+import { Prisma, Difficulty, RecipeStatus } from "@prisma/client";
 import { saveRecipeToFile } from "@/lib/recipeStorage";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") || "";
-    
+
     // Support multiple values for filters
-    const categories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
+    const categories =
+      searchParams.get("categories")?.split(",").filter(Boolean) || [];
     const tags = searchParams.get("tags")?.split(",").filter(Boolean) || [];
-    const cuisines = searchParams.get("cuisines")?.split(",").filter(Boolean) || [];
-    const allergens = searchParams.get("allergens")?.split(",").filter(Boolean) || [];
+    const cuisines =
+      searchParams.get("cuisines")?.split(",").filter(Boolean) || [];
+    const allergens =
+      searchParams.get("allergens")?.split(",").filter(Boolean) || [];
     const difficulty = searchParams.get("difficulty") || "";
-    
+
     // Time filters
-    const minPrepTime = searchParams.get("minPrepTime") ? parseInt(searchParams.get("minPrepTime")!) : null;
-    const maxPrepTime = searchParams.get("maxPrepTime") ? parseInt(searchParams.get("maxPrepTime")!) : null;
-    const minCookTime = searchParams.get("minCookTime") ? parseInt(searchParams.get("minCookTime")!) : null;
-    const maxCookTime = searchParams.get("maxCookTime") ? parseInt(searchParams.get("maxCookTime")!) : null;
-    
+    const minPrepTime = searchParams.get("minPrepTime")
+      ? parseInt(searchParams.get("minPrepTime")!)
+      : null;
+    const maxPrepTime = searchParams.get("maxPrepTime")
+      ? parseInt(searchParams.get("maxPrepTime")!)
+      : null;
+    const minCookTime = searchParams.get("minCookTime")
+      ? parseInt(searchParams.get("minCookTime")!)
+      : null;
+    const maxCookTime = searchParams.get("maxCookTime")
+      ? parseInt(searchParams.get("maxCookTime")!)
+      : null;
+
     // Sort option
     const sort = searchParams.get("sort") || "newest";
-    
+
     const page = parseInt(searchParams.get("page") || "1");
     const perPage = parseInt(searchParams.get("perPage") || "12");
     const skip = (page - 1) * perPage;
@@ -92,7 +99,10 @@ export async function GET(request: Request) {
     }
 
     // Filter by difficulty
-    if (difficulty && Object.values(Difficulty).includes(difficulty as Difficulty)) {
+    if (
+      difficulty &&
+      Object.values(Difficulty).includes(difficulty as Difficulty)
+    ) {
       where.difficulty = difficulty as Difficulty;
     }
 
@@ -243,6 +253,7 @@ export async function POST(request: Request) {
       allergens,
       status,
     } = body;
+    console.log("Received recipe data:", body);
 
     // Validate required fields
     if (!title) {

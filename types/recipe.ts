@@ -63,6 +63,10 @@ export interface FormattedRecipeResponse {
   tags?: string[];
   categories?: string[];
   allergens?: string[];
+  calories?: number;
+  proteinG?: number;
+  fatG?: number;
+  carbsG?: number;
 }
 
 // Type for recipe data structure stored in JSON files (seeds)

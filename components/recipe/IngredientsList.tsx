@@ -199,13 +199,13 @@ export default function IngredientsList({ ingredients }: IngredientsListProps) {
                         isChecked ? 'line-through text-text-muted' : ''
                       }`}
                     >
-                      {scaled && scaled.amount && scaled.unit && (
-                        <>
-                          <span className="font-semibold">{scaled.amount} </span>
-                          <span className="font-semibold">
-                            {scaled.unit.toLowerCase().replace(/_/g, ' ')}{' '}
-                          </span>
-                        </>
+                      {scaled?.amount && (
+                        <span className="font-semibold">{scaled.amount} </span>
+                      )}
+                      {scaled?.unit && (
+                        <span className="font-semibold">
+                          {scaled.unit.toLowerCase().replace(/_/g, ' ')}{' '}
+                        </span>
                       )}
                       {ingredient.size && (
                         <span className="font-semibold">{ingredient.size} </span>

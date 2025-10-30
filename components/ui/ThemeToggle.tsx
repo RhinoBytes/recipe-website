@@ -38,7 +38,7 @@ export function getStoredTheme(): ThemeName {
  * Cycles between light, dark, and terracotta themes
  */
 export default function ThemeToggle() {
-  const [currentTheme, setCurrentTheme] = useState<ThemeName>(THEMES.TERRACOTTA); // default Terracotta
+  const [currentTheme, setCurrentTheme] = useState<ThemeName>(THEMES.TERRACOTTA);
   const [mounted, setMounted] = useState(false);
 
   // Initialize theme on mount
@@ -66,37 +66,57 @@ export default function ThemeToggle() {
   if (!mounted) {
     return (
       <button
-        className="p-2 rounded-full bg-bg-secondary border border-border hover:bg-accent-light transition-colors"
+        className="w-10 h-10 flex items-center justify-center rounded-full bg-bg-secondary border border-border hover:bg-accent-light transition-colors"
         aria-label="Toggle theme"
       >
-        <Sun size={20} className="text-text" />
+        <div className="w-5 h-5" /> {/* Empty placeholder to maintain size */}
       </button>
     );
   }
 
   // Determine icon and labels
-  let Icon = Sun;
   let nextThemeName = 'dark';
 
   if (currentTheme === THEMES.LIGHT) {
-    Icon = Moon;
     nextThemeName = 'dark';
   } else if (currentTheme === THEMES.DARK) {
-    Icon = Palette; // shows terracotta next
     nextThemeName = 'terracotta';
   } else if (currentTheme === THEMES.TERRACOTTA) {
-    Icon = Sun;
     nextThemeName = 'light';
   }
 
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-full bg-bg-secondary border border-border hover:bg-accent-light transition-colors"
+      className="relative w-10 h-10 flex items-center justify-center rounded-full bg-bg-secondary border border-border hover:bg-accent-light transition-colors"
       aria-label={`Switch to ${nextThemeName} theme`}
       title={`Switch to ${nextThemeName} theme`}
     >
-      <Icon size={20} className="text-text" />
+      {/* All icons absolutely positioned with crossfade effect */}
+      <Sun 
+        size={20} 
+        className={`absolute text-text transition-all duration-300 ${
+          currentTheme === THEMES.LIGHT 
+            ? 'opacity-100 rotate-0 scale-100' 
+            : 'opacity-0 rotate-180 scale-50'
+        }`}
+      />
+      <Moon 
+        size={20} 
+        className={`absolute text-text transition-all duration-300 ${
+          currentTheme === THEMES.DARK 
+            ? 'opacity-100 rotate-0 scale-100' 
+            : 'opacity-0 -rotate-180 scale-50'
+        }`}
+      />
+      <Palette 
+        size={20} 
+        className={`absolute text-text transition-all duration-300 ${
+          currentTheme === THEMES.TERRACOTTA 
+            ? 'opacity-100 rotate-0 scale-100' 
+            : 'opacity-0 rotate-90 scale-50'
+        }`}
+      />
     </button>
   );
 }

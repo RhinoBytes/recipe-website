@@ -1,19 +1,27 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { LogIn, UserPlus, Plus, User, ChevronDown, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from "@/context/AuthContext"; 
 
-interface UserDropdownProps {
-  dropdownOpen: boolean;
-  setDropdownOpen: (open: boolean) => void;
-  dropdownRef?: React.RefObject<HTMLDivElement>;
-}
-
-export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRef }: UserDropdownProps) {
-  const { user, isAuthenticated, loading, logout } = useAuth();
+export default function UserDropdown() {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { user, isAuthenticated, logout, loading } = useAuth();
   
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
     await logout();
@@ -28,40 +36,40 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
         aria-haspopup="menu"
         aria-expanded={dropdownOpen}
         aria-controls="user-menu"
+        disabled={loading}
       >
-        {loading ? (
-          <>
-            <User size={18} />
-            Loading...
-          </>
-        ) : isAuthenticated && user?.avatarUrl ? (
-          <>
+        {/* Always reserve space for icon (32px) + text (120px on desktop) + chevron (16px) */}
+        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+          {loading ? (
+            <div className="w-8 h-8 rounded-full bg-border animate-pulse" />
+          ) : isAuthenticated && user?.avatarUrl ? (
             <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-accent">
               <Image
                 src={user.avatarUrl}
                 alt={user.username || 'User avatar'}
                 width={32}
                 height={32}
+                priority
                 className="object-cover"
                 unoptimized={user.avatarUrl.startsWith('data:')}
               />
             </div>
-            <span className="hidden md:inline">{user?.username || 'Account'}</span>
-          </>
-        ) : isAuthenticated ? (
-          <>
-            <User size={18} />
-            {user?.username || 'Account'}
-          </>
+          ) : (
+            <User size={20} />
+          )}
+        </div>
+        
+        {loading ? (
+          <span className="hidden md:inline md:w-[120px] h-4 bg-border rounded animate-pulse" />
         ) : (
-          <>
-            <User size={18} />
-            Login
-          </>
+          <span className="hidden md:inline md:w-[120px] truncate text-left">
+            {isAuthenticated ? (user?.username || 'Account') : 'Login'}
+          </span>
         )}
+        
         <ChevronDown
           size={16}
-          className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+          className={`flex-shrink-0 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -74,9 +82,7 @@ export default function UserDropdown({ dropdownOpen, setDropdownOpen, dropdownRe
             : 'opacity-0 scale-95 pointer-events-none'
         }`}
       >
-        {loading ? (
-          <div className="px-4 py-3 text-text-secondary">Loading...</div>
-        ) : isAuthenticated ? (
+        {isAuthenticated ? (
           // Authenticated user options
           <>
             <div className="px-4 py-1 text-xs text-text-muted">
