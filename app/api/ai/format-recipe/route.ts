@@ -221,23 +221,37 @@ You are an expert unit converter. Each ingredient MUST have a "measurements" arr
 1. measurements array structure:
    - system: "IMPERIAL", "METRIC", or "OTHER"
    - amount: string (e.g., "1", "1/2", "2-3")
-   - unit: string (e.g., "cup", "g", "ml", "tbsp")
+   - unit: string (e.g., "cup", "g", "ml", "tbsp", "eggs")
 
-2. If the recipe provides IMPERIAL units (cup, oz, lb, tbsp, tsp, fl oz):
+2. **UNIT-COUNTED INGREDIENTS (NEVER convert to weight):**
+   For ingredients that are naturally counted by units, store them identically in BOTH systems:
+   - Examples: eggs, egg whites, egg yolks, apples, oranges, lemons, limes, onions, garlic cloves, tomatoes, potatoes, bananas, etc.
+   - These should have the SAME measurement in both IMPERIAL and METRIC systems
+   - Use system "OTHER" for both entries since they're unit-based, not volume/weight
+   - Example: "2 eggs" → measurements: [
+       {system: "OTHER", amount: "2", unit: "eggs"},
+       {system: "OTHER", amount: "2", unit: "eggs"}
+     ]
+   - Example: "3 cloves garlic" → measurements: [
+       {system: "OTHER", amount: "3", unit: "cloves"},
+       {system: "OTHER", amount: "3", unit: "cloves"}
+     ]
+
+3. If the recipe provides IMPERIAL units (cup, oz, lb, tbsp, tsp, fl oz):
    - Parse the original imperial measurement
    - ALSO generate the accurate METRIC equivalent (g, ml, l)
    - Add both to the measurements array
 
-3. If the recipe provides METRIC units (g, kg, ml, l):
+4. If the recipe provides METRIC units (g, kg, ml, l):
    - Parse the original metric measurement
    - ALSO generate the accurate IMPERIAL equivalent (cup, oz, tbsp, tsp)
    - Add both to the measurements array
 
-4. For non-standard units (whole, piece, clove, pinch, dash, to taste, as needed):
+5. For non-standard units (whole, piece, pinch, dash, to taste, as needed):
    - Use system: "OTHER"
    - Only include ONE measurement with this unit
 
-5. Common conversions to use:
+6. Common conversions to use (for non-unit-counted ingredients):
    - 1 cup = 240ml (liquid) or varies by ingredient (flour ~120g, sugar ~200g)
    - 1 tbsp = 15ml
    - 1 tsp = 5ml
@@ -274,7 +288,7 @@ ${text}`;
       {
         role: "system",
         content:
-          "You are an expert recipe parser, nutritionist, culinary expert, and unit conversion specialist. Extract ALL recipe information including instructions. Generate missing cuisine, tags, categories, and allergens. CRITICALLY: For each ingredient, generate BOTH Imperial and Metric measurements with accurate conversions. Distinguish between preparation methods (goes in preparation field) and substitution notes (goes in notes field). Respond with valid JSON only.",
+          "You are an expert recipe parser, nutritionist, culinary expert, and unit conversion specialist. Extract ALL recipe information including instructions. Generate missing cuisine, tags, categories, and allergens. CRITICALLY: For each ingredient, generate BOTH Imperial and Metric measurements with accurate conversions. EXCEPTION: For unit-counted ingredients (eggs, fruits, vegetables counted by piece), use the SAME unit-based measurement in both systems - NEVER convert to weight. Distinguish between preparation methods (goes in preparation field) and substitution notes (goes in notes field). Respond with valid JSON only.",
       },
       { role: "user", content: prompt },
     ],
@@ -310,13 +324,15 @@ Return JSON with all required fields. Ensure:
     * system: "IMPERIAL", "METRIC", or "OTHER"
     * amount: string (e.g., "1", "1/2")
     * unit: string (e.g., "cup", "g", "ml")
+    * CRITICAL: For unit-counted ingredients (eggs, fruits, vegetables by piece), use the SAME unit measurement in both systems - NEVER convert to weight
+    * Example: eggs should be "2 eggs" in both systems, not converted to grams
 - If cuisineName is missing, intelligently determine it from the recipe content
 - If tags are missing, generate relevant tags based on recipe characteristics
 - If categories are missing, determine appropriate categories
 - If allergens are missing, identify them from ingredients
 - servings and nutrition are numbers
 
-CRITICAL: Generate accurate unit conversions between Imperial and Metric systems for all ingredients.`;
+CRITICAL: Generate accurate unit conversions between Imperial and Metric systems for measured ingredients. For counted ingredients (eggs, whole fruits/vegetables, etc.), keep the same unit-based measurement in both systems.`;
 
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
@@ -324,7 +340,7 @@ CRITICAL: Generate accurate unit conversions between Imperial and Metric systems
       {
         role: "system",
         content:
-          "You are a nutrition expert, recipe validator, culinary expert, and unit conversion specialist. Generate missing metadata intelligently. CRITICALLY: For each ingredient, provide BOTH Imperial and Metric measurements with accurate conversions. Respond with valid JSON only.",
+          "You are a nutrition expert, recipe validator, culinary expert, and unit conversion specialist. Generate missing metadata intelligently. CRITICALLY: For each ingredient, provide BOTH Imperial and Metric measurements with accurate conversions. EXCEPTION: For unit-counted ingredients (eggs, fruits, vegetables counted by piece), use the SAME unit-based measurement in both systems - NEVER convert to weight. Respond with valid JSON only.",
       },
       { role: "user", content: prompt },
     ],
