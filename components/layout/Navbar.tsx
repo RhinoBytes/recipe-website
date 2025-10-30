@@ -8,7 +8,7 @@ import {
   X,
   Search,
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth'; // Import your auth hook
+import { useAuth } from "@/context/AuthContext"; 
 import UserDropdown from './UserDropdown';
 import MobileMenu from './MobileMenu';
 import Utensils from './Utensils';
@@ -25,7 +25,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
-  useAuth(); // Keep auth initialized for the app
+
 
   // Handle scroll shadow + blur
   useEffect(() => {

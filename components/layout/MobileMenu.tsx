@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Search, LogIn, UserPlus, Plus, User, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth'; // Make sure this path is correct!
+import { useAuth } from "@/context/AuthContext"; 
 
 type NavLink = { label: string; href: string };
 

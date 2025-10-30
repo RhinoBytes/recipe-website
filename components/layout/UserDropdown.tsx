@@ -3,7 +3,7 @@
 import { LogIn, UserPlus, Plus, User, ChevronDown, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '@/hooks/useAuth'; // Make sure this path is correct!
+import { useAuth } from "@/context/AuthContext"; 
 
 interface UserDropdownProps {
   dropdownOpen: boolean;

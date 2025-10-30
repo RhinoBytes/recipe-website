@@ -1,48 +1,6 @@
 import fs from "fs";
 import path from "path";
-
-// Type for recipe data structure
-interface RecipeData {
-  title: string;
-  slug: string | null;
-  description: string | null;
-  servings: number | null;
-  prepTimeMinutes: number | null;
-  cookTimeMinutes: number | null;
-  difficulty: string | null;
-  imageUrl: string | null;
-  sourceUrl: string | null;
-  sourceText: string | null;
-  status: string | null;
-  calories: number | null;
-  proteinG: number | null;
-  fatG: number | null;
-  carbsG: number | null;
-  cuisine: string | null;
-  ingredients: Array<{
-    name: string;
-    size: string | null;
-    preparation: string | null;
-    notes: string | null;
-    groupName: string | null;
-    isOptional: boolean;
-    displayOrder: number;
-    measurements: Array<{
-      system: string;
-      amount: string;
-      unit: string;
-    }>;
-  }>;
-  steps: Array<{
-    stepNumber: number;
-    instruction: string;
-    groupName: string | null;
-    isOptional: boolean;
-  }>;
-  tags: string[];
-  categories: string[];
-  allergens: string[];
-}
+import { RecipeIngredient, RecipeStep, RecipeData } from "@/types/recipe";
 
 /**
  * Save recipe data to JSON file in development mode
@@ -88,6 +46,7 @@ export async function saveRecipeToFile(
 
 /**
  * Save recipe image to folder in development mode
+ * Copies image from public/uploads/recipes/{recipeId}/ to prisma/data/recipes/{slug}/
  */
 export async function saveRecipeImage(
   recipeSlug: string,
@@ -98,18 +57,55 @@ export async function saveRecipeImage(
     return;
   }
 
-  // For now, we'll just store the image URL in the JSON
-  // In a real implementation, you might download the image
-  // This is a placeholder for future image handling
-  console.log(
-    `Recipe image URL saved in JSON: ${imageUrl} for recipe ${recipeSlug}`
-  );
+  try {
+    // Check if imageUrl is a local upload path
+    if (!imageUrl || imageUrl.startsWith("http")) {
+      console.log(`Skipping image save - not a local upload: ${imageUrl}`);
+      return;
+    }
+
+    // Construct source path from imageUrl (e.g., /uploads/recipes/{id}/image.jpg)
+    const sourceImagePath = path.join(process.cwd(), "public", imageUrl);
+
+    if (!fs.existsSync(sourceImagePath)) {
+      console.log(`Source image not found: ${sourceImagePath}`);
+      return;
+    }
+
+    // Create recipe folder
+    const recipeFolderPath = path.join(
+      process.cwd(),
+      "prisma",
+      "data",
+      "recipes",
+      recipeSlug
+    );
+
+    if (!fs.existsSync(recipeFolderPath)) {
+      fs.mkdirSync(recipeFolderPath, { recursive: true });
+    }
+
+    // Get filename from source path
+    const fileName = path.basename(sourceImagePath);
+    const targetImagePath = path.join(recipeFolderPath, fileName);
+
+    // Copy the image file
+    fs.copyFileSync(sourceImagePath, targetImagePath);
+
+    console.log(`Recipe image copied to: ${targetImagePath}`);
+  } catch (error) {
+    console.error("Error saving recipe image:", error);
+  }
 }
 
 /**
  * Read all recipe folders and their JSON files
  */
-export function readRecipeFolders(): Array<{ slug: string; data: RecipeData }> {
+export function readRecipeFolders(): Array<{
+  slug: string;
+  data: RecipeData;
+  folderPath: string;
+}> {
   const recipesPath = path.join(process.cwd(), "prisma", "data", "recipes");
 
   // Create directory if it doesn't exist
@@ -118,7 +114,11 @@ export function readRecipeFolders(): Array<{ slug: string; data: RecipeData }> {
     return [];
   }
 
-  const recipes: Array<{ slug: string; data: RecipeData }> = [];
+  const recipes: Array<{
+    slug: string;
+    data: RecipeData;
+    folderPath: string;
+  }> = [];
 
   try {
     const folders = fs
@@ -127,13 +127,18 @@ export function readRecipeFolders(): Array<{ slug: string; data: RecipeData }> {
       .map((dirent) => dirent.name);
 
     for (const folder of folders) {
-      const jsonPath = path.join(recipesPath, folder, "recipe.json");
+      const folderPath = path.join(recipesPath, folder);
+      const jsonPath = path.join(folderPath, "recipe.json");
 
       if (fs.existsSync(jsonPath)) {
         try {
           const jsonContent = fs.readFileSync(jsonPath, "utf-8");
           const data = JSON.parse(jsonContent);
-          recipes.push({ slug: folder, data });
+          recipes.push({
+            slug: folder,
+            data,
+            folderPath,
+          });
         } catch (error) {
           console.error(`Error reading recipe JSON for ${folder}:`, error);
         }

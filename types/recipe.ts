@@ -71,13 +71,27 @@ export interface FormattedRecipeResponse {
   allergens?: string[];
 }
 
-// Legacy ingredient format for backward compatibility during migration
-export interface LegacyRecipeIngredient {
-  amount: string | null;
-  unit: string | null;
-  name: string;
-  notes?: string | null;
-  groupName?: string | null;
-  isOptional?: boolean;
-  displayOrder?: number;
+// Type for recipe data structure stored in JSON files (seeds)
+export interface RecipeData {
+  title: string;
+  slug: string | null;
+  description: string | null;
+  servings: number | null;
+  prepTimeMinutes: number | null;
+  cookTimeMinutes: number | null;
+  difficulty: string | null;
+  imageUrl: string | null;
+  sourceUrl: string | null;
+  sourceText: string | null;
+  status: string | null;
+  calories: number | null;
+  proteinG: number | null;
+  fatG: number | null;
+  carbsG: number | null;
+  cuisine: string | null;
+  ingredients: RecipeIngredient[];
+  steps: RecipeStep[];
+  tags: string[];
+  categories: string[];
+  allergens: string[];
 }

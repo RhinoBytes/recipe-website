@@ -34,7 +34,7 @@ export default function RecipeActions({ slug, isAuthor }: RecipeActionsProps) {
         throw new Error("Failed to delete recipe");
       }
 
-      router.push("/profile");
+      router.push("/");
     } catch (error) {
       console.error("Delete error:", error);
       alert("Failed to delete recipe. Please try again.");

@@ -6,6 +6,12 @@ import {
   getRandomProfileAvatar,
   getRandomRecipePlaceholder,
 } from "../lib/placeholders.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient({
   log: ["query", "info", "warn", "error"],
@@ -13,6 +19,42 @@ const prisma = new PrismaClient({
 
 type DifficultyType = keyof typeof Difficulty;
 type RecipeStatusType = keyof typeof RecipeStatus;
+
+// Helper function to copy image file
+async function copyRecipeImage(
+  sourceImagePath: string,
+  recipeId: string
+): Promise<string | null> {
+  try {
+    // Create the target directory if it doesn't exist
+    const targetDir = path.join(
+      __dirname,
+      "..",
+      "public",
+      "uploads",
+      "recipes",
+      recipeId
+    );
+
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    // Get the file extension from the source image
+    const ext = path.extname(sourceImagePath);
+    const targetFileName = `image${ext}`;
+    const targetPath = path.join(targetDir, targetFileName);
+
+    // Copy the file
+    fs.copyFileSync(sourceImagePath, targetPath);
+
+    // Return the public URL path
+    return `/uploads/recipes/${recipeId}/${targetFileName}`;
+  } catch (error) {
+    console.error(`Failed to copy image: ${error}`);
+    return null;
+  }
+}
 
 async function main() {
   console.log("Seeding database started...");
@@ -35,6 +77,13 @@ async function main() {
   await prisma.user.deleteMany({});
 
   console.log("All tables cleared.");
+
+  // Clean up old recipe uploads folder
+  const uploadsDir = path.join(__dirname, "..", "public", "uploads", "recipes");
+  if (fs.existsSync(uploadsDir)) {
+    fs.rmSync(uploadsDir, { recursive: true, force: true });
+    console.log("Cleaned up old recipe uploads folder.");
+  }
 
   // --- CREATE USERS ---
   console.log("Creating seed users...");
@@ -116,7 +165,7 @@ async function main() {
   console.log(`Found ${recipeFolders.length} recipe(s) to import.`);
 
   // --- IMPORT JSON RECIPES ---
-  for (const { slug, data } of recipeFolders) {
+  for (const { slug, data, folderPath } of recipeFolders) {
     console.log(`Importing recipe: ${data.title}`);
     try {
       const author = faker.helpers.arrayElement(users);
@@ -135,6 +184,7 @@ async function main() {
         cuisineId = cuisine.id;
       }
 
+      // Create recipe first to get the ID
       const recipe = await prisma.recipe.create({
         data: {
           authorId: author.id,
@@ -156,6 +206,60 @@ async function main() {
           carbsG: data.carbsG,
         },
       });
+
+      // Handle image copying if there's a local image file
+      if (folderPath) {
+        let sourceImagePath: string | null = null;
+
+        // If imageUrl is provided and is a local path (not a URL)
+        if (data.imageUrl && !data.imageUrl.startsWith("http")) {
+          sourceImagePath = path.join(folderPath, data.imageUrl);
+          console.log(`  Checking for image: ${data.imageUrl}`);
+        }
+        // If no imageUrl or empty string, search for image files in the folder
+        else if (!data.imageUrl || data.imageUrl === "") {
+          console.log(`  No imageUrl specified, searching for image files...`);
+          const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+          const files = fs.readdirSync(folderPath);
+
+          for (const file of files) {
+            const ext = path.extname(file).toLowerCase();
+            if (imageExtensions.includes(ext)) {
+              sourceImagePath = path.join(folderPath, file);
+              console.log(`  Found image file: ${file}`);
+              break;
+            }
+          }
+        }
+
+        // If we found an image path, try to copy it
+        if (sourceImagePath) {
+          console.log(`  Looking for image at: ${sourceImagePath}`);
+
+          if (fs.existsSync(sourceImagePath)) {
+            console.log(`  Image found! Copying...`);
+            const newImageUrl = await copyRecipeImage(
+              sourceImagePath,
+              recipe.id
+            );
+
+            if (newImageUrl) {
+              // Update the recipe with the new image URL
+              await prisma.recipe.update({
+                where: { id: recipe.id },
+                data: { imageUrl: newImageUrl },
+              });
+              console.log(`  ✓ Copied image to ${newImageUrl}`);
+            } else {
+              console.log(`  ✗ Failed to copy image`);
+            }
+          } else {
+            console.log(`  ✗ Image file not found at path: ${sourceImagePath}`);
+          }
+        } else {
+          console.log(`  No image file found in folder`);
+        }
+      }
 
       // Ingredients
       if (data.ingredients?.length) {

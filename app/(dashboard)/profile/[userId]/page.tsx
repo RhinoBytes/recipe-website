@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, use, useCallback } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext"; 
 import { useRouter } from "next/navigation";
 import { ChefHat, Heart, Settings, Loader2, Edit, X, ArrowLeft } from "lucide-react";
 import Button from '@/components/ui/Button';
