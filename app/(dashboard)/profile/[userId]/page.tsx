@@ -421,6 +421,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                               alt={recipe.title}
                               fill
                               className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 33vw"
                             />
                           </div>
                         )}
@@ -496,6 +497,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                               alt={recipe.title}
                               fill
                               className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 33vw"
                             />
                           </div>
                         )}
