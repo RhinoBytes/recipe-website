@@ -3,29 +3,46 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import ProtectedPage from '@/components/auth/ProtectedPage';
-import { Plus, Trash2, Loader2, Sparkles } from "lucide-react";
+import { Loader2, Upload, AlertCircle } from "lucide-react";
 import Button from '@/components/ui/Button';
+import CollapsibleSection from "@/components/ui/CollapsibleSection";
+import { Difficulty, RecipeStatus } from "@prisma/client";
+import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
 
 interface Ingredient {
-  amount: number | null;
+  amount: string | null;
   unit: string | null;
   name: string;
+  notes: string | null;
+  groupName: string | null;
+  isOptional: boolean;
   displayOrder: number;
+}
+
+interface RecipeStep {
+  stepNumber: number;
+  instruction: string;
+  groupName: string | null;
+  isOptional: boolean;
 }
 
 interface RecipeFormData {
   title: string;
   description: string;
-  instructions: string;
+  steps: RecipeStep[];
   servings: number;
   prepTimeMinutes: number;
   cookTimeMinutes: number;
-  difficulty: string;
+  difficulty: Difficulty;
   imageUrl: string;
+  sourceUrl: string;
+  sourceText: string;
+  cuisineName: string;
   ingredients: Ingredient[];
   tags: string[];
   categories: string[];
   allergens: string[];
+  status: RecipeStatus;
 }
 
 interface Category {
@@ -43,19 +60,27 @@ export default function EditRecipePage() {
   const params = useParams() as { slug?: string };
   const slug = params?.slug as string | undefined;
   
+  // State for textarea inputs
+  const [ingredientsText, setIngredientsText] = useState("");
+  const [stepsText, setStepsText] = useState("");
+  
   const [formData, setFormData] = useState<RecipeFormData>({
     title: "",
     description: "",
-    instructions: "",
+    steps: [],
     servings: 4,
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
-    difficulty: "Medium",
+    difficulty: Difficulty.MEDIUM,
     imageUrl: "",
+    sourceUrl: "",
+    sourceText: "",
+    cuisineName: "",
     ingredients: [],
     tags: [],
     categories: [],
     allergens: [],
+    status: RecipeStatus.PUBLISHED,
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [allergens, setAllergens] = useState<Allergen[]>([]);
@@ -63,6 +88,8 @@ export default function EditRecipePage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     // Fetch recipe data, categories, and allergens
@@ -81,109 +108,108 @@ export default function EditRecipePage() {
         ]);
         
         if (!recipeRes.ok) {
-          const txt = await recipeRes.text().catch(() => "");
-          throw new Error(`Recipe fetch failed: ${recipeRes.status} ${txt}`);
+          throw new Error(`Failed to fetch recipe: ${recipeRes.status}`);
         }
 
         const recipe = await recipeRes.json();
-        console.log("Fetched recipe:", recipe);
-        // Normalize instructions -> string
-       const instructionsStr = (() => {
-  console.group("Instructions normalization");
-  try {
-    // Accept either recipe.instructions OR recipe.steps (fallback)
-    const instr = recipe.instructions ?? recipe.steps;
-
-    // Raw inputs for debugging
-    console.log("recipe.instructions (raw):", recipe.instructions);
-    console.log("recipe.steps (raw):", recipe.steps);
-    console.log("resolved instr value:", instr);
-    console.log("resolved instr type:", typeof instr, "isArray:", Array.isArray(instr));
-
-    let result = "";
-
-    if (typeof instr === "string") {
-      result = instr;
-    } else if (Array.isArray(instr)) {
-      console.log("array length:", instr.length, "first item:", instr[0]);
-      result = instr
-        .slice()
-        .sort((a: { stepNumber?: number }, b: { stepNumber?: number }) => Number(a.stepNumber ?? 0) - Number(b.stepNumber ?? 0))
-        .map((s: { instruction?: string; text?: string } | string) => typeof s === "string" ? s : s.instruction ?? s.text ?? JSON.stringify(s))
-        .join("\n\n");
-    } else if (instr && typeof instr === "object") {
-      if (typeof instr.text === "string") {
-        result = instr.text;
-      } else if (Array.isArray(instr.steps)) {
-        console.log("instr.steps length:", instr.steps.length);
-        result = instr.steps
-          .map((s: { text?: string } | string) => (typeof s === "string" ? s : s.text ?? JSON.stringify(s)))
-          .join("\n\n");
-      } else {
-        result = JSON.stringify(instr);
-      }
-    } else {
-      result = "";
-    }
-
-    console.log("normalized instructions length:", result.length);
-    console.log("normalized instructions preview:", result.slice(0, 1000));
-    return result;
-  } catch (err) {
-    console.error("Error normalizing instructions:", err);
-    return "";
-  } finally {
-    console.groupEnd();
-  }
-})();
         
-
-        console.group(`Parsed instructions ${instructionsStr}`);
-       
-
-        // Helper to map arrays that might be strings or objects
+        // Helper to map arrays that might be objects with name property
         const toNameArray = (arr: unknown) =>
           Array.isArray(arr)
-            ? arr.map((it: { name?: string; title?: string } | string) => (typeof it === "string" ? it : it.name ?? it.title ?? String(it)))
+            ? arr.map((it: { name?: string } | string) => 
+                typeof it === "string" ? it : (it.name ?? String(it))
+              )
             : [];
 
-        const normalizeIngredients = (arr: unknown) =>
+        // Normalize ingredients from API response
+        const normalizeIngredients = (arr: unknown): Ingredient[] =>
           Array.isArray(arr)
-            ? arr.map((ing: { amount?: number | string; unit?: string; measure?: string; name?: string; ingredient?: string; item?: string; displayOrder?: number }, idx: number) => ({
-                amount: typeof ing.amount === "number" ? ing.amount : ing.amount ? Number(ing.amount) : null,
-                unit: ing.unit ?? ing.measure ?? null,
-                name: ing.name ?? ing.ingredient ?? ing.item ?? "",
+            ? arr.map((ing: {
+                amount?: string | null;
+                unit?: string | null;
+                name?: string;
+                notes?: string | null;
+                groupName?: string | null;
+                isOptional?: boolean;
+                displayOrder?: number;
+              }, idx: number) => ({
+                amount: ing.amount ?? null,
+                unit: ing.unit ?? null,
+                name: ing.name ?? "",
+                notes: ing.notes ?? null,
+                groupName: ing.groupName ?? null,
+                isOptional: ing.isOptional ?? false,
                 displayOrder: typeof ing.displayOrder === "number" ? ing.displayOrder : idx,
               }))
             : [];
 
+        // Normalize steps from API response
+        const normalizeSteps = (arr: unknown): RecipeStep[] =>
+          Array.isArray(arr)
+            ? arr.map((step: {
+                stepNumber?: number;
+                instruction?: string;
+                groupName?: string | null;
+                isOptional?: boolean;
+              }) => ({
+                stepNumber: step.stepNumber ?? 1,
+                instruction: step.instruction ?? "",
+                groupName: step.groupName ?? null,
+                isOptional: step.isOptional ?? false,
+              }))
+            : [];
+
+        // Normalize difficulty to enum
+        let difficultyEnum: Difficulty = Difficulty.MEDIUM;
+        if (recipe.difficulty) {
+          const upper = String(recipe.difficulty).toUpperCase();
+          if (upper === "EASY") difficultyEnum = Difficulty.EASY;
+          else if (upper === "HARD") difficultyEnum = Difficulty.HARD;
+          else difficultyEnum = Difficulty.MEDIUM;
+        }
+
+        // Normalize status to enum
+        let statusEnum: RecipeStatus = RecipeStatus.PUBLISHED;
+        if (recipe.status) {
+          const upper = String(recipe.status).toUpperCase();
+          if (upper === "DRAFT") statusEnum = RecipeStatus.DRAFT;
+          else statusEnum = RecipeStatus.PUBLISHED;
+        }
+
+        const normalizedIngredients = normalizeIngredients(recipe.ingredients);
+        const normalizedSteps = normalizeSteps(recipe.steps);
+
+        // Convert to textarea format
+        setIngredientsText(ingredientsToText(normalizedIngredients));
+        setStepsText(stepsToText(normalizedSteps));
+
         setFormData({
           title: recipe.title ?? "",
           description: recipe.description ?? "",
-          instructions: instructionsStr,
-          servings: typeof recipe.servings === "number" ? recipe.servings : Number(recipe.servings) || 4,
-          prepTimeMinutes: typeof recipe.prepTimeMinutes === "number" ? recipe.prepTimeMinutes : Number(recipe.prepTimeMinutes) || 15,
-          cookTimeMinutes: typeof recipe.cookTimeMinutes === "number" ? recipe.cookTimeMinutes : Number(recipe.cookTimeMinutes) || 30,
-          difficulty: recipe.difficulty ?? "Medium",
-          imageUrl: recipe.imageUrl ?? recipe.image ?? "",
-          ingredients: normalizeIngredients(recipe.ingredients),
+          steps: normalizedSteps,
+          servings: typeof recipe.servings === "number" ? recipe.servings : 4,
+          prepTimeMinutes: typeof recipe.prepTimeMinutes === "number" ? recipe.prepTimeMinutes : 15,
+          cookTimeMinutes: typeof recipe.cookTimeMinutes === "number" ? recipe.cookTimeMinutes : 30,
+          difficulty: difficultyEnum,
+          imageUrl: recipe.imageUrl ?? "",
+          sourceUrl: recipe.sourceUrl ?? "",
+          sourceText: recipe.sourceText ?? "",
+          cuisineName: recipe.cuisine?.name ?? "",
+          ingredients: normalizedIngredients,
           tags: toNameArray(recipe.tags),
           categories: toNameArray(recipe.categories),
           allergens: toNameArray(recipe.allergens),
+          status: statusEnum,
         });
         
         if (categoriesRes.ok) {
-          const categoriesData = await categoriesRes.json().catch(() => []);
+          const categoriesData = await categoriesRes.json();
           setCategories(Array.isArray(categoriesData) ? categoriesData : []);
-        } else {
-          console.warn("Categories fetch failed:", categoriesRes.status);
         }
         
         if (allergensRes.ok) {
-          const allergensData = await allergensRes.json().catch(() => []);
+          const allergensData = await allergensRes.json();
           setAllergens(Array.isArray(allergensData) ? allergensData : []);
-        } else {
-          console.warn("Allergens fetch failed:", allergensRes.status);
         }
       } catch (err) {
         console.error("Failed to load recipe:", err);
@@ -196,42 +222,33 @@ export default function EditRecipePage() {
     fetchData();
   }, [slug]);
 
-  const handleFormatWithAI = async () => {
-    setLoading(true);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
     setError(null);
-    
+
     try {
-      const response = await fetch("/api/ai/format-recipe", {
+      const uploadFormData = new FormData();
+      uploadFormData.append("image", file);
+
+      const response = await fetch("/api/upload/image", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: formData }),
+        body: uploadFormData,
       });
 
       if (!response.ok) {
-        throw new Error("Failed to format recipe");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to upload image");
       }
 
-      const formatted = await response.json();
-      
-      // Update form with AI-formatted data (defensive)
-      setFormData({
-        title: formatted.title ?? formData.title,
-        description: formatted.description ?? formData.description,
-        instructions: typeof formatted.instructions === "string" ? formatted.instructions : formData.instructions,
-        servings: typeof formatted.servings === "number" ? formatted.servings : formData.servings,
-        prepTimeMinutes: typeof formatted.prepTimeMinutes === "number" ? formatted.prepTimeMinutes : formData.prepTimeMinutes,
-        cookTimeMinutes: typeof formatted.cookTimeMinutes === "number" ? formatted.cookTimeMinutes : formData.cookTimeMinutes,
-        difficulty: formatted.difficulty ?? formData.difficulty,
-        imageUrl: formatted.imageUrl ?? formData.imageUrl,
-        ingredients: Array.isArray(formatted.ingredients) ? formatted.ingredients : formData.ingredients,
-        tags: Array.isArray(formatted.tags) ? formatted.tags : formData.tags,
-        categories: Array.isArray(formatted.categories) ? formatted.categories : formData.categories,
-        allergens: Array.isArray(formatted.allergens) ? formatted.allergens : formData.allergens,
-      });
+      const data = await response.json();
+      setFormData((prev) => ({ ...prev, imageUrl: data.imageUrl }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to format recipe");
+      setError(err instanceof Error ? err.message : "Failed to upload image");
     } finally {
-      setLoading(false);
+      setUploadingImage(false);
     }
   };
 
@@ -243,10 +260,29 @@ export default function EditRecipePage() {
     
     try {
       if (!slug) throw new Error("Missing slug");
+
+      // Parse textareas into structured data
+      const parsedIngredients = parseIngredients(ingredientsText);
+      const parsedSteps = parseSteps(stepsText);
+
+      // Validate at least one ingredient and step
+      if (parsedIngredients.length === 0) {
+        throw new Error("Please add at least one ingredient");
+      }
+      if (parsedSteps.length === 0) {
+        throw new Error("Please add at least one instruction step");
+      }
+
+      const submissionData = {
+        ...formData,
+        ingredients: parsedIngredients,
+        steps: parsedSteps,
+      };
+
       const response = await fetch(`/api/recipes/${encodeURIComponent(slug)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submissionData),
       });
 
       if (!response.ok) {
@@ -261,29 +297,6 @@ export default function EditRecipePage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const addIngredient = () => {
-    setFormData({
-      ...formData,
-      ingredients: [
-        ...formData.ingredients,
-        { amount: null, unit: null, name: "", displayOrder: formData.ingredients.length },
-      ],
-    });
-  };
-
-  const removeIngredient = (index: number) => {
-    setFormData({
-      ...formData,
-      ingredients: formData.ingredients.filter((_, i) => i !== index).map((ing, i) => ({ ...ing, displayOrder: i })),
-    });
-  };
-
-  const updateIngredient = (index: number, field: keyof Ingredient, value: string | number | null) => {
-    const newIngredients = [...formData.ingredients];
-    newIngredients[index] = { ...newIngredients[index], [field]: value };
-    setFormData({ ...formData, ingredients: newIngredients });
   };
 
   const addTag = () => {
@@ -344,9 +357,11 @@ export default function EditRecipePage() {
 
   return (
     <ProtectedPage>
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen bg-gray-50 py-4 md:py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-gray-900">Edit Recipe</h1>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Edit Recipe</h1>
+          </div>
           
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
@@ -354,290 +369,397 @@ export default function EditRecipePage() {
             </div>
           )}
 
-          {/* Recipe Form */}
-          <form onSubmit={handleSubmit}>
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              {/* Title */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Recipe Title *
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          <form onSubmit={handleSubmit} className="space-y-6">
+              <CollapsibleSection title="Basic Information" defaultOpen={true}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Recipe Title <span className="text-red-500">*</span>
+                      <span className="ml-2 text-xs text-gray-500">Required</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="e.g., Honey Garlic Glazed Salmon"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                      <span className="ml-2 text-xs text-gray-500">Optional - A brief overview of your recipe</span>
+                    </label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Brief description of your recipe..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Servings
+                        <span className="ml-2 text-xs text-gray-500">How many people?</span>
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.servings}
+                        onChange={(e) => setFormData({ ...formData, servings: parseInt(e.target.value) || 1 })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        min="1"
+                        max="100"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Prep Time (min)
+                        <span className="ml-2 text-xs text-gray-500">Setup time</span>
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.prepTimeMinutes}
+                        onChange={(e) => setFormData({ ...formData, prepTimeMinutes: parseInt(e.target.value) || 0 })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        min="0"
+                        max="1440"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Cook Time (min)
+                        <span className="ml-2 text-xs text-gray-500">Active cooking</span>
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.cookTimeMinutes}
+                        onChange={(e) => setFormData({ ...formData, cookTimeMinutes: parseInt(e.target.value) || 0 })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        min="0"
+                        max="1440"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Difficulty
+                      <span className="ml-2 text-xs text-gray-500">How complex is this recipe?</span>
+                    </label>
+                    <select
+                      value={formData.difficulty}
+                      onChange={(e) => setFormData({ ...formData, difficulty: e.target.value as Difficulty })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    >
+                      <option value={Difficulty.EASY}>Easy - Quick and simple</option>
+                      <option value={Difficulty.MEDIUM}>Medium - Some experience helpful</option>
+                      <option value={Difficulty.HARD}>Hard - Advanced techniques</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Recipe Image
+                      <span className="ml-2 text-xs text-gray-500">Optional - Add a photo to make your recipe more appealing</span>
+                    </label>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="url"
+                          value={formData.imageUrl}
+                          onChange={(e) => {
+                            setFormData({ ...formData, imageUrl: e.target.value });
+                            setImageError(false);
+                          }}
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          placeholder="Enter image URL or upload a file below"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="flex-1 cursor-pointer">
+                          <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-colors">
+                            <Upload size={18} />
+                            <span className="text-sm text-gray-600">
+                              {uploadingImage ? "Uploading..." : "Upload Image"}
+                            </span>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            disabled={uploadingImage}
+                          />
+                        </label>
+                      </div>
+                      {formData.imageUrl && !imageError && (
+                        <div className="mt-2">
+                          <img
+                            src={formData.imageUrl}
+                            alt="Recipe preview"
+                            className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                            onError={() => setImageError(true)}
+                          />
+                        </div>
+                      )}
+                      {imageError && formData.imageUrl && (
+                        <div className="flex items-center gap-2 text-amber-600 text-sm">
+                          <AlertCircle size={16} />
+                          <span>Image failed to load. Using default placeholder.</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cuisine
+                      <span className="ml-2 text-xs text-gray-500">Optional - e.g., Italian, Mexican, Thai</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.cuisineName}
+                      onChange={(e) => setFormData({ ...formData, cuisineName: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="e.g., Italian, Mexican, Thai"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Source URL
+                      <span className="ml-2 text-xs text-gray-500">Optional - If adapted from another recipe</span>
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.sourceUrl}
+                      onChange={(e) => setFormData({ ...formData, sourceUrl: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Source Text
+                      <span className="ml-2 text-xs text-gray-500">Optional - e.g., &ldquo;From Grandma&apos;s cookbook&rdquo;</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.sourceText}
+                      onChange={(e) => setFormData({ ...formData, sourceText: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      placeholder="e.g., From Grandma's cookbook"
+                    />
+                  </div>
+                </div>
+              </CollapsibleSection>
+
+              {/* Ingredients */}
+              <CollapsibleSection 
+                title="Ingredients" 
+                defaultOpen={true}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  <span className="font-medium">Enter one ingredient per line.</span> Format: <code className="bg-gray-100 px-1 rounded">amount unit name (notes) optional</code>
+                  <br />
+                  <span className="text-xs">Examples: <code className="bg-gray-100 px-1 rounded">2 cups flour</code>, <code className="bg-gray-100 px-1 rounded">1/2 cup sugar (or brown sugar) optional</code></span>
+                  <br />
+                  <span className="text-xs">Group ingredients: <code className="bg-gray-100 px-1 rounded">For the sauce:</code></span>
+                </p>
+                <textarea
+                  value={ingredientsText}
+                  onChange={(e) => setIngredientsText(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono text-sm"
+                  rows={10}
+                  placeholder={`2 cups all-purpose flour\n1/2 cup sugar\n1 tsp baking powder\n\nFor the sauce:\n3 tbsp olive oil\n2 cloves garlic, minced (optional)`}
                   required
                 />
-              </div>
+              </CollapsibleSection>
 
-              {/* Description */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
+              {/* Instructions/Steps */}
+              <CollapsibleSection 
+                title="Instructions" 
+                defaultOpen={true}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  <span className="font-medium">Enter one step per line.</span> Steps will be numbered automatically.
+                  <br />
+                  <span className="text-xs">Group steps: <code className="bg-gray-100 px-1 rounded">For the cake:</code></span>
+                  <br />
+                  <span className="text-xs">Mark optional: Add <code className="bg-gray-100 px-1 rounded">(optional)</code> at the end</span>
+                </p>
                 <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full h-24 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  rows={3}
+                  value={stepsText}
+                  onChange={(e) => setStepsText(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                  rows={12}
+                  placeholder={`Preheat oven to 350°F\nMix flour and sugar in a large bowl\n\nFor the sauce:\nHeat oil in a pan\nAdd garlic and cook until fragrant (optional)`}
+                  required
                 />
-              </div>
+              </CollapsibleSection>
 
-              {/* Servings, Prep Time, Cook Time */}
-              <div className="grid grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Servings
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.servings}
-                    onChange={(e) => setFormData({ ...formData, servings: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    min="1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Prep Time (min)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.prepTimeMinutes}
-                    onChange={(e) => setFormData({ ...formData, prepTimeMinutes: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    min="0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cook Time (min)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.cookTimeMinutes}
-                    onChange={(e) => setFormData({ ...formData, cookTimeMinutes: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    min="0"
-                  />
-                </div>
-              </div>
-
-              {/* Difficulty */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Difficulty
-                </label>
-                <select
-                  value={formData.difficulty}
-                  onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                >
-                  <option value="Easy">Easy</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Hard">Hard</option>
-                </select>
-              </div>
-
-              {/* Image URL */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URL
-                </label>
-                <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-            </div>
-
-            {/* Ingredients */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">Ingredients</h2>
-              {formData.ingredients.map((ingredient, index) => (
-                <div key={index} className="flex gap-2 mb-3">
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={ingredient.amount ?? ""}
-                    onChange={(e) => updateIngredient(index, "amount", e.target.value ? parseFloat(e.target.value) : null)}
-                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                    placeholder="Amount"
-                  />
+              {/* Tags */}
+              <CollapsibleSection 
+                title="Tags" 
+                badge={formData.tags.length || undefined}
+                defaultOpen={false}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  Tags help users find your recipe. Press Enter or click Add to add tags.
+                </p>
+                <div className="flex gap-2 mb-4">
                   <input
                     type="text"
-                    value={ingredient.unit ?? ""}
-                    onChange={(e) => updateIngredient(index, "unit", e.target.value || null)}
-                    className="w-28 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                    placeholder="Unit"
-                  />
-                  <input
-                    type="text"
-                    value={ingredient.name}
-                    onChange={(e) => updateIngredient(index, "name", e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                    placeholder="Ingredient name"
-                    required
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    placeholder="Add a tag (e.g., Vegetarian, Quick, Healthy)"
                   />
                   <button
                     type="button"
-                    onClick={() => removeIngredient(index)}
-                    className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                    onClick={addTag}
+                    className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors whitespace-nowrap"
                   >
-                    <Trash2 size={18} />
+                    Add
                   </button>
                 </div>
-              ))}
-              <button
-                type="button"
-                onClick={addIngredient}
-                className="flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 font-medium"
-              >
-                <Plus size={18} />
-                Add Ingredient
-              </button>
-            </div>
 
-            {/* Instructions */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">Instructions</h2>
-              <textarea
-                value={formData.instructions}
-                onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-                className="w-full h-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                placeholder="Write your cooking instructions here..."
-                required
-              />
-            </div>
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="hover:text-amber-900 font-bold"
+                          title="Remove tag"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </CollapsibleSection>
 
-            {/* Tags */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">Tags</h2>
-              <div className="flex gap-2 mb-4">
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
-                  placeholder="Add a tag (e.g., Vegetarian, Quick)"
-                />
-                <button
-                  type="button"
-                  onClick={addTag}
-                  className="px-4 py-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 font-medium"
+              {/* Categories */}
+              {categories.length > 0 && (
+                <CollapsibleSection 
+                  title="Categories" 
+                  badge={formData.categories.length || undefined}
+                  defaultOpen={false}
                 >
-                  Add
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {formData.tags.map(tag => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="text-amber-600 hover:text-amber-800"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Select one or more categories that best describe your recipe.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((category) => (
+                      <button
+                        key={category.id}
+                        type="button"
+                        onClick={() => toggleCategory(category.name)}
+                        className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                          formData.categories.includes(category.name)
+                            ? "border-amber-600 bg-amber-50 text-amber-800 font-medium"
+                            : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                        }`}
+                      >
+                        {category.name}
+                      </button>
+                    ))}
+                  </div>
+                </CollapsibleSection>
+              )}
 
-            {/* Categories */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">Categories</h2>
-              <div className="flex flex-wrap gap-2">
-                {categories.map(category => (
-                  <button
-                    key={category.id}
+              {/* Allergens */}
+              {allergens.length > 0 && (
+                <CollapsibleSection 
+                  title="Allergen Warnings" 
+                  badge={formData.allergens.length || undefined}
+                  defaultOpen={false}
+                >
+                  <p className="text-sm text-gray-600 mb-4">
+                    <span className="font-medium">Important:</span> Select all allergens present in your recipe to help keep users safe.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {allergens.map((allergen) => (
+                      <button
+                        key={allergen.id}
+                        type="button"
+                        onClick={() => toggleAllergen(allergen.name)}
+                        className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                          formData.allergens.includes(allergen.name)
+                            ? "border-red-600 bg-red-50 text-red-800 font-medium"
+                            : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                        }`}
+                      >
+                        {allergen.name}
+                      </button>
+                    ))}
+                  </div>
+                </CollapsibleSection>
+              )}
+
+              {/* Submit Actions */}
+              <CollapsibleSection 
+                title="Save Changes" 
+                defaultOpen={true}
+              >
+                <p className="text-sm text-gray-600 mb-4">
+                  Save your recipe as a draft or publish it immediately.
+                </p>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as RecipeStatus })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  >
+                    <option value={RecipeStatus.DRAFT}>Save as Draft - Not visible to others</option>
+                    <option value={RecipeStatus.PUBLISHED}>Publish Recipe - Visible to everyone</option>
+                  </select>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    variant="primary"
+                    className="flex-1 justify-center"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="animate-spin" size={18} />
+                        Saving...
+                      </>
+                    ) : (
+                      "Update Recipe"
+                    )}
+                  </Button>
+                  <Button
                     type="button"
-                    onClick={() => toggleCategory(category.name)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      formData.categories.includes(category.name)
-                        ? "bg-blue-600 text-white"
-                        : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                    }`}
+                    onClick={() => router.back()}
+                    variant="outline"
+                    disabled={loading}
+                    className="sm:flex-none"
                   >
-                    {category.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Allergens */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">Allergen Warnings</h2>
-              <div className="flex flex-wrap gap-2">
-                {allergens.map(allergen => (
-                  <button
-                    key={allergen.id}
-                    type="button"
-                    onClick={() => toggleAllergen(allergen.name)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      formData.allergens.includes(allergen.name)
-                        ? "bg-red-600 text-white"
-                        : "bg-red-100 text-red-700 hover:bg-red-200"
-                    }`}
-                  >
-                    {allergen.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-              <Button
-                type="button"
-                onClick={handleFormatWithAI}
-                disabled={loading}
-                variant="secondary"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={18} />
-                    Formatting...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={18} />
-                    Format & Validate with AI
-                  </>
-                )}
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                variant="primary"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={18} />
-                    Saving...
-                  </>
-                ) : (
-                  "Update Recipe"
-                )}
-              </Button>
-              <Button
-                type="button"
-                onClick={() => router.back()}
-                variant="secondary"
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
+                    Cancel
+                  </Button>
+                </div>
+              </CollapsibleSection>
+            </form>
         </div>
       </div>
     </ProtectedPage>
