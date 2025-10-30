@@ -20,17 +20,23 @@ interface RecipeData {
   carbsG: number | null;
   cuisine: string | null;
   ingredients: Array<{
-    amount: string | null;
-    unit: string | null;
     name: string;
+    size: string | null;
+    preparation: string | null;
     notes: string | null;
     groupName: string | null;
     isOptional: boolean;
     displayOrder: number;
+    measurements: Array<{
+      system: string;
+      amount: string;
+      unit: string;
+    }>;
   }>;
   steps: Array<{
     stepNumber: number;
     instruction: string;
+    groupName: string | null;
     isOptional: boolean;
   }>;
   tags: string[];

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 import RecipeCard from "@/components/ui/RecipeCard";
 import CategoryCard from "@/components/ui/CategoryCard";
 import FeaturedRecipe from "@/components/ui/FeaturedRecipe";
@@ -326,10 +327,12 @@ export default async function HomePage() {
 <section className="relative text-center py-24 text-bg">
   {/* Background image + gradient overlay */}
   <div className="absolute inset-0 w-full h-full bg-center bg-cover">
-    <img
+    <Image
       src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&h=600&fit=crop"
       alt="Hero Background"
-      className="w-full h-full object-cover"
+      fill
+      className="object-cover"
+      priority
     />
     {/* Theme-aware gradient overlay */}
     <div

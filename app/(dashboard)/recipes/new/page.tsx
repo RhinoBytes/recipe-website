@@ -2,24 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import ProtectedPage from '@/components/auth/ProtectedPage';
 import { Loader2, Sparkles, Upload, AlertCircle } from "lucide-react";
 import Button from '@/components/ui/Button';
 import AIRecipeModal from "@/components/ui/AIRecipeModal";
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
-import { FormattedRecipeResponse, RecipeIngredient } from "@/types/recipe";
+import { FormattedRecipeResponse, RecipeIngredient as NewRecipeIngredient } from "@/types/recipe";
 import { Difficulty, RecipeStatus } from "@prisma/client";
-import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
-
-interface Ingredient {
-  amount: string | null;
-  unit: string | null;
-  name: string;
-  notes: string | null;
-  groupName: string | null;
-  isOptional: boolean;
-  displayOrder: number;
-}
+import { parseIngredients, parseSteps, ingredientsToText, stepsToText, convertToNewFormat, ParsedIngredient } from "@/lib/recipeParser";
 
 interface RecipeStep {
   stepNumber: number;
@@ -40,7 +31,7 @@ interface RecipeFormData {
   sourceUrl: string;
   sourceText: string;
   cuisineName: string;
-  ingredients: Ingredient[];
+  ingredients: NewRecipeIngredient[];
   tags: string[];
   categories: string[];
   allergens: string[];
@@ -164,21 +155,27 @@ export default function NewRecipePage() {
       else difficultyEnum = Difficulty.MEDIUM;
     }
 
-    // Convert AI ingredients to our format
+    // Convert AI ingredients to our format (AI now returns new format with measurements)
     const finalIngredients = formatted.ingredients && formatted.ingredients.length > 0
-      ? formatted.ingredients.map((ing: RecipeIngredient, idx: number) => ({
-          amount: ing.amount || null,
-          unit: ing.unit || null,
-          name: ing.name,
-          notes: ing.notes || null,
-          groupName: ing.groupName || null,
-          isOptional: ing.isOptional || false,
-          displayOrder: idx,
-        }))
+      ? formatted.ingredients
       : [];
 
+    // For display in the textarea, convert first measurement to text
+    const displayIngredients: ParsedIngredient[] = finalIngredients.map((ing, idx) => {
+      const firstMeasurement = ing.measurements && ing.measurements[0];
+      return {
+        amount: firstMeasurement?.amount || null,
+        unit: firstMeasurement?.unit || null,
+        name: ing.name,
+        notes: ing.notes || null,
+        groupName: ing.groupName || null,
+        isOptional: ing.isOptional || false,
+        displayOrder: idx,
+      };
+    });
+
     // Convert to textarea format
-    setIngredientsText(ingredientsToText(finalIngredients));
+    setIngredientsText(ingredientsToText(displayIngredients));
     setStepsText(stepsToText(finalSteps));
 
     // Update form with AI-formatted data
@@ -251,9 +248,12 @@ export default function NewRecipePage() {
         throw new Error("Please add at least one instruction step");
       }
 
+      // Convert parsed ingredients to new format with measurements
+      const ingredientsWithMeasurements = parsedIngredients.map(ing => convertToNewFormat(ing));
+
       const submissionData = {
         ...formData,
-        ingredients: parsedIngredients,
+        ingredients: ingredientsWithMeasurements,
         steps: parsedSteps,
       };
 
@@ -480,9 +480,11 @@ export default function NewRecipePage() {
                       </div>
                       {formData.imageUrl && !imageError && (
                         <div className="mt-2">
-                          <img
+                          <Image
                             src={formData.imageUrl}
                             alt="Recipe preview"
+                            width={128}
+                            height={128}
                             className="w-32 h-32 object-cover rounded-lg border border-gray-300"
                             onError={() => setImageError(true)}
                           />

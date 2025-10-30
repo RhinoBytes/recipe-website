@@ -159,18 +159,32 @@ async function main() {
 
       // Ingredients
       if (data.ingredients?.length) {
-        await prisma.recipeIngredient.createMany({
-          data: data.ingredients.map((ing) => ({
-            recipeId: recipe.id,
-            amount: ing.amount,
-            unit: ing.unit || null,
-            name: ing.name,
-            notes: ing.notes,
-            groupName: ing.groupName,
-            isOptional: ing.isOptional || false,
-            displayOrder: ing.displayOrder || 0,
-          })),
-        });
+        for (const ing of data.ingredients) {
+          const ingredient = await prisma.recipeIngredient.create({
+            data: {
+              recipeId: recipe.id,
+              name: ing.name,
+              size: ing.size || null,
+              preparation: ing.preparation || null,
+              notes: ing.notes || null,
+              groupName: ing.groupName || null,
+              isOptional: ing.isOptional || false,
+              displayOrder: ing.displayOrder || 0,
+            },
+          });
+
+          // Create measurements for this ingredient
+          if (ing.measurements && ing.measurements.length > 0) {
+            await prisma.ingredientMeasurement.createMany({
+              data: ing.measurements.map((m: any) => ({
+                recipeIngredientId: ingredient.id,
+                system: m.system,
+                amount: m.amount,
+                unit: m.unit,
+              })),
+            });
+          }
+        }
       }
 
       // Steps
