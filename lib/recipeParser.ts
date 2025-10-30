@@ -1,129 +1,7 @@
-// Efficient recipe parsing utilities
-// Optimized for dual measurement system (Imperial + Metric)
+// Recipe parsing utilities
+// Simplified to handle single measurement system per ingredient
 
-import { MeasurementSystem } from "@prisma/client";
 import { RecipeIngredient, RecipeStep } from "@/types/recipe";
-
-/**
- * Parse fraction string to decimal for conversion calculations
- */
-function parseFraction(str: string): number | null {
-  // Handle range (e.g., "2-3") - use midpoint
-  if (str.includes('-')) {
-    const [a, b] = str.split('-').map(s => parseFloat(s.trim()));
-    return !isNaN(a) && !isNaN(b) ? (a + b) / 2 : null;
-  }
-  
-  // Handle mixed fraction (e.g., "1 1/2")
-  const mixed = str.match(/^(\d+)\s+(\d+)\/(\d+)$/);
-  if (mixed) {
-    return parseInt(mixed[1]) + (parseInt(mixed[2]) / parseInt(mixed[3]));
-  }
-  
-  // Handle simple fraction (e.g., "1/2")
-  const simple = str.match(/^(\d+)\/(\d+)$/);
-  if (simple) {
-    return parseInt(simple[1]) / parseInt(simple[2]);
-  }
-  
-  // Handle decimal/integer
-  const num = parseFloat(str);
-  return !isNaN(num) ? num : null;
-}
-
-/**
- * Format converted amount with appropriate precision
- */
-function formatAmount(value: number): string {
-  if (value >= 1000) return Math.round(value).toString();
-  if (value >= 100) return Math.round(value).toString();
-  if (value >= 10) return (Math.round(value * 2) / 2).toString();
-  if (value >= 1) return (Math.round(value * 10) / 10).toString();
-  return (Math.round(value * 100) / 100).toString();
-}
-
-/**
- * Conversion table: Imperial ↔ Metric
- */
-const CONVERSIONS = {
-  // Imperial → Metric
-  imperial: {
-    'cup': { ml: 240, threshold: 1000 },
-    'cups': { ml: 240, threshold: 1000 },
-    'tbsp': { ml: 15 },
-    'tablespoon': { ml: 15 },
-    'tablespoons': { ml: 15 },
-    'tsp': { ml: 5 },
-    'teaspoon': { ml: 5 },
-    'teaspoons': { ml: 5 },
-    'oz': { g: 28, threshold: 1000 },
-    'ounce': { g: 28, threshold: 1000 },
-    'ounces': { g: 28, threshold: 1000 },
-    'lb': { g: 454, threshold: 1000 },
-    'pound': { g: 454, threshold: 1000 },
-    'pounds': { g: 454, threshold: 1000 },
-    'fl oz': { ml: 30, threshold: 1000 },
-  },
-  // Metric → Imperial
-  metric: {
-    'ml': { cup: 1/240 },
-    'milliliter': { cup: 1/240 },
-    'milliliters': { cup: 1/240 },
-    'l': { cup: 4.227 },
-    'liter': { cup: 4.227 },
-    'liters': { cup: 4.227 },
-    'g': { oz: 1/28 },
-    'gram': { oz: 1/28 },
-    'grams': { oz: 1/28 },
-    'kg': { lb: 2.205 },
-    'kilogram': { lb: 2.205 },
-    'kilograms': { lb: 2.205 },
-  },
-} as const;
-
-/**
- * Convert between measurement systems
- * Returns BOTH imperial and metric when possible
- */
-function convertMeasurement(amount: string, unit: string) {
-  const num = parseFraction(amount);
-  if (num === null) return null;
-  
-  const unitLower = unit.toLowerCase();
-  
-  // Try Imperial → Metric
-  const impConfig = CONVERSIONS.imperial[unitLower as keyof typeof CONVERSIONS.imperial];
-  if (impConfig) {
-    const [targetUnit, multiplier] = Object.entries(impConfig)[0] as [string, number];
-    let converted = num * multiplier;
-    let finalUnit = targetUnit;
-    
-    // Convert to larger unit if threshold exceeded (ml→l, g→kg)
-    if ('threshold' in impConfig && converted >= impConfig.threshold) {
-      converted /= 1000;
-      finalUnit = targetUnit === 'ml' ? 'l' : 'kg';
-    }
-    
-    return {
-      imperial: { system: MeasurementSystem.IMPERIAL, amount, unit },
-      metric: { system: MeasurementSystem.METRIC, amount: formatAmount(converted), unit: finalUnit },
-    };
-  }
-  
-  // Try Metric → Imperial
-  const metConfig = CONVERSIONS.metric[unitLower as keyof typeof CONVERSIONS.metric];
-  if (metConfig) {
-    const [targetUnit, multiplier] = Object.entries(metConfig)[0] as [string, number];
-    const converted = num * multiplier;
-    
-    return {
-      metric: { system: MeasurementSystem.METRIC, amount, unit },
-      imperial: { system: MeasurementSystem.IMPERIAL, amount: formatAmount(converted), unit: targetUnit },
-    };
-  }
-  
-  return null;
-}
 
 /**
  * Parse ingredients from textarea
@@ -158,11 +36,19 @@ export function parseIngredients(text: string): RecipeIngredient[] {
     let unit: string | null = null;
     let name = withoutNotes;
 
+    // Common units to check for
+    const commonUnits = [
+      'cup', 'cups', 'tbsp', 'tablespoon', 'tablespoons', 'tsp', 'teaspoon', 'teaspoons',
+      'oz', 'ounce', 'ounces', 'lb', 'pound', 'pounds', 'fl oz',
+      'ml', 'milliliter', 'milliliters', 'l', 'liter', 'liters',
+      'g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms',
+      'clove', 'cloves', 'pinch', 'dash', 'piece', 'pieces', 'slice', 'slices'
+    ];
+
     if (parts.length >= 2 && /^[\d\/\-\.]+$/.test(parts[0])) {
       amount = parts[0];
       
       // Check if second part is a unit
-      const commonUnits = Object.keys({...CONVERSIONS.imperial, ...CONVERSIONS.metric});
       if (commonUnits.includes(parts[1].toLowerCase())) {
         unit = parts[1];
         name = parts.slice(2).join(' ');
@@ -171,28 +57,16 @@ export function parseIngredients(text: string): RecipeIngredient[] {
       }
     }
 
-    // Generate measurements (dual system if conversion available)
-    const measurements = [];
-    if (amount && unit) {
-      const converted = convertMeasurement(amount, unit);
-      if (converted) {
-        measurements.push(converted.imperial, converted.metric);
-      } else {
-        // No conversion - use OTHER system (appears in both views)
-        const system = MeasurementSystem.OTHER;
-        measurements.push({ system, amount, unit }, { system, amount, unit });
-      }
-    }
-
     ingredients.push({
       name: name.trim() || line,
+      amount,
+      unit,
       size: null,
       preparation: null,
       notes,
       groupName: currentGroup,
       isOptional,
       displayOrder: displayOrder++,
-      measurements,
     });
   }
 
@@ -241,7 +115,6 @@ export function parseSteps(text: string): RecipeStep[] {
 
 /**
  * Convert ingredients array back to textarea format
- * Uses first measurement (imperial preferred)
  */
 export function ingredientsToText(ingredients: RecipeIngredient[]): string {
   const lines: string[] = [];
@@ -256,9 +129,10 @@ export function ingredientsToText(ingredients: RecipeIngredient[]): string {
     }
 
     let line = '';
-    const measurement = ing.measurements?.[0];
-    if (measurement) {
-      line += `${measurement.amount} ${measurement.unit} `;
+    if (ing.amount && ing.unit) {
+      line += `${ing.amount} ${ing.unit} `;
+    } else if (ing.amount) {
+      line += `${ing.amount} `;
     }
     line += ing.name;
     if (ing.notes) line += ` (${ing.notes})`;

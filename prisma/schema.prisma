@@ -27,12 +27,6 @@ enum RecipeStatus {
   PUBLISHED
 }
 
-enum MeasurementSystem {
-  METRIC   // For grams, ml, liters
-  IMPERIAL // For cups, oz, lbs, tbsp, tsp
-  OTHER    // For non-standard units like "clove", "pinch", "to taste"
-}
-
 model User {
   id           String   @id @default(uuid())
   username     String   @unique
@@ -88,6 +82,8 @@ model RecipeIngredient {
   id           String  @id @default(uuid())
   recipeId     String
   name         String
+  amount       String?
+  unit         String?
   size         String?
   preparation  String?
   notes        String?
@@ -95,18 +91,7 @@ model RecipeIngredient {
   isOptional   Boolean @default(false)
   displayOrder Int     @default(0)
 
-  measurements IngredientMeasurement[]
-  recipe       Recipe                  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-}
-
-model IngredientMeasurement {
-  id                 String            @id @default(uuid())
-  recipeIngredientId String
-  system             MeasurementSystem
-  amount             String
-  unit               String
-
-  ingredient RecipeIngredient @relation(fields: [recipeIngredientId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }
 
 model RecipeStep {

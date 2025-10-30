@@ -2,23 +2,17 @@
 
 import { useState, useMemo } from "react";
 import { ListCheck } from "lucide-react";
-import { MeasurementSystem } from "@prisma/client";
-
-interface IngredientMeasurement {
-  system: MeasurementSystem;
-  amount: string;
-  unit: string;
-}
 
 interface Ingredient {
   id: string;
   name: string;
+  amount: string | null;
+  unit: string | null;
   size: string | null;
   preparation: string | null;
   notes: string | null;
   groupName: string | null;
   isOptional: boolean;
-  measurements: IngredientMeasurement[];
 }
 
 interface IngredientsListProps {
@@ -105,7 +99,6 @@ function formatAmount(value: number): string {
 export default function IngredientsList({ ingredients }: IngredientsListProps) {
   const [scale, setScale] = useState(1);
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
-  const [measurementSystem, setMeasurementSystem] = useState<MeasurementSystem>(MeasurementSystem.IMPERIAL);
 
   // Group ingredients by groupName
   const groupedIngredients = useMemo(() => {
@@ -119,37 +112,19 @@ export default function IngredientsList({ ingredients }: IngredientsListProps) {
     return grouped;
   }, [ingredients]);
 
-  // Get the measurement for the selected system or fallback
-  const getMeasurement = (ingredient: Ingredient): IngredientMeasurement | null => {
-    if (!ingredient.measurements || ingredient.measurements.length === 0) return null;
-    
-    // Try to find measurement for selected system
-    const measurement = ingredient.measurements.find(m => m.system === measurementSystem);
-    
-    // If not found, try OTHER system
-    if (!measurement) {
-      const otherMeasurement = ingredient.measurements.find(m => m.system === MeasurementSystem.OTHER);
-      if (otherMeasurement) return otherMeasurement;
-    }
-    
-    // Fallback to first available measurement
-    return measurement || ingredient.measurements[0];
-  };
-
   // Scale ingredient amount
   const scaleIngredient = (ingredient: Ingredient) => {
-    const measurement = getMeasurement(ingredient);
-    if (!measurement) return null;
+    if (!ingredient.amount) return null;
     
-    const parsed = parseAmount(measurement.amount);
-    if (!parsed) return { amount: measurement.amount, unit: measurement.unit };
+    const parsed = parseAmount(ingredient.amount);
+    if (!parsed) return { amount: ingredient.amount, unit: ingredient.unit };
     
     const scaledValue = parsed.value * scale;
     const formattedAmount = formatAmount(scaledValue);
     
     return {
       amount: formattedAmount,
-      unit: measurement.unit
+      unit: ingredient.unit
     };
   };
 
@@ -164,7 +139,6 @@ export default function IngredientsList({ ingredients }: IngredientsListProps) {
   };
 
   const scaleOptions = [0.5, 1, 2, 3];
-console.log(`ingredients =`, ingredients);
   
   return (
     <div className="bg-bg-secondary rounded-lg shadow-md p-6">
@@ -173,37 +147,6 @@ console.log(`ingredients =`, ingredients);
           <ListCheck className="text-accent" size={28} />
           Ingredients
         </h2>
-      </div>
-
-      {/* Measurement System Toggle */}
-      <div className="flex items-center gap-3 mb-4 p-3 bg-bg rounded-lg border border-border">
-        <label className="text-sm font-semibold text-text">Units:</label>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setMeasurementSystem(MeasurementSystem.IMPERIAL)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all focus-visible:ring-2 focus-visible:ring-accent ${
-              measurementSystem === MeasurementSystem.IMPERIAL
-                ? 'bg-accent text-bg shadow-md'
-                : 'bg-bg-secondary text-text hover:bg-accent-light border border-border'
-            }`}
-            aria-label="Use imperial units"
-            aria-pressed={measurementSystem === MeasurementSystem.IMPERIAL}
-          >
-            Imperial
-          </button>
-          <button
-            onClick={() => setMeasurementSystem(MeasurementSystem.METRIC)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all focus-visible:ring-2 focus-visible:ring-accent ${
-              measurementSystem === MeasurementSystem.METRIC
-                ? 'bg-accent text-bg shadow-md'
-                : 'bg-bg-secondary text-text hover:bg-accent-light border border-border'
-            }`}
-            aria-label="Use metric units"
-            aria-pressed={measurementSystem === MeasurementSystem.METRIC}
-          >
-            Metric
-          </button>
-        </div>
       </div>
 
       {/* Scale Controls */}
@@ -256,7 +199,7 @@ console.log(`ingredients =`, ingredients);
                         isChecked ? 'line-through text-text-muted' : ''
                       }`}
                     >
-                      {scaled && (
+                      {scaled && scaled.amount && scaled.unit && (
                         <>
                           <span className="font-semibold">{scaled.amount} </span>
                           <span className="font-semibold">

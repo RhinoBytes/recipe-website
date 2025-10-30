@@ -1,4 +1,4 @@
-import { PrismaClient, Difficulty, RecipeStatus, MeasurementSystem } from "@prisma/client";
+import { PrismaClient, Difficulty, RecipeStatus } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import { readRecipeFolders } from "../lib/recipeStorage.js";
 import bcrypt from "bcrypt";
@@ -263,32 +263,20 @@ async function main() {
 
       // Ingredients
       if (data.ingredients?.length) {
-        for (const ing of data.ingredients) {
-          const ingredient = await prisma.recipeIngredient.create({
-            data: {
-              recipeId: recipe.id,
-              name: ing.name,
-              size: ing.size || null,
-              preparation: ing.preparation || null,
-              notes: ing.notes || null,
-              groupName: ing.groupName || null,
-              isOptional: ing.isOptional || false,
-              displayOrder: ing.displayOrder || 0,
-            },
-          });
-
-          // Create measurements for this ingredient
-          if (ing.measurements && ing.measurements.length > 0) {
-            await prisma.ingredientMeasurement.createMany({
-              data: ing.measurements.map((m: { system: MeasurementSystem; amount: string; unit: string }) => ({
-                recipeIngredientId: ingredient.id,
-                system: m.system,
-                amount: m.amount,
-                unit: m.unit,
-              })),
-            });
-          }
-        }
+        await prisma.recipeIngredient.createMany({
+          data: data.ingredients.map((ing, idx) => ({
+            recipeId: recipe.id,
+            name: ing.name,
+            amount: ing.amount || null,
+            unit: ing.unit || null,
+            size: ing.size || null,
+            preparation: ing.preparation || null,
+            notes: ing.notes || null,
+            groupName: ing.groupName || null,
+            isOptional: ing.isOptional || false,
+            displayOrder: ing.displayOrder ?? idx,
+          })),
+        });
       }
 
       // Steps

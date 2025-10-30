@@ -2,23 +2,23 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import OpenAI from "openai";
 import { z } from "zod";
-import { Difficulty, MeasurementSystem } from "@prisma/client";
+import { Difficulty } from "@prisma/client";
 
 /** Zod Schemas with preprocessing to handle AI quirks */
-const MeasurementSchema = z.object({
-  system: z.nativeEnum(MeasurementSystem),
-  amount: z.preprocess(
-    (val) => (val == null ? "" : String(val)),
-    z.string().min(1)
-  ),
-  unit: z.preprocess(
-    (val) => (val == null ? "" : String(val).toLowerCase()),
-    z.string().min(1)
-  ),
-});
-
 const RecipeIngredientSchema = z.object({
   name: z.string().min(1).max(200),
+  amount: z
+    .preprocess(
+      (val) => (val == null ? null : String(val)),
+      z.string().nullable()
+    )
+    .optional(),
+  unit: z
+    .preprocess(
+      (val) => (val == null ? null : String(val).toLowerCase()),
+      z.string().nullable()
+    )
+    .optional(),
   size: z
     .preprocess(
       (val) => (val == null ? null : String(val)),
@@ -38,7 +38,6 @@ const RecipeIngredientSchema = z.object({
     (val) => (val == null ? 0 : Number(val)),
     z.number().int().min(0)
   ),
-  measurements: z.array(MeasurementSchema).min(1),
 });
 
 const RecipeStepSchema = z.object({
@@ -217,25 +216,19 @@ STRUCTURE:
 - calories, proteinG, fatG, carbsG, cuisineName
 - difficulty: EASY, MEDIUM, or HARD
 - steps: array with stepNumber, instruction, groupName (if grouped), isOptional
-- ingredients: array with name, size, preparation, notes, groupName, displayOrder, measurements
+- ingredients: array with name, amount, unit, size, preparation, notes, groupName, displayOrder
 
-MEASUREMENTS (critical):
-Each ingredient needs a "measurements" array with BOTH systems:
-- system: "IMPERIAL", "METRIC", or "OTHER"
-- amount: string (e.g., "1", "1/2")
-- unit: string (e.g., "cup", "g", "tbsp")
+INGREDIENT FORMAT:
+Each ingredient should have:
+- name: ingredient name (e.g., "flour", "eggs")
+- amount: numeric quantity as string (e.g., "1", "1/2", "2.5") - optional if not applicable
+- unit: measurement unit (e.g., "cup", "tbsp", "g", "oz", "pieces") - optional if not applicable
+- size: descriptor (large, medium, small) - optional
+- preparation: physical state (diced, melted, sifted) - optional
+- notes: substitutions/alternatives - optional
 
-For unit-counted items (eggs, whole fruits/vegetables): use same unit in both systems with "OTHER"
-Example: "2 eggs" → [{system:"OTHER", amount:"2", unit:"eggs"}, {system:"OTHER", amount:"2", unit:"eggs"}]
-
-For measured ingredients: convert between systems
-- Imperial (cup, tbsp, tsp, oz, lb) ↔ Metric (g, ml, l)
-- 1 cup = 240ml, 1 tbsp = 15ml, 1 tsp = 5ml, 1 oz = 28g, 1 lb = 454g
-
-FIELDS:
-- preparation: physical state (diced, melted, sifted)
-- notes: substitutions/alternatives
-- size: descriptor (large, medium, small)
+For counted items (eggs, apples): include amount and unit (e.g., amount: "2", unit: "eggs")
+For measured items: include amount and unit in their ORIGINAL measurement system
 
 Extract ALL steps from the recipe. Estimate missing nutrition/cuisine. NO tags/categories/allergens.
 
@@ -248,7 +241,7 @@ ${text}`;
       {
         role: "system",
         content:
-          "Expert recipe parser. Extract all info, generate both Imperial and Metric measurements (except unit-counted ingredients like eggs - keep same unit). NO tags/categories/allergens. Return valid JSON only.",
+          "Expert recipe parser. Extract all information from recipes. Keep measurements in their original system (no conversion needed). NO tags/categories/allergens. Return valid JSON only.",
       },
       { role: "user", content: prompt },
     ],
@@ -275,9 +268,7 @@ ${JSON.stringify(data, null, 2)}
 Requirements:
 - difficulty: EASY, MEDIUM, or HARD
 - steps: array with stepNumber, instruction, groupName, isOptional
-- ingredients with measurements array containing BOTH Imperial and Metric
-  * For unit-counted (eggs, fruits): same unit in both systems
-  * For measured: accurate conversions (cup↔ml, oz↔g, etc.)
+- ingredients with amount and unit (keep original measurement system)
 - Estimate missing cuisineName, nutrition, times
 - NO tags/categories/allergens
 
@@ -289,7 +280,7 @@ Return complete JSON.`;
       {
         role: "system",
         content:
-          "Recipe validator. Generate missing fields, provide both measurement systems (except unit-counted ingredients). NO tags/categories/allergens. Valid JSON only.",
+          "Recipe validator. Generate missing fields, keep measurements in original system (no conversion). NO tags/categories/allergens. Valid JSON only.",
       },
       { role: "user", content: prompt },
     ],
