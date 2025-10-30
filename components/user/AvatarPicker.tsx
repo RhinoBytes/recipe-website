@@ -52,6 +52,7 @@ export default function AvatarPicker({ currentAvatar, onSelect, className = '' }
               alt={`Avatar option ${index + 1}`}
               fill
               className="object-cover"
+              sizes="(max-width: 640px) 20vw, 15vw"
               unoptimized
             />
             {selectedAvatar === avatar && (

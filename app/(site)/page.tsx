@@ -356,21 +356,20 @@ export default async function HomePage() {
     <main   >
 
 {/* Hero Section */}
-<section className="relative text-center text-bg min-h-[500px] flex items-center">
+<section className="relative text-center text-bg h-[500px] flex items-center">
   {/* Background image + gradient overlay */}
   <div className="absolute inset-0 w-full h-full bg-center bg-cover">
     <Image
       src="/img/hero/Hero.jpeg"
       alt="Hero Background"
-      
       fill
       className="object-cover"
       priority
+      sizes="100vw"
     />
     {/* Theme-aware gradient overlay */}
     <div
-      className="absolute inset-0"
-      style={{ backgroundImage: "var(--card-gradient)" }}
+      className="absolute inset-0 bg-gradient-to-br from-accent/85 to-accent-hover/90"
     />
   </div>
 

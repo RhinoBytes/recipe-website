@@ -110,7 +110,7 @@ export default function BrowseRecipeCard({
         <div className="flex items-center gap-2 mb-3">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accent to-accent-hover text-bg flex items-center justify-center font-bold text-xs overflow-hidden">
             {recipe.author.avatar.startsWith('http') ? (
-              <Image src={recipe.author.avatar} alt={recipe.author.name} fill className="object-cover" />
+              <Image src={recipe.author.avatar} alt={recipe.author.name} fill className="object-cover" sizes="28px" />
             ) : (
               recipe.author.avatar.charAt(0).toUpperCase()
             )}
