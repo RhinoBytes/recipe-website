@@ -8,34 +8,15 @@ import { Loader2, Sparkles, Upload, AlertCircle } from "lucide-react";
 import Button from '@/components/ui/Button';
 import AIRecipeModal from "@/components/ui/AIRecipeModal";
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
-import { FormattedRecipeResponse, RecipeIngredient as NewRecipeIngredient } from "@/types/recipe";
+import { FormattedRecipeResponse, RecipeIngredient, RecipeFormData } from "@/types/recipe";
 import { Difficulty, RecipeStatus } from "@prisma/client";
-import { parseIngredients, parseSteps, ingredientsToText, stepsToText, convertToNewFormat, ParsedIngredient } from "@/lib/recipeParser";
+import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
 
 interface RecipeStep {
   stepNumber: number;
   instruction: string;
   groupName: string | null;
   isOptional: boolean;
-}
-
-interface RecipeFormData {
-  title: string;
-  description: string;
-  steps: RecipeStep[];
-  servings: number;
-  prepTimeMinutes: number;
-  cookTimeMinutes: number;
-  difficulty: Difficulty;
-  imageUrl: string;
-  sourceUrl: string;
-  sourceText: string;
-  cuisineName: string;
-  ingredients: NewRecipeIngredient[];
-  tags: string[];
-  categories: string[];
-  allergens: string[];
-  status: RecipeStatus;
 }
 
 interface Category {
@@ -181,27 +162,13 @@ export default function NewRecipePage() {
       else difficultyEnum = Difficulty.MEDIUM;
     }
 
-    // Convert AI ingredients to our format (AI now returns new format with measurements)
+    // AI ingredients already have measurements - use them directly
     const finalIngredients = formatted.ingredients && formatted.ingredients.length > 0
       ? formatted.ingredients
       : [];
 
-    // For display in the textarea, convert first measurement to text
-    const displayIngredients: ParsedIngredient[] = finalIngredients.map((ing, idx) => {
-      const firstMeasurement = ing.measurements && ing.measurements[0];
-      return {
-        amount: firstMeasurement?.amount || null,
-        unit: firstMeasurement?.unit || null,
-        name: ing.name,
-        notes: ing.notes || null,
-        groupName: ing.groupName || null,
-        isOptional: ing.isOptional || false,
-        displayOrder: idx,
-      };
-    });
-
     // Convert to textarea format
-    setIngredientsText(ingredientsToText(displayIngredients));
+    setIngredientsText(ingredientsToText(finalIngredients));
     setStepsText(stepsToText(finalSteps));
 
     // Update form with AI-formatted data
@@ -274,12 +241,10 @@ export default function NewRecipePage() {
         throw new Error("Please add at least one instruction step");
       }
 
-      // Convert parsed ingredients to new format with measurements
-      const ingredientsWithMeasurements = parsedIngredients.map(ing => convertToNewFormat(ing));
-
+      // Parsed ingredients already have dual measurements from parseIngredients()
       const submissionData = {
         ...formData,
-        ingredients: ingredientsWithMeasurements,
+        ingredients: parsedIngredients,
         steps: parsedSteps,
       };
 

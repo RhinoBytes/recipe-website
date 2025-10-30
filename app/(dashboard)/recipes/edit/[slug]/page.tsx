@@ -8,33 +8,14 @@ import { Loader2, Upload, AlertCircle } from "lucide-react";
 import Button from '@/components/ui/Button';
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
 import { Difficulty, RecipeStatus, MeasurementSystem } from "@prisma/client";
-import { parseIngredients, parseSteps, ingredientsToText, stepsToText, convertToNewFormat, ParsedIngredient } from "@/lib/recipeParser";
-import { RecipeIngredient as NewRecipeIngredient } from "@/types/recipe";
+import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
+import { RecipeIngredient, RecipeFormData } from "@/types/recipe";
 
 interface RecipeStep {
   stepNumber: number;
   instruction: string;
   groupName: string | null;
   isOptional: boolean;
-}
-
-interface RecipeFormData {
-  title: string;
-  description: string;
-  steps: RecipeStep[];
-  servings: number;
-  prepTimeMinutes: number;
-  cookTimeMinutes: number;
-  difficulty: Difficulty;
-  imageUrl: string;
-  sourceUrl: string;
-  sourceText: string;
-  cuisineName: string;
-  ingredients: NewRecipeIngredient[];
-  tags: string[];
-  categories: string[];
-  allergens: string[];
-  status: RecipeStatus;
 }
 
 interface Category {
@@ -128,43 +109,15 @@ export default function EditRecipePage() {
 
         const recipe = await recipeRes.json();
         
+        // Normalize ingredients from API response
+        const normalizedIngredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
+
         // Helper to map arrays that might be objects with name property
         const toNameArray = (arr: unknown) =>
           Array.isArray(arr)
             ? arr.map((it: { name?: string } | string) => 
                 typeof it === "string" ? it : (it.name ?? String(it))
               )
-            : [];
-
-        // Normalize ingredients from API response
-        const normalizeIngredients = (arr: unknown): ParsedIngredient[] =>
-          Array.isArray(arr)
-            ? arr.map((ing: {
-                name?: string;
-                size?: string | null;
-                preparation?: string | null;
-                notes?: string | null;
-                groupName?: string | null;
-                isOptional?: boolean;
-                displayOrder?: number;
-                measurements?: Array<{
-                  system: MeasurementSystem;
-                  amount: string;
-                  unit: string;
-                }>;
-              }, idx: number) => {
-                // Extract first measurement for display
-                const firstMeasurement = ing.measurements && ing.measurements[0];
-                return {
-                  amount: firstMeasurement?.amount || null,
-                  unit: firstMeasurement?.unit || null,
-                  name: ing.name ?? "",
-                  notes: ing.notes ?? null,
-                  groupName: ing.groupName ?? null,
-                  isOptional: ing.isOptional ?? false,
-                  displayOrder: typeof ing.displayOrder === "number" ? ing.displayOrder : idx,
-                };
-              })
             : [];
 
         // Normalize steps from API response
@@ -200,10 +153,9 @@ export default function EditRecipePage() {
           else statusEnum = RecipeStatus.PUBLISHED;
         }
 
-        const normalizedIngredients = normalizeIngredients(recipe.ingredients);
         const normalizedSteps = normalizeSteps(recipe.steps);
 
-        // Convert to textarea format
+        // Convert to textarea format (ingredientsToText works with RecipeIngredient directly)
         setIngredientsText(ingredientsToText(normalizedIngredients));
         setStepsText(stepsToText(normalizedSteps));
 
@@ -219,7 +171,7 @@ export default function EditRecipePage() {
           sourceUrl: recipe.sourceUrl ?? "",
           sourceText: recipe.sourceText ?? "",
           cuisineName: recipe.cuisine?.name ?? "",
-          ingredients: recipe.ingredients || [], // Store full new format with measurements
+          ingredients: normalizedIngredients, // Store full format with measurements
           tags: toNameArray(recipe.tags),
           categories: toNameArray(recipe.categories),
           allergens: toNameArray(recipe.allergens),
@@ -306,9 +258,10 @@ export default function EditRecipePage() {
         throw new Error("Please add at least one instruction step");
       }
 
+      // Parsed ingredients already have dual measurements from parseIngredients()
       const submissionData = {
         ...formData,
-        ingredients: parsedIngredients.map(ing => convertToNewFormat(ing)),
+        ingredients: parsedIngredients,
         steps: parsedSteps,
       };
 
