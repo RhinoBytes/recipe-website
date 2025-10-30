@@ -154,7 +154,7 @@ async function getCategories() {
     },
     take: 6,
   });
-  console.log("Fetched categories:", categories);
+
 
   return categories.map((category) => {
     const slug = category.name.toLowerCase().replace(/\s+/g, "-");
