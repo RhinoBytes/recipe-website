@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getTags } from "@/lib/queries/metadata";
 
 /**
  * GET /api/tags
@@ -7,22 +7,7 @@ import { prisma } from "@/lib/prisma";
  */
 export async function GET() {
   try {
-    const tags = await prisma.tag.findMany({
-      select: {
-        id: true,
-        name: true,
-        _count: {
-          select: {
-            recipes: true,
-          },
-        },
-      },
-      orderBy: {
-        recipes: {
-          _count: "desc",
-        },
-      },
-    });
+    const tags = await getTags();
 
     const formattedTags = tags.map((tag) => ({
       id: tag.id,

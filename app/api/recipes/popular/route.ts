@@ -1,78 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPopularRecipes } from "@/lib/queries/recipes";
 
 export async function GET() {
   try {
-    // Get recipes with most favorites in the last week
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    const popularRecipes = await prisma.recipe.findMany({
-      where: {
-        status: "PUBLISHED",
-      },
-      select: {
-        id: true,
-        title: true,
-        imageUrl: true,
-        prepTimeMinutes: true,
-        cookTimeMinutes: true,
-        authorId: true,
-        author: {
-          select: {
-            username: true,
-            avatarUrl: true,
-          },
-        },
-        _count: {
-          select: {
-            favorites: {
-              where: {
-                createdAt: {
-                  gte: oneWeekAgo,
-                },
-              },
-            },
-            reviews: true,
-          },
-        },
-        reviews: {
-          select: {
-            rating: true,
-          },
-        },
-      },
-      orderBy: [{ favorites: { _count: "desc" } }],
-      take: 3,
-    });
-
-    // Calculate average rating for each recipe
-    const formattedRecipes = popularRecipes.map((recipe) => {
-      const totalRating = recipe.reviews.reduce(
-        (sum, review) => sum + review.rating,
-        0
-      );
-      const averageRating =
-        recipe.reviews.length > 0
-          ? Math.round(totalRating / recipe.reviews.length)
-          : 0;
-
-      return {
-        id: recipe.id,
-        title: recipe.title,
-        image: recipe.imageUrl || "/images/recipes/default.jpg",
-        time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
-        rating: averageRating,
-        author: {
-          name: recipe.author.username,
-          avatar: recipe.author.avatarUrl
-            ? recipe.author.avatarUrl.charAt(0)
-            : recipe.author.username.charAt(0),
-        },
-      };
-    });
-
-    return NextResponse.json({ recipes: formattedRecipes });
+    const popularRecipes = await getPopularRecipes(3);
+    return NextResponse.json({ recipes: popularRecipes });
   } catch (error) {
     console.error("Failed to fetch popular recipes:", error);
     return NextResponse.json(

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getCuisines } from "@/lib/queries/metadata";
 
 /**
  * GET /api/cuisines
@@ -7,22 +7,7 @@ import { prisma } from "@/lib/prisma";
  */
 export async function GET() {
   try {
-    const cuisines = await prisma.cuisine.findMany({
-      select: {
-        id: true,
-        name: true,
-        _count: {
-          select: {
-            recipes: true,
-          },
-        },
-      },
-      orderBy: {
-        recipes: {
-          _count: "desc",
-        },
-      },
-    });
+    const cuisines = await getCuisines();
 
     const formattedCuisines = cuisines.map((cuisine) => ({
       id: cuisine.id,
