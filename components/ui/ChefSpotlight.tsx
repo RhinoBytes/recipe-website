@@ -10,17 +10,19 @@ interface ChefSpotlightProps {
 export default function ChefSpotlight({ chef }: ChefSpotlightProps) {
    console.log(`Chef ID: ${chef.id}`);
   return (
-    <section className="py-16 bg-bg">
+    <section className="py-16 bg-bg min-h-[300px]">
       <div className="max-w-2xl mx-auto px-4">
         <div className="bg-bg-secondary rounded-2xl shadow-lg p-8 border-2 border-border">
           <div className="flex items-center gap-4 mb-4">
-            <Image
-              src={chef.avatar}
-              alt={chef.name}
-              width={60}
-              height={60}
-              className="rounded-full object-cover border-2 border-accent"
-            />
+            <div className="relative w-[60px] h-[60px] flex-shrink-0">
+              <Image
+                src={chef.avatar}
+                alt={chef.name}
+                fill
+                className="rounded-full object-cover border-2 border-accent"
+                sizes="60px"
+              />
+            </div>
             <div>
               <div className="font-semibold font-heading text-lg text-text">
                 {chef.name}
