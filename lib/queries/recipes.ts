@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { RecipeStatus, Prisma } from "@prisma/client";
+import { RecipeStatus, Prisma, Difficulty } from "@prisma/client";
+import { DEFAULT_RECIPE_IMAGE, DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 /**
  * Format recipe data with calculated ratings
@@ -27,13 +28,13 @@ export function formatRecipeWithRatings(recipe: {
     slug: recipe.slug,
     title: recipe.title,
     description: recipe.description,
-    image: recipe.imageUrl || "/img/default/default.jpg",
+    image: recipe.imageUrl || DEFAULT_RECIPE_IMAGE,
     time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
     rating: Math.round(averageRating),
     author: {
       name: recipe.author.username,
       username: recipe.author.username,
-      avatar: recipe.author.avatarUrl || "/img/users/default-avatar.png",
+      avatar: recipe.author.avatarUrl || DEFAULT_USER_AVATAR,
     },
   };
 }
@@ -174,7 +175,7 @@ export async function getFeaturedRecipe() {
     description:
       featured.description ||
       "Every day we feature an exceptional recipe that showcases the creativity and skill of our community. Today's featured dish combines fresh seasonal ingredients with classic techniques for an unforgettable dining experience.",
-    image: featured.imageUrl || "/img/default/default.jpg",
+    image: featured.imageUrl || DEFAULT_RECIPE_IMAGE,
   };
 }
 
@@ -366,8 +367,9 @@ export async function searchRecipes({
     };
   }
 
-  if (difficulty) {
-    where.difficulty = difficulty as unknown as Prisma.EnumDifficultyFilter;
+  // Validate and set difficulty filter
+  if (difficulty && Object.values(Difficulty).includes(difficulty as Difficulty)) {
+    where.difficulty = difficulty as Difficulty;
   }
 
   if (minPrepTime !== null || maxPrepTime !== null) {
@@ -435,7 +437,7 @@ export async function searchRecipes({
     slug: recipe.slug,
     title: recipe.title,
     description: recipe.description,
-    image: recipe.imageUrl || "/images/recipes/default.jpg",
+    image: recipe.imageUrl || DEFAULT_RECIPE_IMAGE,
     time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
     prepTimeMinutes: recipe.prepTimeMinutes,
     cookTimeMinutes: recipe.cookTimeMinutes,

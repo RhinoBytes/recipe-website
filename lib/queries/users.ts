@@ -1,5 +1,21 @@
 import { prisma } from "@/lib/prisma";
 import { RecipeStatus } from "@prisma/client";
+import { DEFAULT_RECIPE_IMAGE, DEFAULT_CHEF_AVATAR } from "@/lib/constants";
+
+/**
+ * Get sort order for user recipes
+ */
+function getSortOrder(sort: "newest" | "oldest" | "popular") {
+  switch (sort) {
+    case "oldest":
+      return { createdAt: "asc" as const };
+    case "popular":
+      return [{ averageRating: "desc" as const }, { reviewCount: "desc" as const }];
+    case "newest":
+    default:
+      return { createdAt: "desc" as const };
+  }
+}
 
 /**
  * Get user by ID with basic info
@@ -26,10 +42,7 @@ export async function getUserRecipes(
   userId: string,
   sort: "newest" | "oldest" | "popular" = "newest"
 ) {
-  const orderBy = 
-    sort === "oldest" ? { createdAt: "asc" as const } :
-    sort === "popular" ? [{ averageRating: "desc" as const }, { reviewCount: "desc" as const }] :
-    { createdAt: "desc" as const };
+  const orderBy = getSortOrder(sort);
 
   const recipes = await prisma.recipe.findMany({
     where: {
@@ -79,7 +92,7 @@ export async function getUserRecipes(
     slug: recipe.slug,
     title: recipe.title,
     description: recipe.description,
-    imageUrl: recipe.imageUrl || "/img/default/default.jpg",
+    imageUrl: recipe.imageUrl || DEFAULT_RECIPE_IMAGE,
     prepTimeMinutes: recipe.prepTimeMinutes || 0,
     cookTimeMinutes: recipe.cookTimeMinutes || 0,
     servings: recipe.servings,
@@ -168,7 +181,7 @@ export async function getSpotlightChef() {
         id: user.id,
         name: user.username,
         title: "Home Cook & Food Blogger",
-        avatar: user.avatarUrl || "/img/default/default.jpg",
+        avatar: user.avatarUrl || DEFAULT_CHEF_AVATAR,
         quote:
           user.bio ||
           "Cooking is my passion, and I love sharing family recipes that have been passed down through generations. My goal is to help others discover the joy of creating delicious meals from scratch.",
@@ -182,7 +195,7 @@ export async function getSpotlightChef() {
       id: topContributor.id,
       name: topContributor.username,
       title: "Home Cook & Food Blogger",
-      avatar: topContributor.avatarUrl || "/img/default/default.jpg",
+      avatar: topContributor.avatarUrl || DEFAULT_CHEF_AVATAR,
       quote:
         topContributor.bio ||
         "Sharing my passion for food through delicious recipes.",
@@ -231,7 +244,7 @@ export async function getUserFavorites(userId: string) {
     slug: fav.recipe.slug,
     title: fav.recipe.title,
     description: fav.recipe.description,
-    imageUrl: fav.recipe.imageUrl || "/img/default/default.jpg",
+    imageUrl: fav.recipe.imageUrl || DEFAULT_RECIPE_IMAGE,
     prepTimeMinutes: fav.recipe.prepTimeMinutes || 0,
     cookTimeMinutes: fav.recipe.cookTimeMinutes || 0,
     servings: fav.recipe.servings,

@@ -4,14 +4,23 @@ import { getCategories } from "@/lib/queries/metadata";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = searchParams.get("limit");
+    const limitParam = searchParams.get("limit");
+    
+    // Validate limit parameter
+    let limit: number | undefined;
+    if (limitParam) {
+      const parsed = parseInt(limitParam, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 100) {
+        limit = parsed;
+      }
+    }
     
     // Get categories using reusable function
     const categories = await getCategories();
     
-    // Apply limit if specified
+    // Apply limit if specified and valid
     const limitedCategories = limit 
-      ? categories.slice(0, parseInt(limit))
+      ? categories.slice(0, limit)
       : categories;
     
     // Format categories for the UI
