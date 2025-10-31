@@ -15,6 +15,7 @@ export interface JWTPayload {
   email: string;
   username: string;
   role: string;
+  avatarUrl?: string;
 }
 
 // Hash password
@@ -70,4 +71,17 @@ export async function getCurrentUser(): Promise<JWTPayload | null> {
 export async function removeAuthCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(AUTH_COOKIE_NAME);
+}
+
+export async function getUserFromSession() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  return {
+    id: user.userId,
+    email: user.email,
+    username: user.username,
+    role: user.role,
+    avatarUrl: user.avatarUrl, // or fetch from DB if you store it there
+  };
 }

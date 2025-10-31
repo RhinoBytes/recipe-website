@@ -7,8 +7,8 @@ export interface User {
   role: string;
   avatarUrl?: string | null;
   bio?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Recipe {

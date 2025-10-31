@@ -9,6 +9,7 @@ const USER_STORAGE_KEY = "cookbook-user-cache";
 
 export function useAuth(serverUser?: User | null) {
   const [user, setUser] = useState<User | null>(() => {
+    if (serverUser) return serverUser; // ✅ use SSR user first
     if (typeof window === "undefined") return null;
     try {
       const cached = localStorage.getItem(USER_STORAGE_KEY);

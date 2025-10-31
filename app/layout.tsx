@@ -4,7 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import { Playfair_Display, Lora, Dancing_Script } from 'next/font/google';
-
+import { getUserFromSession } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "CookBook - Discover Amazing Recipes",
@@ -40,15 +40,16 @@ const dancing = Dancing_Script({
   display: 'swap',
 });
 
-export default function RootLayout({ 
+export default async function RootLayout({ 
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUserFromSession();
   return (
     <html lang="en" data-theme="terracotta" className={`${playfair.variable} ${lora.variable} ${dancing.variable}`}>
       <body className="antialiased">
-        <AuthProvider>
+        <AuthProvider initialUser={user}>
           <Navbar /> 
 
           {children}

@@ -20,6 +20,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
           className="object-cover"
           sizes="(max-width: 640px) 100vw, 300px"
           priority={false}
+          loading="lazy"
         />
       </div>
       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-accent/80 to-accent-hover/80 text-bg font-semibold font-heading text-xl">

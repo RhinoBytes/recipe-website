@@ -1,3 +1,5 @@
+
+
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import RecipeCard from "@/components/ui/RecipeCard";
@@ -66,7 +68,7 @@ async function getPopularRecipes() {
   return {
     id: recipe.slug || recipe.id,
     title: recipe.title,
-    image: recipe.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop",
+    image: recipe.imageUrl || "img/default/default.jpg",
     time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
     rating: averageRating,
     author: {
@@ -121,7 +123,7 @@ async function getRecentRecipes() {
     return {
       id: recipe.slug || recipe.id,
       title: recipe.title,
-      image: recipe.imageUrl || "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop",
+      image: recipe.imageUrl || "img/default/default.jpg",
       time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
       rating: averageRating,
       author: {
@@ -214,7 +216,7 @@ async function getFeaturedRecipe() {
       "Every day we feature an exceptional recipe that showcases the creativity and skill of our community. Today's featured dish combines fresh seasonal ingredients with classic techniques for an unforgettable dining experience.",
     image:
       featured.imageUrl ||
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=500&h=300&fit=crop",
+      "img/default/default.jpg",
   };
 }
 
@@ -287,7 +289,7 @@ async function getSpotlightChef() {
         id: user.id,
         name: user.username,
         title: "Home Cook & Food Blogger",
-        avatar: user.avatarUrl || "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face",
+        avatar: user.avatarUrl || "img/default/default.jpg",
         quote:
           user.bio ||
           "Cooking is my passion, and I love sharing family recipes that have been passed down through generations. My goal is to help others discover the joy of creating delicious meals from scratch.",
@@ -301,7 +303,7 @@ async function getSpotlightChef() {
       id: topContributor.id,
       name: topContributor.username,
       title: "Home Cook & Food Blogger",
-      avatar: topContributor.avatarUrl || "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face",
+      avatar: topContributor.avatarUrl || "img/default/default.jpg",
       quote:
         topContributor.bio ||
         "Sharing my passion for food through delicious recipes.",
@@ -356,7 +358,8 @@ export default async function HomePage() {
     <main   >
 
 {/* Hero Section */}
-<section className="relative text-center text-bg h-[500px] flex items-center">
+<section className="relative text-center text-bg min-h-[500px] flex items-center ">
+  <div className="h-20 flex-shrink-0" /> 
   {/* Background image + gradient overlay */}
   <div className="absolute inset-0 w-full h-full bg-center bg-cover">
     <Image
@@ -369,7 +372,8 @@ export default async function HomePage() {
     />
     {/* Theme-aware gradient overlay */}
     <div
-      className="absolute inset-0 bg-gradient-to-br from-accent/85 to-accent-hover/90"
+      className="absolute inset-0"
+      style={{ backgroundImage: 'var(--card-gradient)' }}
     />
   </div>
 

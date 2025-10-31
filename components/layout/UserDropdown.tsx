@@ -4,13 +4,19 @@ import { useState, useRef, useEffect } from 'react';
 import { LogIn, UserPlus, Plus, User, ChevronDown, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from "@/context/AuthContext"; 
+import { useAuth } from '@/context/AuthContext';
 
 export default function UserDropdown() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mounted, setMounted] = useState(false); // Track hydration
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, isAuthenticated, logout, loading } = useAuth();
-  
+
+  // Only render dynamic content after client mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -38,44 +44,45 @@ export default function UserDropdown() {
         aria-controls="user-menu"
         disabled={loading}
       >
-        {/* Always reserve space for icon (32px) + text (120px on desktop) + chevron (16px) */}
-        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 relative">
-          {loading ? (
-            <div className="w-8 h-8 rounded-full bg-border animate-pulse" />
+        {/* Avatar / Icon area */}
+        <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-accent flex items-center justify-center bg-border">
+          {!mounted || loading ? (
+            <div className="w-full h-full animate-pulse bg-border" />
           ) : isAuthenticated && user?.avatarUrl ? (
-            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-accent">
-              <Image
-                src={user.avatarUrl}
-                alt={user.username || 'User avatar'}
-                width={32}
-                height={32}
-                priority
-                className="object-cover w-full h-full"
-                unoptimized={user.avatarUrl.startsWith('data:')}
-              />
-            </div>
+            <Image
+              src={user.avatarUrl}
+              alt={user.username || 'User avatar'}
+              width={32}
+              height={32}
+              priority
+              className="object-cover w-full h-full"
+              unoptimized={user.avatarUrl.startsWith('data:')}
+            />
           ) : (
-            <User size={20} />
+            <User size={20} className="text-text-muted" />
           )}
         </div>
-        
-        {/* Fixed width text container prevents layout shift */}
+
+        {/* Username / Login text */}
         <span className="hidden md:inline-block md:w-[120px] h-5 flex items-center">
-          {loading ? (
-            <span className="block w-full h-4 bg-border rounded animate-pulse" />
-          ) : (
-            <span className="block w-full truncate text-left">
-              {isAuthenticated ? (user?.username || 'Account') : 'Login'}
-            </span>
-          )}
+          <span className="block w-full truncate text-left">
+            {!mounted || loading
+              ? ''
+              : isAuthenticated
+              ? user?.username || 'Account'
+              : 'Login'}
+          </span>
         </span>
-        
+
         <ChevronDown
           size={16}
-          className={`flex-shrink-0 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
+          className={`flex-shrink-0 transition-transform ${
+            dropdownOpen ? 'rotate-180' : ''
+          }`}
         />
       </button>
 
+      {/* Dropdown Menu */}
       <div
         id="user-menu"
         role="menu"
@@ -85,12 +92,12 @@ export default function UserDropdown() {
             : 'opacity-0 scale-95 pointer-events-none'
         }`}
       >
-        {isAuthenticated ? (
-          // Authenticated user options
+        {mounted && (isAuthenticated ? (
           <>
             <div className="px-4 py-1 text-xs text-text-muted">
               Logged in as {user?.email || user?.username}
             </div>
+
             <Link
               href={`/profile/${user?.id}`}
               onClick={() => setDropdownOpen(false)}
@@ -99,6 +106,7 @@ export default function UserDropdown() {
               <User size={16} />
               My Profile
             </Link>
+
             <Link
               href="/recipes/new"
               onClick={() => setDropdownOpen(false)}
@@ -107,7 +115,9 @@ export default function UserDropdown() {
               <Plus size={16} />
               Create Recipe
             </Link>
-            <div className="h-px bg-border my-2"></div>
+
+            <div className="h-px bg-border my-2" />
+
             <button
               onClick={handleLogout}
               className="flex w-full text-left items-center gap-3 px-4 py-3 text-text hover:bg-accent-light/30 hover:text-error transition-colors"
@@ -117,7 +127,6 @@ export default function UserDropdown() {
             </button>
           </>
         ) : (
-          // Non-authenticated user options
           <>
             <Link
               href="/auth?tab=login"
@@ -127,6 +136,7 @@ export default function UserDropdown() {
               <LogIn size={16} />
               Sign In
             </Link>
+
             <Link
               href="/auth?tab=register"
               onClick={() => setDropdownOpen(false)}
@@ -136,7 +146,7 @@ export default function UserDropdown() {
               Register
             </Link>
           </>
-        )}
+        ))}
       </div>
     </div>
   );
