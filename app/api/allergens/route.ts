@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getAllergens } from "@/lib/queries/metadata";
 
 /**
  * GET /api/allergens
@@ -7,12 +7,7 @@ import { prisma } from "@/lib/prisma";
  */
 export async function GET() {
   try {
-    const allergens = await prisma.allergen.findMany({
-      orderBy: {
-        name: 'asc',
-      },
-    });
-
+    const allergens = await getAllergens();
     return NextResponse.json(allergens);
   } catch (error) {
     console.error("Get allergens error:", error);

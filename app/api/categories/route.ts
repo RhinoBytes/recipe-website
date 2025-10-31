@@ -1,36 +1,30 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getCategories } from "@/lib/queries/metadata";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = searchParams.get("limit");
+    const limitParam = searchParams.get("limit");
     
-    // Get top-level categories with recipe counts
-    const categories = await prisma.category.findMany({
-      where: {
-        parentId: null, // Top-level categories only
-      },
-      select: {
-        id: true,
-        name: true,
-        _count: {
-          select: {
-            recipes: true,
-          },
-        },
-      },
-      orderBy: {
-        recipes: {
-          _count: "desc",
-        },
-      },
-      ...(limit ? { take: parseInt(limit) } : {}),
-    });
-
+    // Validate limit parameter
+    let limit: number | undefined;
+    if (limitParam) {
+      const parsed = parseInt(limitParam, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 100) {
+        limit = parsed;
+      }
+    }
+    
+    // Get categories using reusable function
+    const categories = await getCategories();
+    
+    // Apply limit if specified and valid
+    const limitedCategories = limit 
+      ? categories.slice(0, limit)
+      : categories;
+    
     // Format categories for the UI
-    const formattedCategories = categories.map((category) => {
-      // Convert category name to slug
+    const formattedCategories = limitedCategories.map((category) => {
       const slug = category.name.toLowerCase().replace(/\s+/g, "-");
 
       return {
@@ -38,7 +32,7 @@ export async function GET(request: Request) {
         name: category.name,
         slug: slug,
         count: category._count.recipes,
-        image: `/images/categories/${slug}.jpg`, // Assuming you have these images
+        image: `/images/categories/${slug}.jpg`,
       };
     });
 

@@ -55,3 +55,44 @@ export interface AuthContextType {
   refreshUser: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
 }
+
+// Filter metadata interface used in browse page
+export interface FilterOption {
+  id: string;
+  name: string;
+  count?: number;
+}
+
+// Detailed recipe interface used in recipe detail pages
+export interface DetailedRecipe {
+  id: string;
+  slug: string | null;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  prepTimeMinutes: number | null;
+  cookTimeMinutes: number | null;
+  servings: number | null;
+  difficulty: string | null;
+  rating: number;
+  reviewCount: number;
+  author: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string | null;
+  };
+  tags: string[];
+  categories: string[];
+  cuisine: string | null;
+  allergens: string[];
+}
+
+// Pagination info interface
+export interface PaginationInfo {
+  page: number;
+  perPage: number;
+  totalCount: number;
+  totalPages: number;
+}
+

@@ -1,25 +1,25 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { Prisma, Difficulty, RecipeStatus } from "@prisma/client";
+import { Difficulty, RecipeStatus } from "@prisma/client";
 import { saveRecipeToFile } from "@/lib/recipeStorage";
+import { searchRecipes } from "@/lib/queries/recipes";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    
+    // Parse query parameters
     const query = searchParams.get("q") || "";
-
-    // Support multiple values for filters
-    const categories =
-      searchParams.get("categories")?.split(",").filter(Boolean) || [];
+    const categories = searchParams.get("categories")?.split(",").filter(Boolean) || [];
     const tags = searchParams.get("tags")?.split(",").filter(Boolean) || [];
-    const cuisines =
-      searchParams.get("cuisines")?.split(",").filter(Boolean) || [];
-    const allergens =
-      searchParams.get("allergens")?.split(",").filter(Boolean) || [];
+    const cuisines = searchParams.get("cuisines")?.split(",").filter(Boolean) || [];
+    const allergens = searchParams.get("allergens")?.split(",").filter(Boolean) || [];
     const difficulty = searchParams.get("difficulty") || "";
-
-    // Time filters
+    const sort = searchParams.get("sort") || "newest";
+    const page = parseInt(searchParams.get("page") || "1");
+    const perPage = parseInt(searchParams.get("perPage") || "12");
+    
     const minPrepTime = searchParams.get("minPrepTime")
       ? parseInt(searchParams.get("minPrepTime")!)
       : null;
@@ -33,180 +33,24 @@ export async function GET(request: Request) {
       ? parseInt(searchParams.get("maxCookTime")!)
       : null;
 
-    // Sort option
-    const sort = searchParams.get("sort") || "newest";
-
-    const page = parseInt(searchParams.get("page") || "1");
-    const perPage = parseInt(searchParams.get("perPage") || "12");
-    const skip = (page - 1) * perPage;
-
-    // Build where clause with filters
-    const where: Prisma.RecipeWhereInput = { status: RecipeStatus.PUBLISHED };
-
-    // Text search on title, description, and ingredients
-    if (query) {
-      where.OR = [
-        { title: { contains: query, mode: "insensitive" } },
-        { description: { contains: query, mode: "insensitive" } },
-        {
-          ingredients: {
-            some: {
-              name: { contains: query, mode: "insensitive" },
-            },
-          },
-        },
-      ];
-    }
-
-    // Filter by multiple categories
-    if (categories.length > 0) {
-      where.categories = {
-        some: {
-          category: {
-            name: { in: categories, mode: "insensitive" },
-          },
-        },
-      };
-    }
-
-    // Filter by multiple tags
-    if (tags.length > 0) {
-      where.tags = {
-        some: {
-          tag: {
-            name: { in: tags, mode: "insensitive" },
-          },
-        },
-      };
-    }
-
-    // Filter by multiple cuisines
-    if (cuisines.length > 0) {
-      where.cuisine = {
-        name: { in: cuisines, mode: "insensitive" },
-      };
-    }
-
-    // Filter by multiple allergens
-    if (allergens.length > 0) {
-      where.allergens = {
-        some: {
-          allergen: {
-            name: { in: allergens, mode: "insensitive" },
-          },
-        },
-      };
-    }
-
-    // Filter by difficulty
-    if (
-      difficulty &&
-      Object.values(Difficulty).includes(difficulty as Difficulty)
-    ) {
-      where.difficulty = difficulty as Difficulty;
-    }
-
-    // Filter by prep time range
-    if (minPrepTime !== null || maxPrepTime !== null) {
-      where.prepTimeMinutes = {};
-      if (minPrepTime !== null) where.prepTimeMinutes.gte = minPrepTime;
-      if (maxPrepTime !== null) where.prepTimeMinutes.lte = maxPrepTime;
-    }
-
-    // Filter by cook time range
-    if (minCookTime !== null || maxCookTime !== null) {
-      where.cookTimeMinutes = {};
-      if (minCookTime !== null) where.cookTimeMinutes.gte = minCookTime;
-      if (maxCookTime !== null) where.cookTimeMinutes.lte = maxCookTime;
-    }
-
-    // Get total count for pagination
-    const totalCount = await prisma.recipe.count({ where });
-
-    // Determine sort order
-    let orderBy: Prisma.RecipeOrderByWithRelationInput = { createdAt: "desc" };
-    if (sort === "oldest") {
-      orderBy = { createdAt: "asc" };
-    } else if (sort === "popular") {
-      orderBy = [
-        { averageRating: "desc" },
-        { reviewCount: "desc" },
-      ] as Prisma.RecipeOrderByWithRelationInput;
-    }
-
-    // Get recipes with pagination
-    const recipes = await prisma.recipe.findMany({
-      where,
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            avatarUrl: true,
-          },
-        },
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-        categories: {
-          include: {
-            category: true,
-          },
-        },
-        cuisine: true,
-        allergens: {
-          include: {
-            allergen: true,
-          },
-        },
-      },
-      orderBy,
-      skip,
-      take: perPage,
+    // Use reusable search function
+    const result = await searchRecipes({
+      query,
+      categories,
+      tags,
+      cuisines,
+      allergens,
+      difficulty,
+      minPrepTime,
+      maxPrepTime,
+      minCookTime,
+      maxCookTime,
+      sort,
+      page,
+      perPage,
     });
 
-    // Format recipes for display with ratings
-    const formattedRecipes = recipes.map((recipe) => {
-      return {
-        id: recipe.id,
-        slug: recipe.slug,
-        title: recipe.title,
-        description: recipe.description,
-        image: recipe.imageUrl || "/images/recipes/default.jpg",
-        time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
-        prepTimeMinutes: recipe.prepTimeMinutes,
-        cookTimeMinutes: recipe.cookTimeMinutes,
-        servings: recipe.servings,
-        difficulty: recipe.difficulty,
-        rating: recipe.averageRating
-          ? parseFloat(recipe.averageRating.toString())
-          : 0,
-        reviewCount: recipe.reviewCount,
-        author: {
-          id: recipe.author.id,
-          name: recipe.author.username,
-          avatar: recipe.author.avatarUrl || recipe.author.username.charAt(0),
-          username: recipe.author.username,
-        },
-        tags: recipe.tags.map((rt) => rt.tag.name),
-        categories: recipe.categories.map((rc) => rc.category.name),
-        cuisine: recipe.cuisine?.name || null,
-        allergens: recipe.allergens.map((ra) => ra.allergen.name),
-        createdAt: recipe.createdAt,
-      };
-    });
-
-    return NextResponse.json({
-      recipes: formattedRecipes,
-      pagination: {
-        page,
-        perPage,
-        totalCount,
-        totalPages: Math.ceil(totalCount / perPage),
-      },
-    });
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching recipes:", error);
     return NextResponse.json(
