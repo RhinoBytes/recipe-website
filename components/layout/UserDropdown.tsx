@@ -32,14 +32,14 @@ export default function UserDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setDropdownOpen(!dropdownOpen)}
-        className="flex items-center gap-2 px-4 py-2 text-text font-medium hover:text-accent focus-visible:ring-2 focus-visible:ring-accent rounded-2xl transition"
+        className="flex items-center gap-2 px-4 py-2 h-11 text-text font-medium hover:text-accent focus-visible:ring-2 focus-visible:ring-accent rounded-2xl transition"
         aria-haspopup="menu"
         aria-expanded={dropdownOpen}
         aria-controls="user-menu"
         disabled={loading}
       >
         {/* Always reserve space for icon (32px) + text (120px on desktop) + chevron (16px) */}
-        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 relative">
           {loading ? (
             <div className="w-8 h-8 rounded-full bg-border animate-pulse" />
           ) : isAuthenticated && user?.avatarUrl ? (
@@ -50,7 +50,7 @@ export default function UserDropdown() {
                 width={32}
                 height={32}
                 priority
-                className="object-cover"
+                className="object-cover w-full h-full"
                 unoptimized={user.avatarUrl.startsWith('data:')}
               />
             </div>
@@ -59,13 +59,16 @@ export default function UserDropdown() {
           )}
         </div>
         
-        {loading ? (
-          <span className="hidden md:inline md:w-[120px] h-4 bg-border rounded animate-pulse" />
-        ) : (
-          <span className="hidden md:inline md:w-[120px] truncate text-left">
-            {isAuthenticated ? (user?.username || 'Account') : 'Login'}
-          </span>
-        )}
+        {/* Fixed width text container prevents layout shift */}
+        <span className="hidden md:inline-block md:w-[120px] h-5 flex items-center">
+          {loading ? (
+            <span className="block w-full h-4 bg-border rounded animate-pulse" />
+          ) : (
+            <span className="block w-full truncate text-left">
+              {isAuthenticated ? (user?.username || 'Account') : 'Login'}
+            </span>
+          )}
+        </span>
         
         <ChevronDown
           size={16}

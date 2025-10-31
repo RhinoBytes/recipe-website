@@ -17,14 +17,14 @@ export default function SearchBar() {
   };
 
   return (
-    <form onSubmit={handleSearch} className="relative flex-1 max-w-md">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary w-4 h-4 pointer-events-none" />
+    <form onSubmit={handleSearch} className="relative flex-1 max-w-md min-w-0 h-10">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary w-4 h-4 pointer-events-none flex-shrink-0" />
       <input
         type="text"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search recipes, ingredients, or chefs..."
-        className="w-full pl-10 pr-4 py-2 border-2 border-border rounded-full text-sm bg-bg-secondary text-text focus:outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent transition-colors"
+        className="w-full h-full pl-10 pr-4 py-2 border-2 border-border rounded-full text-sm bg-bg-secondary text-text focus:outline-none focus:border-accent focus-visible:ring-2 focus-visible:ring-accent transition-colors"
       />
     </form>
   );

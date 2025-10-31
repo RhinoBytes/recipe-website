@@ -12,8 +12,8 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-20 backdrop-blur-md bg-bg/80 transition-shadow border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-5 w-full h-full">
+    <header className="fixed top-0 left-0 right-0 z-50 h-20 backdrop-blur-md bg-bg/80 transition-shadow border-b border-border/50 flex items-center">
+      <div className="max-w-7xl mx-auto px-5 w-full h-full flex items-center">
         {/* Desktop Navigation */}
         <nav
           className="hidden md:flex items-center justify-between gap-8 h-full"

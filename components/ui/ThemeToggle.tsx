@@ -66,10 +66,12 @@ export default function ThemeToggle() {
   if (!mounted) {
     return (
       <button
-        className="w-10 h-10 flex items-center justify-center rounded-full bg-bg-secondary border border-border hover:bg-accent-light transition-colors"
-        aria-label="Toggle theme"
+        className="w-10 h-10 flex items-center justify-center rounded-full bg-bg-secondary border border-border transition-colors pointer-events-none"
+        aria-label="Loading theme toggle"
+        disabled
       >
-        <div className="w-5 h-5" /> {/* Empty placeholder to maintain size */}
+        {/* Show terracotta icon as default to match server-side rendering */}
+        <Palette size={20} className="text-text opacity-50" />
       </button>
     );
   }

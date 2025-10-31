@@ -9,15 +9,15 @@ interface FeaturedRecipeProps {
 
 export default function FeaturedRecipe({ featured }: FeaturedRecipeProps) {
   return (
-    <section className="bg-gradient-to-br from-accent-light to-secondary-light py-16">
+    <section className="bg-gradient-to-br from-accent-light to-secondary-light py-16 min-h-[400px]">
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
-        <div>
+        <div className="relative w-full h-[300px] flex-shrink-0">
           <Image
             src={featured.image}
             alt={featured.title}
-            width={500}
-            height={300}
-            className="rounded-2xl object-cover w-full h-[300px] border-2 border-border shadow-lg"
+            fill
+            className="rounded-2xl object-cover border-2 border-border shadow-lg"
+            sizes="(max-width: 768px) 100vw, 50vw"
             priority
           />
         </div>
