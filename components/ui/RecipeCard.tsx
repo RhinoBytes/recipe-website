@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, Star } from "lucide-react";
 import type { Recipe } from "@/types";
-import { useRecipePlaceholder, useProfileAvatar } from "@/hooks/useCottagecorePlaceholders";
+import { useRecipePlaceholder, useProfileAvatar } from "@/hooks/usePlaceholders";
 
 interface RecipeCardProps {
   recipe: Recipe;
