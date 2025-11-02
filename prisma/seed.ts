@@ -1,16 +1,10 @@
-import { PrismaClient, Difficulty, RecipeStatus } from "@prisma/client";
+import { PrismaClient, Difficulty, RecipeStatus, User, Media } from "@prisma/client";
 import { faker } from "@faker-js/faker";
-import { readRecipeFolders } from "../lib/recipeStorage.js";
 import bcrypt from "bcrypt";
-import {
-  getRandomRecipePlaceholder,
-} from "../lib/placeholders.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { createUploadSignature } from "../lib/cloudinary.js";
-import FormData from "form-data";
-import fetch from "node-fetch";
+import { uploadImageToCloudinary } from "../lib/uploadHelper.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,92 +16,125 @@ const prisma = new PrismaClient({
 type DifficultyType = keyof typeof Difficulty;
 type RecipeStatusType = keyof typeof RecipeStatus;
 
-/**
- * Upload an image file to Cloudinary
- * @param filePath Path to the image file
- * @param folder Cloudinary folder path
- * @param userId User ID for the media record
- * @returns Media object or null if upload fails
- */
-async function uploadImageToCloudinary(
-  filePath: string,
-  folder: string,
-  userId: string,
-  isProfileAvatar: boolean = false
-): Promise<any | null> {
-  try {
-    // Check if Cloudinary is configured
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY) {
-      console.log("  ⚠️  Cloudinary not configured, skipping upload");
-      return null;
-    }
-
-    console.log(`  ☁️  Uploading to Cloudinary: ${path.basename(filePath)}`);
-    
-    // Generate upload signature (simplified for seed script)
-    const timestamp = Math.round(Date.now() / 1000);
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY;
-    
-    // Create form data for upload
-    const formData = new FormData();
-    formData.append('file', fs.createReadStream(filePath));
-    formData.append('timestamp', timestamp.toString());
-    formData.append('api_key', apiKey);
-    formData.append('folder', folder);
-    
-    // For unsigned upload, we can use upload preset if available
-    if (process.env.CLOUDINARY_UPLOAD_PRESET) {
-      formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET);
-    }
-
-    // Upload to Cloudinary
-    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
-    const response = await fetch(uploadUrl, {
-      method: 'POST',
-      body: formData as any,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`  ❌ Cloudinary upload failed: ${errorText}`);
-      return null;
-    }
-
-    const uploadData = await response.json();
-    console.log(`  ✅ Uploaded to Cloudinary: ${uploadData.public_id}`);
-
-    // Create Media record in database
-    const media = await prisma.media.create({
-      data: {
-        publicId: uploadData.public_id,
-        url: uploadData.url,
-        secureUrl: uploadData.secure_url,
-        mimeType: `image/${uploadData.format}`,
-        size: uploadData.bytes,
-        width: uploadData.width || null,
-        height: uploadData.height || null,
-        originalFilename: path.basename(filePath),
-        folder: uploadData.folder || folder,
-        resourceType: 'IMAGE',
-        userId: userId,
-        isProfileAvatar: isProfileAvatar,
-        isPrimary: false, // Will be set later for recipes
-      },
-    });
-
-    console.log(`  ✅ Created Media record: ${media.id}`);
-    return media;
-  } catch (error) {
-    console.error(`  ❌ Failed to upload image:`, error);
-    return null;
-  }
+interface RecipeData {
+  title: string;
+  slug?: string;
+  description?: string;
+  servings?: number;
+  prepTimeMinutes?: number;
+  cookTimeMinutes?: number;
+  difficulty?: string;
+  sourceUrl?: string;
+  sourceText?: string;
+  cuisine?: string;
+  status?: string;
+  calories?: number;
+  proteinG?: number;
+  fatG?: number;
+  carbsG?: number;
+  ingredients?: Array<{
+    name: string;
+    amount?: string;
+    unit?: string;
+    size?: string;
+    preparation?: string;
+    notes?: string;
+    groupName?: string;
+    isOptional?: boolean;
+    displayOrder?: number;
+  }>;
+  steps?: Array<{
+    stepNumber: number;
+    instruction: string;
+    isOptional?: boolean;
+  }>;
+  tags?: string[];
+  categories?: string[];
+  allergens?: string[];
+  imageUrl?: string;
 }
 
-async function main() {
-  console.log("Seeding database started...");
+// User assignments for recipes
+const USER_RECIPE_ASSIGNMENTS: Record<string, string[]> = {
+  HomeBaker: [
+    "classic-chocolate-chip-cookies",
+    "homemade-sourdough-bread",
+    "vanilla-cupcakes-buttercream",
+    "apple-cinnamon-muffins",
+    "lemon-blueberry-scones",
+  ],
+  TheRealSpiceGirl: [
+    "chicken-enchiladas-verde",
+    "authentic-street-tacos",
+    "homemade-guacamole",
+    "mexican-rice",
+    "churros-chocolate-sauce",
+  ],
+  ChefDad: [
+    "classic-beef-burger",
+    "bbq-ribs",
+    "mac-and-cheese",
+    "grilled-chicken-caesar-salad",
+    "apple-pie",
+  ],
+};
 
-  // --- DELETE EXISTING DATA ---
+/**
+ * Read recipe folders from seed-data directory
+ */
+function readRecipeFolders(): Array<{
+  slug: string;
+  data: RecipeData;
+  folderPath: string;
+}> {
+  const recipesPath = path.join(__dirname, "seed-data");
+
+  if (!fs.existsSync(recipesPath)) {
+    console.log("No seed-data directory found");
+    return [];
+  }
+
+  const recipes: Array<{
+    slug: string;
+    data: RecipeData;
+    folderPath: string;
+  }> = [];
+
+  try {
+    const folders = fs
+      .readdirSync(recipesPath, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
+
+    for (const folder of folders) {
+      const folderPath = path.join(recipesPath, folder);
+      const jsonPath = path.join(folderPath, "recipe.json");
+
+      if (fs.existsSync(jsonPath)) {
+        try {
+          const jsonContent = fs.readFileSync(jsonPath, "utf-8");
+          const data = JSON.parse(jsonContent);
+          recipes.push({
+            slug: folder,
+            data,
+            folderPath,
+          });
+        } catch (error) {
+          console.error(`Error reading recipe JSON for ${folder}:`, error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error reading recipe folders:", error);
+  }
+
+  return recipes;
+}
+
+/**
+ * Clean up existing data from database
+ */
+async function clearExistingData() {
   console.log("Deleting all existing data...");
 
   // Delete child tables first to avoid foreign key constraints
@@ -118,9 +145,7 @@ async function main() {
   await prisma.recipeIngredient.deleteMany({});
   await prisma.review.deleteMany({});
   await prisma.favoriteRecipe.deleteMany({});
-  
-  // Note: Media records will cascade delete when recipes/users are deleted
-  // For explicit cleanup of Cloudinary assets, run: node scripts/reset-seed-media.ts
+  await prisma.media.deleteMany({});
   await prisma.recipe.deleteMany({});
   await prisma.tag.deleteMany({});
   await prisma.category.deleteMany({});
@@ -136,30 +161,15 @@ async function main() {
     fs.rmSync(uploadsDir, { recursive: true, force: true });
     console.log("Cleaned up old recipe uploads folder.");
   }
+}
 
-  // --- CREATE USERS ---
-  console.log("Creating seed users...");
-  const seedUsernames = ["HomeBaker", "ChefDad", "TheRealSpiceGirl"];
-  const users = [];
+/**
+ * Seed static reference data (categories, tags, cuisines, allergens)
+ */
+async function seedStaticData() {
+  console.log("Creating static data...");
 
-  for (const username of seedUsernames) {
-    const user = await prisma.user.create({
-      data: {
-        username,
-        email: `${username.toLowerCase()}@example.com`,
-        passwordHash: await bcrypt.hash("password123", 10),
-        bio: faker.lorem.sentence(),
-      },
-    });
-    users.push(user);
-    console.log(`Created user: ${username} (ID: ${user.id})`);
-    
-    // Note: Not creating seed avatars to keep it simple
-    // Users can upload avatars via the UI using the Media API
-  }
-
-  // --- CREATE CATEGORIES ---
-  console.log("Creating categories...");
+  // Create categories
   const categoryNames = [
     "Breakfast",
     "Lunch",
@@ -174,17 +184,14 @@ async function main() {
     "Bread / Baking",
     "Side Dish",
   ];
-  for (const name of categoryNames) {
-    await prisma.category.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    });
-  }
-  console.log("Categories seeded successfully.");
+  
+  await prisma.category.createMany({
+    data: categoryNames.map(name => ({ name })),
+    skipDuplicates: true,
+  });
+  console.log(`Created ${categoryNames.length} categories`);
 
-  // --- CREATE TAGS ---
-  console.log("Creating tags...");
+  // Create tags
   const tagNames = [
     "Dairy-Free",
     "Low-Carb",
@@ -197,17 +204,14 @@ async function main() {
     "Party / Entertaining",
     "Comfort Food",
   ];
-  for (const name of tagNames) {
-    await prisma.tag.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    });
-  }
-  console.log("Tags seeded successfully.");
+  
+  await prisma.tag.createMany({
+    data: tagNames.map(name => ({ name })),
+    skipDuplicates: true,
+  });
+  console.log(`Created ${tagNames.length} tags`);
 
-  // --- CREATE CUISINES ---
-  console.log("Creating cuisines...");
+  // Create cuisines
   const cuisineNames = [
     "American",
     "Italian",
@@ -230,17 +234,14 @@ async function main() {
     "Brazilian",
     "African",
   ];
-  for (const name of cuisineNames) {
-    await prisma.cuisine.upsert({
-      where: { name },
-      update: {},
-      create: { name },
-    });
-  }
-  console.log("Cuisines seeded successfully.");
+  
+  await prisma.cuisine.createMany({
+    data: cuisineNames.map(name => ({ name })),
+    skipDuplicates: true,
+  });
+  console.log(`Created ${cuisineNames.length} cuisines`);
 
-  // --- CREATE ALLERGENS ---
-  console.log("Creating allergens...");
+  // Create allergens
   const allergenNames = [
     "Vegetarian",
     "Vegan",
@@ -249,39 +250,95 @@ async function main() {
     "Egg Free",
     "Soy Free",
   ];
-  const allergens = [];
-  for (const name of allergenNames) {
-    const allergen = await prisma.allergen.create({ data: { name } });
-    allergens.push(allergen);
-    console.log(`Created allergen: ${name} (ID: ${allergen.id})`);
+  
+  await prisma.allergen.createMany({
+    data: allergenNames.map(name => ({ name })),
+    skipDuplicates: true,
+  });
+  console.log(`Created ${allergenNames.length} allergens`);
+}
+
+/**
+ * Create seed users
+ */
+async function createUsers(): Promise<User[]> {
+  console.log("Creating seed users...");
+  const seedUsernames = ["HomeBaker", "ChefDad", "TheRealSpiceGirl"];
+  const users: User[] = [];
+
+  for (const username of seedUsernames) {
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email: `${username.toLowerCase()}@example.com`,
+        passwordHash: await bcrypt.hash("password123", 10),
+        bio: faker.lorem.sentence(),
+      },
+    });
+    users.push(user);
+    console.log(`Created user: ${username} (ID: ${user.id})`);
   }
 
-  // --- READ RECIPE JSON FILES ---
-  console.log("Reading recipe folders...");
-  const recipeFolders = readRecipeFolders() || [];
+  return users;
+}
+
+/**
+ * Import recipes from seed-data directory
+ */
+async function importRecipes(users: User[]) {
+  console.log("Reading recipe folders from seed-data...");
+  const recipeFolders = readRecipeFolders();
   console.log(`Found ${recipeFolders.length} recipe(s) to import.`);
 
-  // --- IMPORT JSON RECIPES ---
-  for (const { slug, data, folderPath } of recipeFolders) {
-    console.log(`Importing recipe: ${data.title}`);
-    try {
-      const author = faker.helpers.arrayElement(users);
+  // Create a map of usernames to user objects for easy lookup
+  const userMap = new Map(users.map(u => [u.username, u]));
 
+  for (const { slug, data, folderPath } of recipeFolders) {
+    console.log(`\nImporting recipe: ${data.title}`);
+    
+    try {
+      // Determine the author based on recipe assignment
+      let author: User | undefined = undefined;
+      for (const [username, recipeList] of Object.entries(USER_RECIPE_ASSIGNMENTS)) {
+        if (recipeList.includes(slug)) {
+          author = userMap.get(username);
+          break;
+        }
+      }
+      
+      // Fallback to random user if not assigned
+      if (!author) {
+        author = faker.helpers.arrayElement(users);
+        console.log(`  ⚠️  No specific author assigned, using random: ${author.username}`);
+      } else {
+        console.log(`  Author: ${author.username}`);
+      }
+
+      // Find or create cuisine
       let cuisineId: string | null = null;
       if (data.cuisine) {
-        let cuisine = await prisma.cuisine.findUnique({
+        const cuisine = await prisma.cuisine.upsert({
           where: { name: data.cuisine },
+          update: {},
+          create: { name: data.cuisine },
         });
-        if (!cuisine) {
-          cuisine = await prisma.cuisine.create({
-            data: { name: data.cuisine },
-          });
-          console.log(`Created cuisine: ${cuisine.name}`);
-        }
         cuisineId = cuisine.id;
       }
 
-      // Create recipe first to get the ID
+      // Handle image upload if there's a local image file
+      let media: Media | null = null;
+      const imagePath = path.join(folderPath, "image.jpg");
+      if (fs.existsSync(imagePath)) {
+        console.log(`  Uploading image...`);
+        media = await uploadImageToCloudinary(
+          imagePath,
+          "recipe-website/seed",
+          author.id,
+          false
+        );
+      }
+
+      // Create recipe with nested writes
       const recipe = await prisma.recipe.create({
         data: {
           authorId: author.id,
@@ -300,134 +357,88 @@ async function main() {
           proteinG: data.proteinG,
           fatG: data.fatG,
           carbsG: data.carbsG,
+          ingredients: {
+            createMany: {
+              data: (data.ingredients || []).map((ing, idx: number) => ({
+                name: ing.name,
+                amount: ing.amount || null,
+                unit: ing.unit || null,
+                size: ing.size || null,
+                preparation: ing.preparation || null,
+                notes: ing.notes || null,
+                groupName: ing.groupName || null,
+                isOptional: ing.isOptional || false,
+                displayOrder: ing.displayOrder ?? idx,
+              })),
+            },
+          },
+          steps: {
+            createMany: {
+              data: (data.steps || []).map((step) => ({
+                stepNumber: step.stepNumber,
+                instruction: step.instruction,
+                isOptional: step.isOptional || false,
+              })),
+            },
+          },
         },
       });
 
-      // Handle image upload if there's a local image file
-      if (folderPath) {
-        let sourceImagePath: string | null = null;
-
-        // If imageUrl is provided and is a local path (not a URL)
-        if (data.imageUrl && !data.imageUrl.startsWith("http")) {
-          sourceImagePath = path.join(folderPath, data.imageUrl);
-          console.log(`  Checking for image: ${data.imageUrl}`);
-        }
-        // If no imageUrl or empty string, search for image files in the folder
-        else if (!data.imageUrl || data.imageUrl === "") {
-          console.log(`  No imageUrl specified, searching for image files...`);
-          const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
-          const files = fs.readdirSync(folderPath);
-
-          for (const file of files) {
-            const ext = path.extname(file).toLowerCase();
-            if (imageExtensions.includes(ext)) {
-              sourceImagePath = path.join(folderPath, file);
-              console.log(`  Found image file: ${file}`);
-              break;
-            }
-          }
-        }
-
-        // If we found an image path, try to upload it to Cloudinary
-        if (sourceImagePath && fs.existsSync(sourceImagePath)) {
-          console.log(`  Image found! Uploading to Cloudinary...`);
-          const media = await uploadImageToCloudinary(
-            sourceImagePath,
-            "recipe-website/seed",
-            author.id,
-            false
-          );
-
-          if (media) {
-            // Link media to recipe and set as primary
-            await prisma.media.update({
-              where: { id: media.id },
-              data: {
-                recipeId: recipe.id,
-                isPrimary: true,
-              },
-            });
-            console.log(`  ✓ Uploaded and linked image to recipe`);
-          } else {
-            console.log(`  ⚠️  No image uploaded - using default placeholder`);
-          }
-        } else {
-          if (sourceImagePath) {
-            console.log(`  ✗ Image file not found at path: ${sourceImagePath}`);
-          } else {
-            console.log(`  No image file found in folder`);
-          }
-        }
-      }
-
-      // Ingredients
-      if (data.ingredients?.length) {
-        await prisma.recipeIngredient.createMany({
-          data: data.ingredients.map((ing, idx) => ({
+      // Link media to recipe if uploaded
+      if (media) {
+        await prisma.media.update({
+          where: { id: media.id },
+          data: {
             recipeId: recipe.id,
-            name: ing.name,
-            amount: ing.amount || null,
-            unit: ing.unit || null,
-            size: ing.size || null,
-            preparation: ing.preparation || null,
-            notes: ing.notes || null,
-            groupName: ing.groupName || null,
-            isOptional: ing.isOptional || false,
-            displayOrder: ing.displayOrder ?? idx,
-          })),
+            isPrimary: true,
+          },
         });
       }
 
-      // Steps
-      if (data.steps?.length) {
-        await prisma.recipeStep.createMany({
-          data: data.steps.map((step) => ({
-            recipeId: recipe.id,
-            stepNumber: step.stepNumber,
-            instruction: step.instruction,
-            isOptional: step.isOptional || false,
-          })),
-        });
-      }
-
-      // Tags
+      // Connect tags using connectOrCreate
       if (data.tags?.length) {
         for (const tagName of data.tags) {
-          let tag = await prisma.tag.findUnique({ where: { name: tagName } });
-          if (!tag) tag = await prisma.tag.create({ data: { name: tagName } });
+          const tag = await prisma.tag.upsert({
+            where: { name: tagName },
+            update: {},
+            create: { name: tagName },
+          });
           await prisma.recipesTags.create({
             data: { recipeId: recipe.id, tagId: tag.id },
           });
         }
       }
 
-      // Categories
+      // Connect categories
       if (data.categories?.length) {
         for (const categoryName of data.categories) {
           const category = await prisma.category.findUnique({
             where: { name: categoryName },
           });
-          if (category)
+          if (category) {
             await prisma.recipesCategories.create({
               data: { recipeId: recipe.id, categoryId: category.id },
             });
+          }
         }
       }
 
-      // Allergens
+      // Connect allergens
       if (data.allergens?.length) {
         for (const allergenName of data.allergens) {
           const allergen = await prisma.allergen.findUnique({
             where: { name: allergenName },
           });
-          if (allergen)
+          if (allergen) {
             await prisma.recipesAllergens.create({
               data: { recipeId: recipe.id, allergenId: allergen.id },
             });
+          }
         }
       }
 
-      const reviewsCount = faker.number.int({ min: 1, max: 3 }); // min is now 1
+      // Generate random reviews
+      const reviewsCount = faker.number.int({ min: 1, max: 3 });
       for (let r = 0; r < reviewsCount; r++) {
         const reviewer = faker.helpers.arrayElement(users);
         await prisma.review.create({
@@ -440,13 +451,29 @@ async function main() {
         });
       }
 
-      console.log(`✓ Imported recipe: ${data.title}`);
+      console.log(`  ✓ Successfully imported: ${data.title}`);
     } catch (err) {
-      console.error(`✗ Failed to import recipe ${data.title}:`, err);
+      console.error(`  ✗ Failed to import recipe ${data.title}:`, err);
     }
   }
+}
 
-  console.log("Seeding finished successfully!");
+async function main() {
+  console.log("Seeding database started...\n");
+
+  // Step 1: Clear existing data
+  await clearExistingData();
+
+  // Step 2: Seed static reference data
+  await seedStaticData();
+
+  // Step 3: Create users
+  const users = await createUsers();
+
+  // Step 4: Import recipes from seed-data
+  await importRecipes(users);
+
+  console.log("\n✅ Seeding finished successfully!");
 }
 
 main()
