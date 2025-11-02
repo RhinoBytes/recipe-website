@@ -23,7 +23,6 @@ export default function AvatarPicker({ currentAvatar, onSuccess, className = '' 
   const avatars = getAllProfilePhotos();
 
   const handleSelect = async (avatar: string) => {
-    setSelectedAvatar(avatar);
     setUploading(true);
     setUploadError(null);
 
@@ -40,12 +39,11 @@ export default function AvatarPicker({ currentAvatar, onSuccess, className = '' 
       }
 
       const data = await response.json();
+      setSelectedAvatar(data.avatarUrl);
       onSuccess(data.avatarUrl);
     } catch (error) {
       console.error('Avatar selection error:', error);
       setUploadError(error instanceof Error ? error.message : 'Failed to set avatar');
-      // Revert selection on error
-      setSelectedAvatar(currentAvatar || '');
     } finally {
       setUploading(false);
     }
