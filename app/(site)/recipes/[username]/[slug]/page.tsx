@@ -319,43 +319,92 @@ export default async function RecipePage({ params }: RecipePageProps) {
             )}
 
             {/* Mobile-Only Accordion Sections for Quick Actions & Nutrition */}
-            <div className="lg:hidden bg-bg-secondary rounded-lg shadow-md overflow-hidden">
-              <AccordionSection title="Quick Actions" defaultOpen={false}>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
-                    <FavoriteButton recipeId={recipe.id} />
-                  </div>
-                  <SocialShare title={recipe.title} description={recipe.description || undefined} />
-                  <PrintButton />
+            {/*
+              Extract averageRatingFloat to avoid duplicate parseFloat logic
+            */}
+            {(() => {
+              const averageRatingFloat =
+                recipe.averageRating && !isNaN(Number(recipe.averageRating))
+                  ? parseFloat(recipe.averageRating.toString())
+                  : 0;
+              return (
+                <div className="lg:hidden bg-bg-secondary rounded-lg shadow-md overflow-hidden">
+                  <AccordionSection title="Quick Actions" defaultOpen={false}>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="col-span-2">
+                        <FavoriteButton recipeId={recipe.id} />
+                      </div>
+                      <SocialShare title={recipe.title} description={recipe.description || undefined} />
+                      <PrintButton />
+                    </div>
+                  </AccordionSection>
+
+                  {(recipe.averageRating && recipe.averageRating > 0) || recipe.reviewCount > 0 ? (
+                    <AccordionSection title="Rating" defaultOpen={false}>
+                      <div className="text-center space-y-3">
+                        <div className="flex gap-1 justify-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={24}
+                              className={
+                                star <= Math.round(averageRatingFloat)
+                                  ? "fill-highlight text-highlight"
+                                  : "text-border"
+                              }
+                            />
+                          ))}
+                        </div>
+                        <div className="text-3xl font-bold text-text">
+                          {averageRatingFloat.toFixed(1)}
+                        </div>
+                        <div className="text-sm text-text-secondary">
+                          {recipe.reviewCount} {recipe.reviewCount === 1 ? "review" : "reviews"}
+                        </div>
+                      </div>
+                    </AccordionSection>
+                  ) : null}
+
+                  <AccordionSection title="Nutrition Per Serving" defaultOpen={false}>
+                    {(recipe.calories || recipe.proteinG || recipe.fatG || recipe.carbsG) ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        {recipe.calories && (
+                          <div className="bg-bg rounded-lg p-4 text-center border-2 border-accent/20">
+                            <div className="text-3xl font-bold text-accent">{recipe.calories}</div>
+                            <div className="text-xs text-text-secondary mt-1 font-medium">Calories</div>
+                          </div>
+                        )}
+                        {recipe.proteinG && (
+                          <div className="bg-bg rounded-lg p-4 text-center border-2 border-secondary/20">
+                            <div className="text-3xl font-bold text-secondary">{recipe.proteinG}g</div>
+                            <div className="text-xs text-text-secondary mt-1 font-medium">Protein</div>
+                          </div>
+                        )}
+                        {recipe.fatG && (
+                          <div className="bg-bg rounded-lg p-4 text-center border-2 border-muted/20">
+                            <div className="text-3xl font-bold text-muted">{recipe.fatG}g</div>
+                            <div className="text-xs text-text-secondary mt-1 font-medium">Fat</div>
+                          </div>
+                        )}
+                        {recipe.carbsG && (
+                          <div className="bg-bg rounded-lg p-4 text-center border-2 border-highlight/20">
+                            <div className="text-3xl font-bold text-highlight">{recipe.carbsG}g</div>
+                            <div className="text-xs text-text-secondary mt-1 font-medium">Carbs</div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-text-secondary">Not Available</p>
+                        <p className="text-xs text-text-muted mt-1">
+                          Nutritional data has not been provided for this recipe
+                        </p>
+                      </div>
+                    )}
+                  </AccordionSection>
                 </div>
-              </AccordionSection>
-
-              {(recipe.averageRating && recipe.averageRating > 0) || recipe.reviewCount > 0 ? (
-                <AccordionSection title="Rating" defaultOpen={false}>
-                  <div className="text-center space-y-3">
-                    <div className="flex gap-1 justify-center">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          size={24}
-                          className={
-                            star <= Math.round(recipe.averageRating ? parseFloat(recipe.averageRating.toString()) : 0)
-                              ? "fill-highlight text-highlight"
-                              : "text-border"
-                          }
-                        />
-                      ))}
-                    </div>
-                    <div className="text-3xl font-bold text-text">
-                      {recipe.averageRating ? parseFloat(recipe.averageRating.toString()).toFixed(1) : '0.0'}
-                    </div>
-                    <div className="text-sm text-text-secondary">
-                      {recipe.reviewCount} {recipe.reviewCount === 1 ? "review" : "reviews"}
-                    </div>
-                  </div>
-                </AccordionSection>
-              ) : null}
-
+              );
+            })()}
               <AccordionSection title="Nutrition Per Serving" defaultOpen={false}>
                 {(recipe.calories || recipe.proteinG || recipe.fatG || recipe.carbsG) ? (
                   <div className="grid grid-cols-2 gap-3">
