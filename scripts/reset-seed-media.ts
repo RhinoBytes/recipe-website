@@ -209,7 +209,11 @@ async function cleanupSeedMedia() {
 /**
  * Optional: Clean up seed users and recipes
  * This is more aggressive and should be used with caution
+ * 
+ * NOTE: Currently unused. This function is kept for potential future use.
+ * For full database reset, use 'npx prisma migrate reset'
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function cleanupSeedData(deleteUsers: boolean = false) {
   console.log("\n🗑️  Cleaning up seed data (recipes, users, etc.)...");
   
