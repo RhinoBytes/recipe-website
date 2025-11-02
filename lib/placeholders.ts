@@ -1,11 +1,11 @@
 /**
- * Cottagecore Placeholder Images and Profile Avatars
- * SVG-based placeholders that match the cottagecore aesthetic
+ * Placeholder Images
+ * SVG-based placeholders for recipes and categories
  */
 
 /**
- * Cottagecore Recipe Placeholder Images
- * These are data URLs for inline SVG images with cottagecore themes
+ * Recipe Placeholder Images
+ * These are data URLs for inline SVG images with themed designs
  */
 export const COTTAGECORE_RECIPE_PLACEHOLDERS = [
   // Wildflower Meadow
@@ -28,7 +28,7 @@ export const COTTAGECORE_RECIPE_PLACEHOLDERS = [
 ];
 
 /**
- * Get a random cottagecore recipe placeholder
+ * Get a random recipe placeholder
  */
 export function getRandomRecipePlaceholder(): string {
   return COTTAGECORE_RECIPE_PLACEHOLDERS[
@@ -37,7 +37,7 @@ export function getRandomRecipePlaceholder(): string {
 }
 
 /**
- * Get a specific cottagecore recipe placeholder by index
+ * Get a specific recipe placeholder by index
  */
 export function getRecipePlaceholder(index: number): string {
   return COTTAGECORE_RECIPE_PLACEHOLDERS[
@@ -46,8 +46,8 @@ export function getRecipePlaceholder(index: number): string {
 }
 
 /**
- * Cottagecore Profile Avatar Options
- * Round avatar designs with cottagecore themes
+ * Profile Avatar Options
+ * Round avatar designs with themed styles
  */
 export const COTTAGECORE_PROFILE_AVATARS = [
   // Sage Green with Flower
@@ -82,7 +82,7 @@ export const COTTAGECORE_PROFILE_AVATARS = [
 ];
 
 /**
- * Get a random cottagecore profile avatar
+ * Get a random profile avatar
  */
 export function getRandomProfileAvatar(): string {
   return COTTAGECORE_PROFILE_AVATARS[
@@ -91,7 +91,7 @@ export function getRandomProfileAvatar(): string {
 }
 
 /**
- * Get a specific cottagecore profile avatar by index
+ * Get a specific profile avatar by index
  */
 export function getProfileAvatar(index: number): string {
   return COTTAGECORE_PROFILE_AVATARS[
@@ -107,7 +107,7 @@ export function getAllProfileAvatars(): string[] {
 }
 
 /**
- * Cottagecore Category Images
+ * Category Images
  * Unique images for main recipe categories
  */
 export const COTTAGECORE_CATEGORY_IMAGES: Record<string, string> = {
@@ -165,6 +165,6 @@ export function getCategoryImage(categoryName: string): string {
     return COTTAGECORE_RECIPE_PLACEHOLDERS[0];
   }
 
-  // Ultimate fallback: a simple cottagecore-themed SVG
+  // Ultimate fallback: a simple themed SVG
   return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Crect fill='%23FAF8F5' width='400' height='200'/%3E%3Ctext x='200' y='100' font-family='serif' font-size='24' fill='%238C6B56' text-anchor='middle'%3ERecipe%3C/text%3E%3C/svg%3E`;
 }

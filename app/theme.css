@@ -1,104 +1,10 @@
 /**
- * Cottagecore Theme System
- * CSS custom properties for light, dark, and terracotta themes
+ * Theme System
+ * CSS custom properties for terracotta light and dark themes
  */
 
-/* Light Cottagecore Theme (Default) */
+/* Terracotta Theme (Light Mode - Default) */
 :root,
-:root[data-theme="light-cottagecore"] {
-  /* Background colors */
-  --bg: #faf8f5;
-  --bg-secondary: #ffffff;
-  --bg-elevated: #ffffff;
-
-  /* Text colors */
-  --text: #3e3b36;
-  --text-secondary: #8c6b56;
-  --text-muted: #a89b8f;
-
-  /* Accent colors */
-  --accent: #a8bba0;
-  --accent-hover: #92a589;
-  --accent-light: #c5d4be;
-
-  /* Secondary accent */
-  --secondary: #ebc8c0;
-  --secondary-hover: #ddb3aa;
-  --secondary-light: #f5e0dc;
-
-  /* Highlight color */
-  --highlight: #f2e2b9;
-  --highlight-hover: #e6d4a3;
-
-  /* Border colors */
-  --border: #e5e1da;
-  --border-light: #f0ede6;
-  --border-dark: #d1ccc0;
-
-  /* Muted/brown tones */
-  --muted: #8c6b56;
-  --muted-light: #b5967d;
-
-  /* Shadow colors */
-  --shadow-sm: rgba(62, 59, 54, 0.05);
-  --shadow-md: rgba(62, 59, 54, 0.1);
-  --shadow-lg: rgba(62, 59, 54, 0.15);
-
-  /* State colors */
-  --success: #a8bba0;
-  --error: #c97c6c;
-  --warning: #e6c577;
-  --info: #9dafbd;
-}
-
-/* Dark Cottagecore Theme */
-:root[data-theme="dark-cottagecore"] {
-  /* Background colors */
-  --bg: #3d4a3f;
-  --bg-secondary: #4a5a4d;
-  --bg-elevated: #556856;
-
-  /* Text colors */
-  --text: #e5e1da;
-  --text-secondary: #c5bdb0;
-  --text-muted: #a8bba0;
-
-  /* Accent colors */
-  --accent: #566350;
-  --accent-hover: #6a7863;
-  --accent-light: #7a8b76;
-
-  /* Secondary accent */
-  --secondary: #c9a6a0;
-  --secondary-hover: #ddb8b2;
-  --secondary-light: #e0c3be;
-
-  /* Highlight color */
-  --highlight: #dcd2b2;
-  --highlight-hover: #e8dfc4;
-
-  /* Border colors */
-  --border: #5b4634;
-  --border-light: #6e5942;
-  --border-dark: #4a3828;
-
-  /* Muted/sage tones */
-  --muted: #a8bba0;
-  --muted-light: #b8c7b0;
-
-  /* Shadow colors */
-  --shadow-sm: rgba(0, 0, 0, 0.2);
-  --shadow-md: rgba(0, 0, 0, 0.3);
-  --shadow-lg: rgba(0, 0, 0, 0.4);
-
-  /* State colors */
-  --success: #a8bba0;
-  --error: #c97c6c;
-  --warning: #e6c577;
-  --info: #9dafbd;
-}
-
-/* Terracotta Theme */
 :root[data-theme="terracotta"] {
   /* Primary colors */
   --accent: #d4735a; /* Warm terracotta */
@@ -133,6 +39,57 @@
   --warning: #ffc107;
   --error: #dc3545;
   --info: #6c757d;
+
+  /* Card gradient */
+  --card-gradient: linear-gradient(
+    to bottom right,
+    rgba(212, 115, 90, 0.85),
+    rgba(184, 92, 66, 0.9)
+  );
+}
+
+/* Dark Terracotta Theme */
+:root[data-theme="dark-terracotta"] {
+  /* Primary colors - warmer, softer terracotta tones for dark mode */
+  --accent: #d4735a; /* Keep terracotta as accent */
+  --accent-hover: #e68970; /* Lighter hover for dark background */
+  --accent-light: #3a2a25; /* Dark accent background */
+
+  /* Background and text */
+  --bg: #1a1410; /* Deep brown-black background */
+  --bg-secondary: #2a1f1a; /* Slightly lighter brown */
+  --bg-elevated: #3a2a25; /* Elevated surfaces */
+
+  --text: #f5e6d3; /* Warm cream text */
+  --text-secondary: #c9b8a0; /* Muted warm text */
+  --text-muted: #8a7a68;
+
+  /* Border */
+  --border: #3a2a25; /* Dark warm border */
+  --border-light: #4a3a30;
+  --border-dark: #2a1f1a;
+
+  /* Muted tones */
+  --muted: #8a7a68;
+  --muted-light: #a89886;
+
+  /* Shadow colors */
+  --shadow-sm: rgba(0, 0, 0, 0.3);
+  --shadow-md: rgba(0, 0, 0, 0.4);
+  --shadow-lg: rgba(0, 0, 0, 0.5);
+
+  /* State colors - adjusted for dark mode */
+  --success: #4caf50;
+  --warning: #ff9800;
+  --error: #f44336;
+  --info: #9e9e9e;
+
+  /* Card gradient */
+  --card-gradient: linear-gradient(
+    to bottom right,
+    rgba(212, 115, 90, 0.75),
+    rgba(58, 42, 37, 0.9)
+  );
 }
 
 /* Base typography styles */
@@ -150,30 +107,4 @@ body {
   transition-property: background-color, border-color, color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 0.2s;
-}
-/* Light Cottagecore */
-:root[data-theme="light-cottagecore"] {
-  --card-gradient: linear-gradient(
-    to bottom right,
-    rgba(168, 187, 160, 0.9),
-    rgba(140, 107, 86, 0.9)
-  );
-}
-
-/* Dark Cottagecore */
-:root[data-theme="dark-cottagecore"] {
-  --card-gradient: linear-gradient(
-    to bottom right,
-    rgba(61, 74, 63, 0.85),
-    rgba(30, 30, 30, 0.9)
-  );
-}
-
-/* Terracotta */
-:root[data-theme="terracotta"] {
-  --card-gradient: linear-gradient(
-    to bottom right,
-    rgba(212, 115, 90, 0.85),
-    rgba(184, 92, 66, 0.9)
-  );
 }
