@@ -60,7 +60,6 @@ export default function NewRecipePage() {
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
     difficulty: Difficulty.MEDIUM,
-    imageUrl: "",
     sourceUrl: "",
     sourceText: "",
     cuisineName: "",
@@ -180,7 +179,6 @@ export default function NewRecipePage() {
       prepTimeMinutes: formatted.prepTimeMinutes || 15,
       cookTimeMinutes: formatted.cookTimeMinutes || 30,
       difficulty: difficultyEnum,
-      imageUrl: formatted.imageUrl || "",
       sourceUrl: "",
       sourceText: "",
       cuisineName: formatted.cuisineName || "",
@@ -199,23 +197,19 @@ export default function NewRecipePage() {
   
   const handleMediaUploaded = (media: Media) => {
     setUploadedMedia((prev) => [...prev, media]);
-    // Set the first uploaded media as the recipe's main image
-    if (uploadedMedia.length === 0) {
-      setFormData((prev) => ({ ...prev, imageUrl: media.secureUrl || media.url }));
+    // Mark first uploaded media as primary
+    if (uploadedMedia.length === 0 && media.id) {
+      // Update media to be primary (will be handled in backend)
+      fetch(`/api/media/${media.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPrimary: true }),
+      }).catch(console.error);
     }
   };
 
   const handleMediaDeleted = (mediaId: string) => {
     setUploadedMedia((prev) => prev.filter((m) => m.id !== mediaId));
-    // If the deleted media was the main image, clear or update imageUrl
-    const deletedMedia = uploadedMedia.find((m) => m.id === mediaId);
-    if (deletedMedia && formData.imageUrl === (deletedMedia.secureUrl || deletedMedia.url)) {
-      const remainingMedia = uploadedMedia.filter((m) => m.id !== mediaId);
-      setFormData((prev) => ({
-        ...prev,
-        imageUrl: remainingMedia.length > 0 ? (remainingMedia[0].secureUrl || remainingMedia[0].url) : "",
-      }));
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

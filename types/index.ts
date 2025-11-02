@@ -5,7 +5,6 @@ export interface User {
   username: string;
   email: string;
   role: string;
-  avatarUrl?: string | null;
   bio?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
@@ -69,7 +68,6 @@ export interface DetailedRecipe {
   slug: string | null;
   title: string;
   description: string | null;
-  imageUrl: string | null;
   prepTimeMinutes: number | null;
   cookTimeMinutes: number | null;
   servings: number | null;
@@ -113,6 +111,8 @@ export interface Media {
   resourceType: "IMAGE" | "VIDEO";
   userId: string;
   recipeId: string | null;
+  isProfileAvatar: boolean;
+  isPrimary: boolean;
   createdAt: Date | string;
 }
 
@@ -120,7 +120,6 @@ export interface MediaWithUser extends Media {
   user: {
     id: string;
     username: string;
-    avatarUrl: string | null;
   };
 }
 

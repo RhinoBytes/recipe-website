@@ -34,6 +34,8 @@ export async function POST(request: Request) {
       folder,
       recipeId,
       altText,
+      isPrimary,
+      isProfileAvatar,
     } = body;
 
     // Validate required fields
@@ -91,6 +93,8 @@ export async function POST(request: Request) {
         resourceType,
         userId: currentUser.id,
         recipeId: recipeId || null,
+        isPrimary: isPrimary || false,
+        isProfileAvatar: isProfileAvatar || false,
       },
     });
 
