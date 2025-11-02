@@ -1,0 +1,138 @@
+{
+  "title": "Mexican Rice (Arroz Rojo)",
+  "slug": "mexican-rice",
+  "description": "Fluffy Spanish rice cooked with tomatoes, onions, and garlic. This classic side dish is the perfect accompaniment to any Mexican meal.",
+  "cuisine": "Mexican",
+  "difficulty": "EASY",
+  "servings": 6,
+  "prepTimeMinutes": 10,
+  "cookTimeMinutes": 25,
+  "calories": 185,
+  "proteinG": 4,
+  "fatG": 4,
+  "carbsG": 34,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "long-grain white rice",
+      "amount": "1 1/2",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "vegetable oil",
+      "amount": "2",
+      "unit": "tbsp",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "white onion",
+      "amount": "1/2",
+      "unit": "cup",
+      "preparation": "finely diced",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "garlic",
+      "amount": "2",
+      "unit": "cloves",
+      "preparation": "minced",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "tomato sauce",
+      "amount": "1/2",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "chicken broth",
+      "amount": "2",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "cumin",
+      "amount": "1/2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "salt",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "fresh cilantro",
+      "amount": "2",
+      "unit": "tbsp",
+      "preparation": "chopped",
+      "isOptional": true,
+      "displayOrder": 8
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Rinse rice in cold water until water runs clear. Drain well.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Heat oil in a large skillet over medium heat.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Add rice and cook, stirring frequently, until golden brown (about 5 minutes).",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Add onion and garlic, cook for 2 minutes until softened.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Stir in tomato sauce, chicken broth, cumin, and salt.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Bring to a boil, then reduce heat to low. Cover and simmer for 20 minutes.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Remove from heat and let stand covered for 5 minutes.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Fluff with a fork and garnish with cilantro before serving.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Easy",
+    "One-Pot"
+  ],
+  "categories": [
+    "Side Dish"
+  ],
+  "allergens": [
+    "Vegetarian",
+    "Dairy Free",
+    "Gluten Free"
+  ],
+  "imageUrl": "image.jpg"
+}

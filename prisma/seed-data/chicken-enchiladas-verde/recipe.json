@@ -1,0 +1,162 @@
+{
+  "title": "Chicken Enchiladas Verde",
+  "slug": "chicken-enchiladas-verde",
+  "description": "Tender chicken wrapped in soft corn tortillas, smothered in tangy tomatillo salsa verde and melted cheese. This authentic Mexican dish is comfort food at its finest.",
+  "cuisine": "Mexican",
+  "difficulty": "MEDIUM",
+  "servings": 6,
+  "prepTimeMinutes": 30,
+  "cookTimeMinutes": 25,
+  "calories": 425,
+  "proteinG": 28,
+  "fatG": 22,
+  "carbsG": 32,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "chicken breast",
+      "amount": "2",
+      "unit": "lbs",
+      "preparation": "cooked and shredded",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "corn tortillas",
+      "amount": "12",
+      "unit": "whole",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "tomatillos",
+      "amount": "1",
+      "unit": "lb",
+      "preparation": "husked",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "jalapeño peppers",
+      "amount": "2",
+      "unit": "whole",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "white onion",
+      "amount": "1/2",
+      "unit": "whole",
+      "preparation": "chopped",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "garlic cloves",
+      "amount": "3",
+      "unit": "cloves",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "fresh cilantro",
+      "amount": "1/2",
+      "unit": "cup",
+      "preparation": "chopped",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "chicken broth",
+      "amount": "1/2",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "sour cream",
+      "amount": "1/4",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "Monterey Jack cheese",
+      "amount": "2",
+      "unit": "cups",
+      "preparation": "shredded",
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "salt",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 10
+    },
+    {
+      "name": "cumin",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 11
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Preheat oven to 375°F (190°C). Lightly grease a 9x13 inch baking dish.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Roast tomatillos, jalapeños, onion, and garlic under broiler for 8-10 minutes until charred.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Transfer roasted vegetables to a blender. Add cilantro, chicken broth, sour cream, salt, and cumin. Blend until smooth.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Warm tortillas in microwave for 30 seconds to make them pliable.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Dip each tortilla in the verde sauce to coat lightly.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Fill each tortilla with shredded chicken and a sprinkle of cheese. Roll tightly and place seam-side down in baking dish.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Pour remaining verde sauce over enchiladas and top with remaining cheese.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Bake for 25-30 minutes until cheese is melted and bubbly.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Let stand 5 minutes before serving. Garnish with cilantro, sour cream, and sliced avocado.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Comfort Food",
+    "Family-Friendly"
+  ],
+  "categories": [
+    "Dinner"
+  ],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}

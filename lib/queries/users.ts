@@ -132,7 +132,6 @@ export async function getUserRecipes(
     };
   });
 }
-}
 
 /**
  * Get spotlight chef (user with highest average rating and multiple recipes)
