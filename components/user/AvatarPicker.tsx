@@ -7,7 +7,7 @@ import { Check, Upload, Loader2 } from 'lucide-react';
 
 interface AvatarPickerProps {
   currentAvatar?: string;
-  onSelect: (avatar: string) => void;
+  onSuccess: (avatarUrl: string) => void;
   className?: string;
 }
 
@@ -15,16 +15,38 @@ interface AvatarPickerProps {
  * Avatar Picker Component
  * Allows users to select from default profile photos or upload their own
  */
-export default function AvatarPicker({ currentAvatar, onSelect, className = '' }: AvatarPickerProps) {
+export default function AvatarPicker({ currentAvatar, onSuccess, className = '' }: AvatarPickerProps) {
   const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar || '');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatars = getAllProfilePhotos();
 
-  const handleSelect = (avatar: string) => {
-    setSelectedAvatar(avatar);
-    onSelect(avatar);
+  const handleSelect = async (avatar: string) => {
+    setUploading(true);
+    setUploadError(null);
+
+    try {
+      const response = await fetch('/api/user/avatar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatarUrl: avatar }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to set avatar');
+      }
+
+      const data = await response.json();
+      setSelectedAvatar(data.avatarUrl);
+      onSuccess(data.avatarUrl);
+    } catch (error) {
+      console.error('Avatar selection error:', error);
+      setUploadError(error instanceof Error ? error.message : 'Failed to set avatar');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleUploadClick = () => {
@@ -67,7 +89,8 @@ export default function AvatarPicker({ currentAvatar, onSelect, className = '' }
       }
 
       const data = await response.json();
-      handleSelect(data.avatarUrl);
+      setSelectedAvatar(data.avatarUrl);
+      onSuccess(data.avatarUrl);
     } catch (error) {
       console.error('Upload error:', error);
       setUploadError(error instanceof Error ? error.message : 'Failed to upload image');
@@ -103,7 +126,7 @@ export default function AvatarPicker({ currentAvatar, onSelect, className = '' }
           type="button"
           onClick={handleUploadClick}
           disabled={uploading}
-          className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-dashed border-border hover:border-accent-light transition-all hover:scale-105 bg-bg-secondary flex items-center justify-center"
+          className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-dashed border-border hover:border-accent-light transition-all hover:scale-105 bg-bg-secondary flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Upload custom avatar"
         >
           {uploading ? (
@@ -127,7 +150,8 @@ export default function AvatarPicker({ currentAvatar, onSelect, className = '' }
             key={index}
             type="button"
             onClick={() => handleSelect(avatar)}
-            className={`relative w-full aspect-square rounded-full overflow-hidden border-4 transition-all hover:scale-105 ${
+            disabled={uploading}
+            className={`relative w-full aspect-square rounded-full overflow-hidden border-4 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
               selectedAvatar === avatar
                 ? 'border-accent shadow-lg ring-2 ring-accent'
                 : 'border-border hover:border-accent-light'

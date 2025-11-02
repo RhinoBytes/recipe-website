@@ -60,7 +60,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [usernameError, setUsernameError] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [usernameLoading, setUsernameLoading] = useState(false);
   const [error, setError] = useState("");
   const [sortOption, setSortOption] = useState<"newest" | "oldest" | "popular">("newest");
 
@@ -148,7 +148,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       return;
     }
 
-    setSaving(true);
+    setUsernameLoading(true);
     setUsernameError("");
     try {
       const response = await fetch("/api/user/profile", {
@@ -173,38 +173,17 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       console.error("Failed to update username:", error);
       setUsernameError("Failed to update username");
     } finally {
-      setSaving(false);
+      setUsernameLoading(false);
     }
   };
 
-  const handleAvatarSelect = async (avatarUrl: string) => {
-    if (!isOwnProfile) return;
-
-    setSaving(true);
-    try {
-      const response = await fetch("/api/user/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarUrl }),
-      });
-
-      if (response.ok) {
-        // Update context immediately for instant feedback across all components
-        updateUser({ avatarUrl });
-        setShowAvatarModal(false);
-        // Update profile user if viewing own profile (needed for this page's display)
-        if (isOwnProfile) {
-          setProfileUser(prev => prev ? { ...prev, avatarUrl } : null);
-        }
-      } else {
-        const data = await response.json();
-        alert(data.error || "Failed to update avatar");
-      }
-    } catch (error) {
-      console.error("Failed to update avatar:", error);
-      alert("Failed to update avatar");
-    } finally {
-      setSaving(false);
+  const handleAvatarUpdate = (avatarUrl: string) => {
+    // Update context immediately for instant feedback across all components
+    updateUser({ avatarUrl });
+    setShowAvatarModal(false);
+    // Update profile user if viewing own profile (needed for this page's display)
+    if (isOwnProfile) {
+      setProfileUser(prev => prev ? { ...prev, avatarUrl } : null);
     }
   };
 
@@ -549,7 +528,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                                 onClick={handleUsernameUpdate}
                                 variant="primary"
                                 size="sm"
-                                loading={saving}
+                                loading={usernameLoading}
                               >
                                 Save
                               </Button>
@@ -634,13 +613,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
             </div>
             <AvatarPicker
               currentAvatar={profileUser?.avatarUrl || ""}
-              onSelect={handleAvatarSelect}
+              onSuccess={handleAvatarUpdate}
             />
-            {saving && (
-              <div className="mt-4 text-center text-text-secondary dark:text-text-muted">
-                Updating avatar...
-              </div>
-            )}
           </div>
         </div>
       )}
