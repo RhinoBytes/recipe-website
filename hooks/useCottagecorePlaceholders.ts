@@ -1,4 +1,4 @@
-import { getRandomRecipePlaceholder } from '@/lib/placeholders';
+import { getRandomRecipePlaceholder } from '@/lib/recipePlaceholders';
 import { getRandomProfilePhoto } from '@/lib/profilePhotos';
 
 /**
