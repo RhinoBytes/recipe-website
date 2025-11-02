@@ -1,16 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, Star, Heart } from "lucide-react";
+import { DEFAULT_RECIPE_IMAGE } from "@/lib/constants";
 
 interface RelatedRecipe {
   id: string;
   title: string;
   slug: string;
-  imageUrl: string | null;
   prepTimeMinutes: number | null;
   cookTimeMinutes: number | null;
   difficulty: string | null;
   averageRating: number;
+  media: Array<{
+    url: string;
+    secureUrl: string | null;
+    isPrimary: boolean;
+  }>;
   author: {
     username: string;
   };
@@ -34,6 +39,10 @@ export default function RelatedRecipes({ recipes }: RelatedRecipesProps) {
           const totalTime =
             (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0);
           const roundedRating = Math.round(recipe.averageRating);
+          
+          // Extract primary image URL
+          const primaryMedia = recipe.media.find(m => m.isPrimary) || recipe.media[0];
+          const imageUrl = primaryMedia?.secureUrl || primaryMedia?.url || DEFAULT_RECIPE_IMAGE;
 
           return (
             <Link
@@ -41,17 +50,15 @@ export default function RelatedRecipes({ recipes }: RelatedRecipesProps) {
               href={`/recipes/${recipe.author.username}/${recipe.slug}`}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
             >
-              {recipe.imageUrl && (
-                <div className="relative w-full h-40">
-                  <Image
-                    src={recipe.imageUrl}
-                    alt={recipe.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-              )}
+              <div className="relative w-full h-40">
+                <Image
+                  src={imageUrl}
+                  alt={recipe.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
               <div className="p-4">
                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
                   {recipe.title}
