@@ -15,7 +15,7 @@ export interface JWTPayload {
   email: string;
   username: string;
   role: string;
-  avatarUrl?: string;
+  // Note: avatarUrl removed - fetch from Media table when needed
 }
 
 // Hash password
@@ -82,6 +82,6 @@ export async function getUserFromSession() {
     email: user.email,
     username: user.username,
     role: user.role,
-    avatarUrl: user.avatarUrl, // or fetch from DB if you store it there
+    // Note: avatarUrl should be fetched from Media table via separate query
   };
 }

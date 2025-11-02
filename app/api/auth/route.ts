@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 /**
  * GET /api/auth
@@ -29,10 +30,17 @@ export async function GET() {
         username: true,
         email: true,
         role: true,
-        avatarUrl: true,
         bio: true,
         createdAt: true,
         updatedAt: true,
+        media: {
+          where: { isProfileAvatar: true },
+          select: {
+            url: true,
+            secureUrl: true,
+          },
+          take: 1,
+        },
       },
     });
 
@@ -41,10 +49,17 @@ export async function GET() {
       return NextResponse.json({ authenticated: false });
     }
 
+    // Extract avatar URL from media
+    const avatarMedia = user.media[0];
+    const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
+
     // Return user data with authenticated: true
     return NextResponse.json({
       authenticated: true,
-      user,
+      user: {
+        ...user,
+        avatarUrl,
+      },
     });
   } catch (error) {
     console.error("Get current user error:", error);

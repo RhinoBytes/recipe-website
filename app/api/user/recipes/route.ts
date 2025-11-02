@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { DEFAULT_RECIPE_IMAGE } from "@/lib/constants";
 
 /**
  * GET /api/user/recipes
@@ -31,6 +32,17 @@ export async function GET(request: Request) {
     const recipes = await prisma.recipe.findMany({
       where: { authorId: currentUser.userId },
       include: {
+        media: {
+          select: {
+            url: true,
+            secureUrl: true,
+            isPrimary: true,
+          },
+          orderBy: [
+            { isPrimary: "desc" },
+            { createdAt: "asc" },
+          ],
+        },
         tags: {
           include: {
             tag: true,
@@ -56,12 +68,15 @@ export async function GET(request: Request) {
 
     // Format recipes for display
     const formattedRecipes = recipes.map((recipe) => {
+      const primaryMedia = recipe.media.find(m => m.isPrimary) || recipe.media[0];
+      const imageUrl = primaryMedia?.secureUrl || primaryMedia?.url || DEFAULT_RECIPE_IMAGE;
+      
       return {
         id: recipe.id,
         slug: recipe.slug,
         title: recipe.title,
         description: recipe.description,
-        imageUrl: recipe.imageUrl,
+        imageUrl,
         prepTimeMinutes: recipe.prepTimeMinutes,
         cookTimeMinutes: recipe.cookTimeMinutes,
         servings: recipe.servings,

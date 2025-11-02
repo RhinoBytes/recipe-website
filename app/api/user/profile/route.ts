@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sanitizeInput } from "@/utils/validation";
+import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 /**
  * PATCH /api/user/profile
- * Update user profile (avatar and username)
+ * Update user profile (username and bio)
+ * 
+ * NOTE: Avatar management should be done via the Media API:
+ * - POST /api/media with isProfileAvatar: true
+ * - DELETE /api/media/[id] to remove avatar
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -18,12 +23,15 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { avatarUrl, username } = body;
+    const { username, bio } = body;
 
-    const updateData: { avatarUrl?: string; username?: string } = {};
+    const updateData: { username?: string; bio?: string } = {};
 
-    if (avatarUrl !== undefined) {
-      updateData.avatarUrl = avatarUrl;
+    // Note: avatarUrl is deprecated - use Media API for avatar management
+
+    if (bio !== undefined) {
+      const sanitizedBio = sanitizeInput(bio);
+      updateData.bio = sanitizedBio;
     }
 
     if (username !== undefined) {
@@ -66,16 +74,30 @@ export async function PATCH(request: NextRequest) {
         id: true,
         username: true,
         email: true,
-        avatarUrl: true,
         bio: true,
         role: true,
         createdAt: true,
+        media: {
+          where: { isProfileAvatar: true },
+          select: {
+            url: true,
+            secureUrl: true,
+          },
+          take: 1,
+        },
       },
     });
 
+    // Extract avatar URL
+    const avatarMedia = updatedUser.media[0];
+    const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
+
     return NextResponse.json({
       message: "Profile updated successfully",
-      user: updatedUser,
+      user: {
+        ...updatedUser,
+        avatarUrl,
+      },
     });
   } catch (error) {
     console.error("Profile update error:", error);

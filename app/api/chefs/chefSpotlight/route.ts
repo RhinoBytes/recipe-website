@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { RecipeStatus } from "@prisma/client";
+import { DEFAULT_CHEF_AVATAR } from "@/lib/constants";
 
 export async function GET() {
   try {
@@ -16,8 +17,15 @@ export async function GET() {
       select: {
         id: true,
         username: true,
-        avatarUrl: true,
         bio: true,
+        media: {
+          where: { isProfileAvatar: true },
+          select: {
+            url: true,
+            secureUrl: true,
+          },
+          take: 1,
+        },
         recipes: {
           select: {
             reviews: {
@@ -70,11 +78,14 @@ export async function GET() {
 
       if (avgRating > highestAvgRating) {
         highestAvgRating = avgRating;
+        const avatarMedia = user.media[0];
+        const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_CHEF_AVATAR;
+        
         spotlightChef = {
           id: user.id,
           name: user.username,
           title: `Recipe Contributor with ${user._count.recipes} recipes`,
-          avatar: user.avatarUrl || "/images/chefs/default.jpg",
+          avatar: avatarUrl,
           quote:
             user.bio ||
             "Cooking is not just about ingredients, it's about bringing joy to the table.",
@@ -85,11 +96,14 @@ export async function GET() {
     // If no suitable chef found, use the most prolific contributor
     if (!spotlightChef && users.length > 0) {
       const topContributor = users[0];
+      const avatarMedia = topContributor.media[0];
+      const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_CHEF_AVATAR;
+      
       spotlightChef = {
         id: topContributor.id,
         name: topContributor.username,
         title: `Recipe Contributor with ${topContributor._count.recipes} recipes`,
-        avatar: topContributor.avatarUrl || "/images/chefs/default.jpg",
+        avatar: avatarUrl,
         quote:
           topContributor.bio ||
           "Sharing my passion for food through delicious recipes.",
