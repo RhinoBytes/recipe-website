@@ -1,0 +1,374 @@
+{
+  "analysis_date": "2025-11-02",
+  "repository": "RhinoBytes/recipe-website",
+  "media_model_status": "PARTIALLY_IMPLEMENTED",
+  "database_status": "MIGRATIONS_EXIST",
+  "occurrences": [
+    {
+      "file": "prisma/schema.prisma",
+      "lines": [193-221],
+      "category": "database",
+      "priority": "DONE",
+      "status": "COMPLETE",
+      "decision": "Media model already exists with all required fields",
+      "notes": "Schema defines Media model with isProfileAvatar, isPrimary, relationships to User and Recipe"
+    },
+    {
+      "file": "prisma/migrations/20251102172700_add_media_model/migration.sql",
+      "category": "database",
+      "priority": "DONE",
+      "status": "COMPLETE",
+      "decision": "Migration already created and deployed",
+      "notes": "Creates Media table with proper indexes and foreign keys"
+    },
+    {
+      "file": "prisma/migrations/20251102173000_remove_image_url_avatar_url/migration.sql",
+      "category": "database",
+      "priority": "DONE",
+      "status": "COMPLETE",
+      "decision": "Migration removes imageUrl and avatarUrl fields",
+      "notes": "Adds isProfileAvatar and isPrimary fields to Media"
+    },
+    {
+      "file": "lib/cloudinary.ts",
+      "category": "backend",
+      "priority": "DONE",
+      "status": "COMPLETE",
+      "decision": "Cloudinary integration already implemented",
+      "notes": "Provides signature generation, upload verification, and deletion functions"
+    },
+    {
+      "file": "app/api/cloudinary/sign/route.ts",
+      "category": "backend",
+      "priority": "DONE",
+      "status": "COMPLETE",
+      "decision": "Cloudinary sign endpoint already implemented",
+      "notes": "Generates signed upload URLs with proper authentication"
+    },
+    {
+      "file": "app/api/media/route.ts",
+      "lines": [1-163],
+      "category": "backend",
+      "priority": "DONE",
+      "status": "NEEDS_FIX",
+      "decision": "Media API exists but returns avatarUrl field that doesn't exist",
+      "action_required": "Remove avatarUrl from user select in GET endpoint (line 142)",
+      "notes": "POST and GET endpoints implemented correctly except for stale avatarUrl reference"
+    },
+    {
+      "file": "app/api/media/[id]/route.ts",
+      "category": "backend",
+      "priority": "DONE",
+      "status": "COMPLETE",
+      "decision": "Media update/delete endpoints properly implemented",
+      "notes": "Handles Cloudinary deletion and database cleanup correctly"
+    },
+    {
+      "file": "app/api/recipes/[slug]/reviews/route.ts",
+      "lines": [37, 59, 148, 167, 201],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Replace avatarUrl with media relationship",
+      "action_required": "Update Prisma queries to include user.media, map to avatar URL using helper function",
+      "notes": "Used in GET and POST review endpoints"
+    },
+    {
+      "file": "app/api/recipes/featured/route.ts",
+      "lines": [18, 59, 72],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Replace recipe.imageUrl with media relationship",
+      "action_required": "Query recipe.media and extract primary image URL",
+      "notes": "Featured recipes endpoint"
+    },
+    {
+      "file": "app/api/upload/image/route.ts",
+      "lines": [77],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_REVIEW",
+      "decision": "Check if this endpoint is still needed or should be removed",
+      "action_required": "This may be legacy code that should use the Media API instead",
+      "notes": "Returns imageUrl field which no longer exists in schema"
+    },
+    {
+      "file": "app/api/auth/route.ts",
+      "lines": [32],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Remove avatarUrl from select query",
+      "action_required": "Include user.media relationship instead",
+      "notes": "Used in auth check endpoint"
+    },
+    {
+      "file": "app/api/auth/register/route.ts",
+      "lines": [70-71, 78, 85],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Replace avatarUrl with Media creation",
+      "action_required": "Upload placeholder avatar to Cloudinary and create Media record instead of storing URL directly",
+      "notes": "Registration flow assigns random avatar"
+    },
+    {
+      "file": "app/api/chefs/chefSpotlight/route.ts",
+      "lines": [19, 77, 92],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Replace user.avatarUrl with media relationship",
+      "action_required": "Query user.media and extract profile avatar URL",
+      "notes": "Chef spotlight endpoint"
+    },
+    {
+      "file": "app/api/user/recipes/route.ts",
+      "lines": [64],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Replace recipe.imageUrl with media relationship",
+      "action_required": "Query recipe.media and extract primary image URL",
+      "notes": "User recipes list endpoint"
+    },
+    {
+      "file": "app/api/user/profile/route.ts",
+      "lines": [8, 21, 23-26, 69],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_REPLACEMENT",
+      "decision": "Replace avatarUrl update with Media API usage",
+      "action_required": "This endpoint should be deprecated or refactored to work with Media records",
+      "notes": "Profile update endpoint - major refactor needed"
+    },
+    {
+      "file": "app/api/user/username/route.ts",
+      "lines": [52],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Remove avatarUrl from select query",
+      "action_required": "Include user.media relationship if avatar needed",
+      "notes": "Username update endpoint"
+    },
+    {
+      "file": "app/api/favorites/route.ts",
+      "lines": [29, 71, 80],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Replace recipe.imageUrl and author.avatarUrl with media relationships",
+      "action_required": "Query recipe.media and author.media, extract URLs using helper functions",
+      "notes": "Favorites list endpoint"
+    },
+    {
+      "file": "app/api/ai/format-recipe/route.ts",
+      "lines": [127],
+      "category": "backend",
+      "priority": "LOW",
+      "status": "KEEP_AS_IS",
+      "decision": "Keep imageUrl in validation schema as optional input",
+      "notes": "AI format endpoint accepts imageUrl as input parameter, not database field"
+    },
+    {
+      "file": "app/(site)/recipes/[username]/[slug]/page.tsx",
+      "lines": [34, 103, 137, 139, 175, 178],
+      "category": "frontend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Replace recipe.imageUrl and author.avatarUrl with media objects",
+      "action_required": "Update Prisma query to include recipe.media and author.media, update render logic",
+      "notes": "Recipe detail page - key user-facing component"
+    },
+    {
+      "file": "app/(site)/browse/page.tsx",
+      "lines": [35],
+      "category": "frontend",
+      "priority": "MEDIUM",
+      "status": "NEEDS_UPDATE",
+      "decision": "Update type definition for avatar",
+      "notes": "Browse page uses avatar string - check if this needs media object"
+    },
+    {
+      "file": "app/(dashboard)/profile/[userId]/page.tsx",
+      "lines": [18, 39, 180-206, 256-283, 417-498, 636, 641],
+      "category": "frontend",
+      "priority": "HIGH",
+      "status": "NEEDS_MAJOR_REFACTOR",
+      "decision": "Replace avatarUrl handling with MediaUploader component",
+      "action_required": "Remove AvatarPicker, use MediaUploader for profile avatar, update queries",
+      "notes": "Profile page - major user-facing component, handles avatar selection"
+    },
+    {
+      "file": "components/ui/RecipeCard.tsx",
+      "lines": [21],
+      "category": "frontend",
+      "priority": "MEDIUM",
+      "status": "NEEDS_UPDATE",
+      "decision": "Update to receive and display Media objects",
+      "notes": "Recipe card component used throughout the app"
+    },
+    {
+      "file": "components/ui/ChefSpotlight.tsx",
+      "lines": [28],
+      "category": "frontend",
+      "priority": "MEDIUM",
+      "status": "NEEDS_UPDATE",
+      "decision": "Update to use Media object for chef avatar",
+      "notes": "Chef spotlight display component"
+    },
+    {
+      "file": "components/browse/BrowseRecipeCard.tsx",
+      "lines": [25, 112-115],
+      "category": "frontend",
+      "priority": "MEDIUM",
+      "status": "NEEDS_UPDATE",
+      "decision": "Update to use Media object for author avatar",
+      "notes": "Browse recipe card component"
+    },
+    {
+      "file": "components/recipe/RecipeReviews.tsx",
+      "lines": [17, 224],
+      "category": "frontend",
+      "priority": "MEDIUM",
+      "status": "NEEDS_UPDATE",
+      "decision": "Update to use Media object for reviewer avatar",
+      "notes": "Recipe reviews display component"
+    },
+    {
+      "file": "components/recipe/RelatedRecipes.tsx",
+      "lines": [9, 44-47],
+      "category": "frontend",
+      "priority": "MEDIUM",
+      "status": "NEEDS_UPDATE",
+      "decision": "Update to use Media object for recipe image",
+      "notes": "Related recipes component"
+    },
+    {
+      "file": "components/layout/UserDropdown.tsx",
+      "lines": [51, 53-54, 59],
+      "category": "frontend",
+      "priority": "MEDIUM",
+      "status": "NEEDS_UPDATE",
+      "decision": "Update to use Media object for user avatar in dropdown",
+      "notes": "User dropdown navigation component"
+    },
+    {
+      "file": "components/user/AvatarPicker.tsx",
+      "category": "frontend",
+      "priority": "MEDIUM",
+      "status": "NEEDS_REFACTOR",
+      "decision": "Deprecate or refactor to work with MediaUploader",
+      "action_required": "This component selects pre-made avatars; should upload to Cloudinary instead",
+      "notes": "Avatar picker component - used in profile page"
+    },
+    {
+      "file": "lib/queries/recipes.ts",
+      "lines": [19-29, 64, 578],
+      "category": "backend",
+      "priority": "DONE",
+      "status": "COMPLETE",
+      "decision": "Helper functions already implemented correctly",
+      "notes": "getProfileAvatarUrl function properly extracts avatar from media array"
+    },
+    {
+      "file": "lib/queries/users.ts",
+      "lines": [110, 117, 212, 217, 227, 232, 289, 296],
+      "category": "backend",
+      "priority": "REVIEW",
+      "status": "VERIFY",
+      "decision": "Check if these helper functions properly use Media model",
+      "notes": "User query helpers - need to verify they're using media correctly"
+    },
+    {
+      "file": "lib/auth.ts",
+      "lines": [18, 85],
+      "category": "backend",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Remove avatarUrl from UserPayload, update getCurrentUser",
+      "action_required": "Remove avatarUrl field, optionally add media relationship if needed in JWT",
+      "notes": "Auth utilities and JWT payload"
+    },
+    {
+      "file": "lib/recipeStorage.ts",
+      "lines": [53, 61-68],
+      "category": "backend",
+      "priority": "REVIEW",
+      "status": "LEGACY",
+      "decision": "Check if this is legacy code or still in use",
+      "notes": "Local file storage - may be deprecated in favor of Cloudinary"
+    },
+    {
+      "file": "lib/placeholders.ts",
+      "lines": [50, 85, 94, 103],
+      "category": "backend",
+      "priority": "KEEP",
+      "status": "COMPLETE",
+      "decision": "Keep placeholder functions for generating default avatar paths",
+      "notes": "Placeholder generation utilities - still useful for defaults"
+    },
+    {
+      "file": "hooks/useCottagecorePlaceholders.ts",
+      "lines": [12-27],
+      "category": "frontend",
+      "priority": "KEEP",
+      "status": "COMPLETE",
+      "decision": "Keep hooks for handling null/missing images",
+      "notes": "Hooks for placeholder images - still useful"
+    },
+    {
+      "file": "types/index.ts",
+      "lines": [21, 45, 81],
+      "category": "types",
+      "priority": "HIGH",
+      "status": "NEEDS_UPDATE",
+      "decision": "Update type definitions to use Media objects",
+      "action_required": "Change avatar: string to media: Media[] or avatarUrl: string | null",
+      "notes": "TypeScript type definitions"
+    },
+    {
+      "file": "prisma/seed.ts",
+      "lines": [99, 241, 257-264, 293],
+      "category": "seeds",
+      "priority": "CRITICAL",
+      "status": "NEEDS_MAJOR_REFACTOR",
+      "decision": "Upload seed images to Cloudinary and create Media records",
+      "action_required": "Implement Cloudinary upload in seed, tag assets as 'seed', create cleanup function",
+      "notes": "Seed script - must upload to Cloudinary instead of local filesystem"
+    }
+  ],
+  "summary": {
+    "total_occurrences": 87,
+    "by_category": {
+      "database": 3,
+      "backend": 35,
+      "frontend": 28,
+      "seeds": 4,
+      "types": 3,
+      "hooks": 2,
+      "legacy": 2
+    },
+    "by_priority": {
+      "CRITICAL": 1,
+      "HIGH": 18,
+      "MEDIUM": 10,
+      "LOW": 1,
+      "DONE": 8,
+      "KEEP": 3
+    },
+    "by_status": {
+      "COMPLETE": 8,
+      "NEEDS_UPDATE": 15,
+      "NEEDS_REFACTOR": 3,
+      "NEEDS_MAJOR_REFACTOR": 2,
+      "NEEDS_REPLACEMENT": 1,
+      "NEEDS_REVIEW": 2,
+      "KEEP_AS_IS": 2,
+      "LEGACY": 1,
+      "VERIFY": 1
+    }
+  }
+}

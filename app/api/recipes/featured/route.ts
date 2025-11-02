@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_RECIPE_IMAGE } from "@/lib/constants";
 
 export async function GET() {
   try {
@@ -15,7 +16,17 @@ export async function GET() {
         id: true,
         title: true,
         description: true,
-        imageUrl: true,
+        media: {
+          select: {
+            url: true,
+            secureUrl: true,
+            isPrimary: true,
+          },
+          orderBy: [
+            { isPrimary: "desc" },
+            { createdAt: "asc" },
+          ],
+        },
         reviews: {
           select: {
             rating: true,
@@ -50,26 +61,32 @@ export async function GET() {
 
       if (score > highestScore) {
         highestScore = score;
+        const primaryMedia = recipe.media.find(m => m.isPrimary) || recipe.media[0];
+        const imageUrl = primaryMedia?.secureUrl || primaryMedia?.url || DEFAULT_RECIPE_IMAGE;
+        
         featuredRecipe = {
           id: recipe.id,
           title: recipe.title,
           description:
             recipe.description ||
             "This delicious recipe has been featured based on excellent reviews from our community.",
-          image: recipe.imageUrl || "/images/recipes/default.jpg",
+          image: imageUrl,
         };
       }
     }
 
     // If no suitable recipe was found, just use the most recent one
     if (!featuredRecipe && featuredRecipes.length > 0) {
+      const primaryMedia = featuredRecipes[0].media.find(m => m.isPrimary) || featuredRecipes[0].media[0];
+      const imageUrl = primaryMedia?.secureUrl || primaryMedia?.url || DEFAULT_RECIPE_IMAGE;
+      
       featuredRecipe = {
         id: featuredRecipes[0].id,
         title: featuredRecipes[0].title,
         description:
           featuredRecipes[0].description ||
           "Check out this recently added recipe from our community!",
-        image: featuredRecipes[0].imageUrl || "/images/recipes/default.jpg",
+        image: imageUrl,
       };
     }
 

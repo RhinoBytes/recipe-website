@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hashPassword, createToken, setAuthCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sanitizeInput, isValidEmail } from "@/utils/validation";
-import { getRandomProfileAvatar } from "@/lib/placeholders";
+import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 /**
  * POST /api/auth/register
@@ -67,26 +67,34 @@ export async function POST(request: NextRequest) {
     // Generate a temporary username from email
     const tempUsername = email.split("@")[0] + "_" + Date.now();
 
-    // Assign a random avatar
-    const avatarUrl = getRandomProfileAvatar();
-
+    // Create user without avatar - they can add one via profile later
     const user = await prisma.user.create({
       data: {
         username: tempUsername,
         email,
         passwordHash,
-        avatarUrl,
       },
       select: {
         id: true,
         username: true,
         email: true,
         role: true,
-        avatarUrl: true,
         bio: true,
         createdAt: true,
+        media: {
+          where: { isProfileAvatar: true },
+          select: {
+            url: true,
+            secureUrl: true,
+          },
+          take: 1,
+        },
       },
     });
+
+    // Extract avatar URL (will be default if no media)
+    const avatarMedia = user.media[0];
+    const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
 
     // Create JWT token
     const token = createToken({
@@ -102,7 +110,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         message: "User created successfully",
-        user,
+        user: {
+          ...user,
+          avatarUrl,
+        },
       },
       { status: 201 }
     );

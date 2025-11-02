@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -49,15 +50,29 @@ export async function PATCH(request: NextRequest) {
         username: true,
         email: true,
         role: true,
-        avatarUrl: true,
         bio: true,
         updatedAt: true,
+        media: {
+          where: { isProfileAvatar: true },
+          select: {
+            url: true,
+            secureUrl: true,
+          },
+          take: 1,
+        },
       },
     });
 
+    // Extract avatar URL
+    const avatarMedia = updatedUser.media[0];
+    const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
+
     return NextResponse.json({
       message: "Username updated successfully",
-      user: updatedUser,
+      user: {
+        ...updatedUser,
+        avatarUrl,
+      },
     });
   } catch (error) {
     console.error("Update username error:", error);

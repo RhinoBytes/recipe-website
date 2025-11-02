@@ -9,6 +9,7 @@ import IngredientsList from "@/components/recipe/IngredientsList";
 import RecipeSidebar from "@/components/recipe/RecipeSidebar";
 import ChefNotes from "@/components/recipe/ChefNotes";
 import RelatedRecipes from "@/components/recipe/RelatedRecipes";
+import { DEFAULT_RECIPE_IMAGE, DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 interface RecipePageProps {
   params: Promise<{ username: string; slug: string }>;
@@ -27,12 +28,30 @@ export default async function RecipePage({ params }: RecipePageProps) {
       }
     },
     include: {
+      media: {
+        select: {
+          url: true,
+          secureUrl: true,
+          isPrimary: true,
+        },
+        orderBy: [
+          { isPrimary: "desc" },
+          { createdAt: "asc" },
+        ],
+      },
       author: {
         select: {
           id: true,
           username: true,
-          avatarUrl: true,
           bio: true,
+          media: {
+            where: { isProfileAvatar: true },
+            select: {
+              url: true,
+              secureUrl: true,
+            },
+            take: 1,
+          },
         },
       },
       cuisine: true,
@@ -70,6 +89,13 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
   const isAuthor = currentUser?.userId === recipe.authorId;
 
+  // Extract media URLs
+  const primaryMedia = recipe.media.find(m => m.isPrimary) || recipe.media[0];
+  const recipeImageUrl = primaryMedia?.secureUrl || primaryMedia?.url || DEFAULT_RECIPE_IMAGE;
+
+  const avatarMedia = recipe.author.media[0];
+  const authorAvatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
+
   // Fetch related recipes (same categories or tags, excluding current recipe)
   const relatedRecipes = await prisma.recipe.findMany({
     where: {
@@ -100,11 +126,21 @@ export default async function RecipePage({ params }: RecipePageProps) {
       id: true,
       title: true,
       slug: true,
-      imageUrl: true,
       prepTimeMinutes: true,
       cookTimeMinutes: true,
       difficulty: true,
       averageRating: true,
+      media: {
+        select: {
+          url: true,
+          secureUrl: true,
+          isPrimary: true,
+        },
+        orderBy: [
+          { isPrimary: "desc" },
+          { createdAt: "asc" },
+        ],
+      },
       author: {
         select: {
           username: true,
@@ -134,15 +170,13 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
           {/* Author Info */}
           <div className="flex items-center gap-3">
-            {recipe.author.avatarUrl && (
-              <Image
-                src={recipe.author.avatarUrl}
-                alt={recipe.author.username}
-                width={48}
-                height={48}
-                className="rounded-full object-cover"
-              />
-            )}
+            <Image
+              src={authorAvatarUrl}
+              alt={recipe.author.username}
+              width={48}
+              height={48}
+              className="rounded-full object-cover"
+            />
             <div>
               <div className="font-semibold text-text">
                 {recipe.author.username}
@@ -172,18 +206,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
             )}
             
             {/* Hero Image */}
-            {recipe.imageUrl && (
-              <div>
-                <Image
-                  src={recipe.imageUrl}
-                  alt={recipe.title}
-                  width={800}
-                  height={400}
-                  className="w-full h-96 object-cover rounded-2xl shadow-lg"
-                  priority
-                />
-              </div>
-            )}
+            <div>
+              <Image
+                src={recipeImageUrl}
+                alt={recipe.title}
+                width={800}
+                height={400}
+                className="w-full h-96 object-cover rounded-2xl shadow-lg"
+                priority
+              />
+            </div>
 
             {/* Metadata Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

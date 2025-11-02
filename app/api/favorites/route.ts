@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { DEFAULT_RECIPE_IMAGE, DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 /**
  * GET /api/favorites
@@ -22,11 +23,29 @@ export async function GET() {
       include: {
         recipe: {
           include: {
+            media: {
+              select: {
+                url: true,
+                secureUrl: true,
+                isPrimary: true,
+              },
+              orderBy: [
+                { isPrimary: "desc" },
+                { createdAt: "asc" },
+              ],
+            },
             author: {
               select: {
                 id: true,
                 username: true,
-                avatarUrl: true,
+                media: {
+                  where: { isProfileAvatar: true },
+                  select: {
+                    url: true,
+                    secureUrl: true,
+                  },
+                  take: 1,
+                },
               },
             },
             tags: {
@@ -63,12 +82,18 @@ export async function GET() {
           ? Math.round(totalRating / recipe.reviews.length)
           : 0;
 
+      const primaryMedia = recipe.media.find(m => m.isPrimary) || recipe.media[0];
+      const imageUrl = primaryMedia?.secureUrl || primaryMedia?.url || DEFAULT_RECIPE_IMAGE;
+
+      const avatarMedia = recipe.author.media[0];
+      const avatar = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
+
       return {
         id: recipe.id,
         slug: recipe.slug,
         title: recipe.title,
         description: recipe.description,
-        imageUrl: recipe.imageUrl,
+        imageUrl,
         prepTimeMinutes: recipe.prepTimeMinutes,
         cookTimeMinutes: recipe.cookTimeMinutes,
         servings: recipe.servings,
@@ -77,7 +102,7 @@ export async function GET() {
         author: {
           id: recipe.author.id,
           name: recipe.author.username,
-          avatar: recipe.author.avatarUrl || recipe.author.username.charAt(0),
+          avatar,
         },
         tags: recipe.tags.map((rt) => rt.tag.name),
         categories: recipe.categories.map((rc) => rc.category.name),

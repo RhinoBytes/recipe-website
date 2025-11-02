@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 /**
  * GET /api/recipes/[slug]/reviews
@@ -34,7 +35,14 @@ export async function GET(
           select: {
             id: true,
             username: true,
-            avatarUrl: true,
+            media: {
+              where: { isProfileAvatar: true },
+              select: {
+                url: true,
+                secureUrl: true,
+              },
+              take: 1,
+            },
           },
         },
       },
@@ -48,17 +56,22 @@ export async function GET(
     const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
 
     return NextResponse.json({
-      reviews: reviews.map((review) => ({
-        id: review.id,
-        rating: review.rating,
-        comment: review.comment,
-        createdAt: review.createdAt,
-        user: {
-          id: review.user.id,
-          username: review.user.username,
-          avatarUrl: review.user.avatarUrl,
-        },
-      })),
+      reviews: reviews.map((review) => {
+        const avatarMedia = review.user.media[0];
+        const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
+        
+        return {
+          id: review.id,
+          rating: review.rating,
+          comment: review.comment,
+          createdAt: review.createdAt,
+          user: {
+            id: review.user.id,
+            username: review.user.username,
+            avatarUrl,
+          },
+        };
+      }),
       averageRating: Math.round(averageRating * 10) / 10,
       totalReviews: reviews.length,
     });
@@ -145,7 +158,14 @@ export async function POST(
             select: {
               id: true,
               username: true,
-              avatarUrl: true,
+              media: {
+                where: { isProfileAvatar: true },
+                select: {
+                  url: true,
+                  secureUrl: true,
+                },
+                take: 1,
+              },
             },
           },
         },
@@ -164,7 +184,14 @@ export async function POST(
             select: {
               id: true,
               username: true,
-              avatarUrl: true,
+              media: {
+                where: { isProfileAvatar: true },
+                select: {
+                  url: true,
+                  secureUrl: true,
+                },
+                take: 1,
+              },
             },
           },
         },
@@ -189,6 +216,10 @@ export async function POST(
       },
     });
 
+    // Extract avatar URL
+    const avatarMedia = review.user.media[0];
+    const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
+
     return NextResponse.json(
       {
         id: review.id,
@@ -198,7 +229,7 @@ export async function POST(
         user: {
           id: review.user.id,
           username: review.user.username,
-          avatarUrl: review.user.avatarUrl,
+          avatarUrl,
         },
       },
       { status: existingReview ? 200 : 201 }
