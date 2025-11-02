@@ -356,8 +356,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 </AccordionSection>
               ) : null}
 
-              {(recipe.calories || recipe.proteinG || recipe.fatG || recipe.carbsG) && (
-                <AccordionSection title="Nutrition Per Serving" defaultOpen={false}>
+              <AccordionSection title="Nutrition Per Serving" defaultOpen={false}>
+                {(recipe.calories || recipe.proteinG || recipe.fatG || recipe.carbsG) ? (
                   <div className="grid grid-cols-2 gap-3">
                     {recipe.calories && (
                       <div className="bg-bg rounded-lg p-4 text-center border-2 border-accent/20">
@@ -384,8 +384,15 @@ export default async function RecipePage({ params }: RecipePageProps) {
                       </div>
                     )}
                   </div>
-                </AccordionSection>
-              )}
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-text-secondary">Not Available</p>
+                    <p className="text-xs text-text-muted mt-1">
+                      Nutritional data has not been provided for this recipe
+                    </p>
+                  </div>
+                )}
+              </AccordionSection>
             </div>
 
             {/* Ingredients with Interactive List */}
