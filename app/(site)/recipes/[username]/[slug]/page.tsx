@@ -455,7 +455,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
             <ChefNotes notes={recipe.chefNotes} />
 
             {/* Cuisine & Source */}
-            {(recipe.cuisine || recipe.sourceUrl) && (
+            {(recipe.cuisine || recipe.sourceUrl || recipe.sourceText) && (
               <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-sm">
                 {recipe.cuisine && (
                   <div className="flex items-center gap-2 mb-2">
@@ -474,8 +474,14 @@ export default async function RecipePage({ params }: RecipePageProps) {
                       rel="noopener noreferrer"
                       className="text-amber-600 hover:text-amber-700 underline"
                     >
-                      {recipe.sourceText || recipe.sourceUrl}
+                      {recipe.sourceUrl}
                     </a>
+                  </div>
+                )}
+                {!recipe.sourceUrl && recipe.sourceText && (
+                  <div className="text-text">
+                    <span className="font-semibold">Source:</span>{' '}
+                    <span className="text-text-secondary">{recipe.sourceText}</span>
                   </div>
                 )}
               </div>

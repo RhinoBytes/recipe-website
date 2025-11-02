@@ -18,7 +18,7 @@ export default function NotFound() {
         </h2>
         
         <p className="text-lg text-text-secondary mb-8 max-w-md mx-auto">
-          Looks like this recipe has been eaten! The page you're looking for doesn't exist or may have been moved.
+          Looks like this recipe has been eaten! The page you&apos;re looking for doesn&apos;t exist or may have been moved.
         </p>
 
         {/* Action Buttons */}

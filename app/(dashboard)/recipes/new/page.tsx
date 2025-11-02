@@ -231,29 +231,46 @@ export default function NewRecipePage() {
         throw new Error("Please add at least one instruction step");
       }
 
-      // Detect if source is a URL
-      const isUrl = formData.source.trim() && (
-        formData.source.startsWith('http://') || 
-        formData.source.startsWith('https://') ||
-        formData.source.startsWith('www.')
-      );
+      // Detect if source is a URL using a more robust check
+      const isUrl = formData.source.trim() && (() => {
+        try {
+          const url = new URL(formData.source.trim());
+          return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch {
+          // If it starts with www., prepend https://
+          if (formData.source.trim().startsWith('www.')) {
+            try {
+              new URL(`https://${formData.source.trim()}`);
+              return true;
+            } catch {
+              return false;
+            }
+          }
+          return false;
+        }
+      })();
+
+      // For www. URLs, prepend https://
+      const normalizedUrl = isUrl && formData.source.trim().startsWith('www.')
+        ? `https://${formData.source.trim()}`
+        : formData.source.trim();
 
       // Parsed ingredients already have dual measurements from parseIngredients()
       const submissionData = {
         ...formData,
         ingredients: parsedIngredients,
         steps: parsedSteps,
-        sourceUrl: isUrl ? formData.source : "",
+        sourceUrl: isUrl ? normalizedUrl : "",
         sourceText: isUrl ? "" : formData.source,
       };
 
       // Remove the 'source' field as it's been split into sourceUrl/sourceText
-      delete (submissionData as any).source;
+      const { source: _, ...dataToSubmit } = submissionData;
 
       const response = await fetch("/api/recipes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submissionData),
+        body: JSON.stringify(dataToSubmit),
       });
 
       if (!response.ok) {
