@@ -77,7 +77,16 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         const response = await fetch(`/api/users/${resolvedParams.userId}`);
         if (response.ok) {
           const data = await response.json();
-          setProfileUser(data.user);
+          const user = data.user;
+          
+          // Extract avatarUrl from media array
+          const avatarMedia = user.media && user.media.length > 0 ? user.media[0] : null;
+          const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || null;
+          
+          setProfileUser({
+            ...user,
+            avatarUrl,
+          });
         } else {
           setError("User not found");
         }
@@ -289,7 +298,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
       {/* Tabs */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="bg-bg-secondary dark:bg-gray-800 rounded-lg shadow-sm mb-6">
-          <div className="flex border-b border-border dark:border-gray-700 overflow-x-auto">
+          <div className="flex flex-col sm:flex-row border-b border-border dark:border-gray-700">
             <button
               onClick={() => setActiveTab("recipes")}
               className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
