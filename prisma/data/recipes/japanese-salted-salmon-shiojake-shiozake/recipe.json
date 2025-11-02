@@ -1,0 +1,127 @@
+{
+  "title": "Japanese Salted Salmon (Shiojake/Shiozake)",
+  "slug": "japanese-salted-salmon-shiojake-shiozake",
+  "description": "Enjoy tender, flavorful Japanese-style salmon with crispy skin. This classic Shiojake is lightly salted and broiled to perfection, making it perfect for rice balls, bento boxes, or a traditional Japanese breakfast. Simple to prepare, it’s a wholesome and versatile dish.",
+  "servings": 8,
+  "prepTimeMinutes": 10,
+  "cookTimeMinutes": 10,
+  "difficulty": "MEDIUM",
+  "imageUrl": "/uploads/recipes/368d4249-75d6-4f5d-a546-1273b528aba1.jpg",
+  "sourceUrl": "https://www.justonecookbook.com/how-to-cook-salmon-salted-salmon/",
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": 108,
+  "proteinG": 15,
+  "fatG": 5,
+  "carbsG": 1,
+  "cuisine": "Japanese",
+  "ingredients": [
+    {
+      "name": "skin-on salmon fillets",
+      "amount": "600",
+      "unit": "grams",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "Prepare Salmon",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "sake",
+      "amount": "1-2",
+      "unit": "tbsp",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "Salt the Salmon",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "kosher salt",
+      "amount": "3",
+      "unit": "tbsp",
+      "size": null,
+      "preparation": null,
+      "notes": "5% of salmon weight",
+      "groupName": "Salt the Salmon",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "inches daikon radish",
+      "amount": "2",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "Serve",
+      "isOptional": false,
+      "displayOrder": 3
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "If not pre-cut, slice salmon into Japanese-style fillets: skin side down, narrow tail to the left, tilt knife 30° and slice diagonally.",
+      "groupName": "Prepare Salmon",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 1,
+      "instruction": "Brush fillets with sake and let sit 10 minutes.",
+      "groupName": "Salt the Salmon",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 1,
+      "instruction": "Line an airtight container with paper towels. Place fillets in a single layer, cover with paper towels, repeat for remaining fillets. Refrigerate 2 days.",
+      "groupName": "Marinate",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 1,
+      "instruction": "Preheat broiler (high, ~550°F / 288°C). Place fillets skin side up on foil-lined baking sheet.",
+      "groupName": "Broil",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 1,
+      "instruction": "Grate daikon and squeeze lightly to remove excess liquid. Serve alongside salmon.",
+      "groupName": "Serve",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 1,
+      "instruction": "Cooked salmon: fridge 3 days or freezer 2 weeks. Raw salted salmon: freezer up to 1 month.",
+      "groupName": "Store",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Pat dry, then sprinkle salt evenly on both sides and the skin. Press lightly.",
+      "groupName": "Salt the Salmon",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Broil 8–10 min until well done and flaky. No need to flip.",
+      "groupName": "Broil",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Alternative cooking: Bake at 425°F (218°C) for 10–12 min or grill 5 min per side over medium heat.",
+      "groupName": "Broil",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Savory"
+  ],
+  "categories": [
+    "Dinner"
+  ],
+  "allergens": []
+}

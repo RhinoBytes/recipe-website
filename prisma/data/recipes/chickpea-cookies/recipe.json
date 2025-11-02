@@ -1,0 +1,174 @@
+{
+  "title": "Chickpea Cookies",
+  "slug": "chickpea-cookies",
+  "description": "These chocolate chip chickpea cookies are such a great healthy cookie recipe. They are an easy vegan recipe, loaded with plant-based protein. Nut-free means they are perfect for the school lunchbox as well.",
+  "servings": 20,
+  "prepTimeMinutes": 15,
+  "cookTimeMinutes": 25,
+  "difficulty": "EASY",
+  "imageUrl": "/uploads/recipes/78a8da57-43b8-468d-b576-7b6340be0fe9.jpg",
+  "sourceUrl": "https://mykidslickthebowl.com/healthy-chocolate-chip-cookies-chickpea-cookies/",
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": 64,
+  "proteinG": 2,
+  "fatG": 1,
+  "carbsG": 12,
+  "cuisine": "American",
+  "ingredients": [
+    {
+      "name": "can chickpeas",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "Oats",
+      "amount": "1",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "medium bananas",
+      "amount": "2",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "brown sugar",
+      "amount": "1/4",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "vanilla",
+      "amount": "1",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "baking powder",
+      "amount": "1",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "dark chocolate chips",
+      "amount": "1/4",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 6
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Heat the oven to 350 F",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Drain the chickpeas and rinse thoroughly",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Place all ingredients excluding the chocolate chips in the food processor",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Whizz for 2-3 mins until very smooth",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Remove the blade from the processor, add the chocolate chips and mix with a spoon",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Using a wet tablespoon place spoonfuls onto a baking paper-lined tray",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Use the back of the spoon to shape the dollops into circular shapes, approximately 1 cm thick. Do not panic if they look a bit.. shall we say rustic",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Bake at 180 degrees celsius for 25 mins",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "The cookies will still be soft but golden when they are ready, leave to cool on the baking tray for 5-10 minutes before cooling on a rack",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 10,
+      "instruction": "Remove from the oven and cool on the tray",
+      "groupName": null,
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Gluten-Free"
+  ],
+  "categories": [
+    "Bread / Baking",
+    "Dessert"
+  ],
+  "allergens": [
+    "Dairy Free",
+    "Vegetarian",
+    "Vegan",
+    "Egg Free",
+    "Soy Free",
+    "Gluten Free"
+  ]
+}

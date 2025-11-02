@@ -1,0 +1,237 @@
+{
+  "title": "Steamed Tofu in Black Bean Sauce",
+  "slug": "steamed-tofu-in-black-bean-sauce",
+  "description": "Steamed Tofu in Black Bean Sauce is light yet flavorful. It is also incredibly quick and easy to make. A great dish to serve with rice especially in summer.",
+  "servings": 2,
+  "prepTimeMinutes": 10,
+  "cookTimeMinutes": 10,
+  "difficulty": "EASY",
+  "imageUrl": "/uploads/recipes/00d35c8a-23fd-417d-85f4-13056465ae96.jpg",
+  "sourceUrl": "https://delightfulplate.com/steamed-tofu-in-black-bean-sauce/",
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": 162,
+  "proteinG": 10,
+  "fatG": 8,
+  "carbsG": 9,
+  "cuisine": "Asian",
+  "ingredients": [
+    {
+      "name": "silken tofu",
+      "amount": "10.5",
+      "unit": "oz",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Tofu",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "sesame oil",
+      "amount": "1/8",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Tofu",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "salt",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Tofu",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "Sichuan pepper",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Tofu",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "ginger",
+      "amount": "2-3",
+      "unit": "teaspoons",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Tofu",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "olive oil",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "ginger",
+      "amount": "1/2",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "garlic cloves",
+      "amount": "2-3",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "fermented black beans",
+      "amount": "1",
+      "unit": "tablespoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "oyster sauce",
+      "amount": "1",
+      "unit": "tablespoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "soy sauce",
+      "amount": "1/2",
+      "unit": "tablespoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false,
+      "displayOrder": 10
+    },
+    {
+      "name": "water",
+      "amount": "1/2",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false,
+      "displayOrder": 11
+    },
+    {
+      "name": "cornstarch",
+      "amount": "1/2",
+      "unit": "tablespoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false,
+      "displayOrder": 12
+    },
+    {
+      "name": "scallion",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false,
+      "displayOrder": 13
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Slice tofu into thin slices, about 1/2 inch (1.25cm) thick. Arrange them overlapping slightly on a plate that you will use to steam.",
+      "groupName": "For the Tofu",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 1,
+      "instruction": "While steaming the tofu, make the sauce. Add a little olive oil to a small saucepan (or small deep pan) over medium heat. Add minced ginger and sauté until fragrant.",
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Drizzle sesame oil and sprinkle a pinch of salt and pepper over the tofu. Top it with julienned ginger. Cover the plate and steam until hot, about 6-7 minutes.",
+      "groupName": "For the Tofu",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Add minced garlic and continue to sauté for a few seconds until fragrant. Then add fermented black beans and also sauté for a few seconds until fragrant.",
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Add oyster sauce and soy sauce to the saucepan. Give everything a quick stir and then add 1/2 cup (120ml) of water. Bring it to a simmer.",
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Combine cornstarch with 1/2 tablespoon of water to make a cornstarch slurry and gradually pour it into the saucepan while stirring to thicken the black bean sauce to your liking.",
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Once the tofu is hot, remove the plate from the steamer. Discard the liquid in the plate, then pour the black bean sauce over the tofu slices.",
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Scatter scallion slices and sprinkle Sichuan pepper over the tofu and serve right away with rice.",
+      "groupName": "For the Black Bean Sauce",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Easy",
+    "Comfort Food"
+  ],
+  "categories": [
+    "Dinner",
+    "Side Dish"
+  ],
+  "allergens": [
+    "Vegetarian",
+    "Dairy Free",
+    "Egg Free"
+  ]
+}

@@ -1,0 +1,236 @@
+{
+  "title": "Grandma’s Swedish Cardamom Bread",
+  "slug": "grandma-s-swedish-cardamom-bread",
+  "description": "This rich and sweet bread is a holiday treat with cardamom and orange zest adding a spicy flavor. A family recipe passed down through generations.",
+  "servings": 12,
+  "prepTimeMinutes": 30,
+  "cookTimeMinutes": 40,
+  "difficulty": "MEDIUM",
+  "imageUrl": "/uploads/recipes/00e246a7-8980-4038-9495-73effe13f672.jpg",
+  "sourceUrl": "https://www.silkroaddiary.com/grandmas-swedish-cardamom-bread/",
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": 280,
+  "proteinG": 6,
+  "fatG": 10,
+  "carbsG": 40,
+  "cuisine": "Swedish",
+  "ingredients": [
+    {
+      "name": "butter",
+      "amount": "1/2",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "package yeast",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "warm water",
+      "amount": "3",
+      "unit": "tablespoons",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "eggs",
+      "amount": "2",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "milk",
+      "amount": "1",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "sugar",
+      "amount": "1/2",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "Kosher salt",
+      "amount": "1/2",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "fresh ground cardamom",
+      "amount": "1",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "orange",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": "zest",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "unsifted regular all-purpose flour",
+      "amount": "5",
+      "unit": "cups",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "egg yolk",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 10
+    },
+    {
+      "name": "milk",
+      "amount": "1",
+      "unit": "tablespoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 11
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Melt butter and set aside to cool.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Dissolve yeast in the warm water.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "In a large mixing bowl combine beaten eggs, milk, sugar, salt, cardamom, grated orange peel, yeast mixture, and butter.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Stir in enough flour to a point where the dough no longer sticks to your fingers (less than 5 cups).",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Turn onto a floured board and knead until dough is smooth.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Shape into a ball and place in a greased bowl; cover. Put in a warm place and let rise until doubled in bulk, about 2 hours. Punch down and divide into 2 equal portions.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Divided each portion into thirds. Roll each third between your hands to form strands 18 -24 inches long (make all the same length) rolling out from the center.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Place 3 strands on a board, crossing in the center, and braid to each end. Form braids into a ring and pinch together. Place on greased cookie sheet.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Cover lightly with wax paper and put in a warm place until nearly double in bulk, from 2 - 2-1/2 hours.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 10,
+      "instruction": "Paint each braid with a mixture of egg yolk beaten with the 1 tablespoon milk.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 11,
+      "instruction": "Bake in a moderate oven (350 degrees) for about 40 minutes or until a medium brown. Or until internal temperature reaches 200 degrees.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 12,
+      "instruction": "Let cool on wire racks (or serve warm). Decorate if desired. Wrap airtight; to freeze braids, seal in aluminum foil. Slice to serve.",
+      "groupName": null,
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Holiday / Festive"
+  ],
+  "categories": [
+    "Bread / Baking",
+    "Dessert"
+  ],
+  "allergens": [
+    "Vegetarian"
+  ]
+}

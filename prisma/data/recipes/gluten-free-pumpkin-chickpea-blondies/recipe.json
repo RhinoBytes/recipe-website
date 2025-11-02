@@ -1,0 +1,208 @@
+{
+  "title": "Gluten Free Pumpkin Chickpea Blondies",
+  "slug": "gluten-free-pumpkin-chickpea-blondies",
+  "description": "If you’re weary about putting chickpeas in a dessert, these delicious gluten free pumpkin chickpea blondies will completely change your mind! Made with ingredients you probably have in your pantry right now, they’re a healthy way to get your pumpkin fix!",
+  "servings": 9,
+  "prepTimeMinutes": 5,
+  "cookTimeMinutes": 27,
+  "difficulty": "EASY",
+  "imageUrl": "/uploads/recipes/7fe7c359-a8bc-4b88-baa1-c8d4f895e2de.jpg",
+  "sourceUrl": "https://www.onceuponapumpkinrd.com/gluten-free-pumpkin-chickpea-blondies/",
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": 240,
+  "proteinG": 6,
+  "fatG": 12,
+  "carbsG": 28,
+  "cuisine": "Unknown",
+  "ingredients": [
+    {
+      "name": "can chickpeas",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "peanut butter",
+      "amount": "1/2",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "maple syrup",
+      "amount": "1/3",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "pumpkin puree",
+      "amount": "1/3",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "tsp. vanilla extract",
+      "amount": "2",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "tsp. pumpkin pie spice",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "tsp. salt",
+      "amount": "1/2",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "tsp. baking powder",
+      "amount": "1/4",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "tsp. baking soda",
+      "amount": "1/4",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "tbsp. coconut oil",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "chocolate chips (plus 2 tbsp. for sprinkling on top",
+      "amount": "1/3",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": true,
+      "displayOrder": 10
+    },
+    {
+      "name": "sea salt",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 11
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Preheat oven to 350 degrees F and spray 8×8 inch pan with cooking spray and line it with parchment paper on top.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "In a food processor, add all ingredients except chocolate chips* and process until batter is smooth.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Fold in chocolate chips.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Spread batter evenly in prepared pan then sprinkle 2 tablespoons of chocolate chips on top.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Bake for 27 minutes or until the center is set.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Let cool in the pan, sprinkle with sea salt and cut into squares.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Store covered in the fridge for 3-4 days.",
+      "groupName": null,
+      "isOptional": false
+    }
+  ],
+  "tags": [],
+  "categories": [
+    "Bread / Baking",
+    "Dessert"
+  ],
+  "allergens": [
+    "Vegetarian",
+    "Vegan",
+    "Gluten Free",
+    "Egg Free",
+    "Dairy Free"
+  ]
+}

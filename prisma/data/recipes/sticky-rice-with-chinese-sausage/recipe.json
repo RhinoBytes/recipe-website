@@ -1,0 +1,231 @@
+{
+  "title": "Sticky Rice with Chinese Sausage",
+  "slug": "sticky-rice-with-chinese-sausage",
+  "description": "Sticky rice with Chinese sausage is a dim sum favorite, and really easy to make at home. You’ll be delighted with this authentic Chinese sticky rice recipe!",
+  "servings": 6,
+  "prepTimeMinutes": 30,
+  "cookTimeMinutes": 45,
+  "difficulty": "EASY",
+  "imageUrl": "/uploads/recipes/fecf69d9-729e-40c1-bcbc-c5ee7b619f16.jpg",
+  "sourceUrl": "https://thewoksoflife.com/sticky-rice-with-chinese-sausage/",
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": 493,
+  "proteinG": 21,
+  "fatG": 21,
+  "carbsG": 54,
+  "cuisine": "Chinese",
+  "ingredients": [
+    {
+      "name": "sticky rice",
+      "amount": "2",
+      "unit": "cups",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "oyster sauce",
+      "amount": "1",
+      "unit": "tablespoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "1/2 tablespoons soy sauce",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "dark soy sauce",
+      "amount": "2",
+      "unit": "teaspoons",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "sesame oil",
+      "amount": "1/4",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "chicken stock",
+      "amount": "1/4",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": "60 ml",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "salt",
+      "amount": "1/2",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "oil",
+      "amount": "2",
+      "unit": "tablespoons",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "dried shrimp",
+      "amount": "1/4",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": "for 15 minutes in warm water",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "medium onion",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "dried shiitake mushrooms",
+      "amount": "5",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": "in warm water until softened and diced",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 10
+    },
+    {
+      "name": "Chinese sausage",
+      "amount": "3",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": "cut into small discs",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 11
+    },
+    {
+      "name": "Shaoxing wine",
+      "amount": "1",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 12
+    },
+    {
+      "name": "white pepper",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 13
+    },
+    {
+      "name": "scallions",
+      "amount": "2",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 14
+    },
+    {
+      "name": "Cilantro (to garnish,",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": true,
+      "displayOrder": 15
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Cook the sticky rice according to the directions on the package and set aside to cool (we usually just make it in our rice cooker). You can also use our method for soaking and steaming the sticky rice to pre-cook it.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Combine the oyster sauce, soy sauces, sesame oil, chicken stock, and salt in a small bowl and set aside. Heat the oil in a wok over medium heat. Add the shrimp and stir-fry for 30 seconds to bring out the flavor. Next, add the onion, mushrooms and Chinese sausage, and stir-fry for another minute, taking care not to burn the onion. Add the Shaoxing wine and stir-fry for another 2 minutes.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Add all of the cooked sticky rice to the wok and break it up as much as possible with a spatula. Spoon half of the sauce mixture over the rice (it helps to add the sauce over any clumps of rice to help break them up). Mix well, using a scooping motion to ensure the rice doesn’t stick to the bottom of the wok. Add the rest of the sauce and stir-fry until the rice is uniform in color.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Season with white pepper to taste and mix in the scallions. You can serve it as is…or if you want to get fancy, you can pack the rice into a nice round bowl rinsed in warm water and turn it over on a plate. Garnish with cilantro and serve.",
+      "groupName": null,
+      "isOptional": true
+    }
+  ],
+  "tags": [
+    "Holiday / Festive",
+    "Savory"
+  ],
+  "categories": [
+    "Side Dish",
+    "Dinner"
+  ],
+  "allergens": []
+}

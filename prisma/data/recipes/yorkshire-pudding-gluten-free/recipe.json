@@ -1,0 +1,152 @@
+{
+  "title": "Yorkshire Pudding - Gluten Free",
+  "slug": "yorkshire-pudding-gluten-free",
+  "description": "Simple, foolproof and perfectly light!",
+  "servings": 12,
+  "prepTimeMinutes": 10,
+  "cookTimeMinutes": 25,
+  "difficulty": "EASY",
+  "imageUrl": "/uploads/recipes/26b492b1-1069-4095-96d9-9d2ca81598ef.webp",
+  "sourceUrl": "https://www.asaucykitchen.com/gluten-free-yorkshire-pudding/",
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": 150,
+  "proteinG": 5,
+  "fatG": 7,
+  "carbsG": 15,
+  "cuisine": "British",
+  "ingredients": [
+    {
+      "name": "white rice flour",
+      "amount": "2/3",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "corn starch or tapioca starch",
+      "amount": "2/3",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "salt",
+      "amount": "1/4",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "eggs",
+      "amount": "4",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "unsweetened milk",
+      "amount": "1",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "oil or fat for roasting",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 5
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Preheat oven to 220°C/425°F.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Drizzle a little oil into a non stick 12 cup muffin pan. Place the greased muffin tin into the oven as it preheats. Your muffin tray and oil should be smoking HOT before adding your batter.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "In a large mixing bowl whisk together the rice flour, starch, and salt until combined.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "In a large measuring jug whisk together the milk and eggs until thoroughly mixed.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Gradually pour the milk and egg mixture into the flour mixture and whisk until no lumps remain. Your batter should be smooth and thin. Pour the batter back into the measuring cup or some other container that is easy to pour.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Once the oven has fully heated and the oil is smoking slightly, remove the hot muffin tins and carefully pour the batter into each greased muffin cup. Fill each cup about 3/4 full.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "If your batter doesn't sizzle after you've filled your first cup then you haven't heated the muffin tin well enough. Return back to the oven another five minutes before adding any more batter.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Place the tin back in the middle of the preheated oven and let bake for 20-25 minutes. The batter will puff up so make sure there is no rack above that could get in the way.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Serve warm and enjoy.",
+      "groupName": null,
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Holiday / Festive"
+  ],
+  "categories": [
+    "Bread / Baking",
+    "Side Dish"
+  ],
+  "allergens": [
+    "Gluten Free"
+  ]
+}

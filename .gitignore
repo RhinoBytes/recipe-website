@@ -47,8 +47,3 @@ next-env.d.ts
 /Documentation
 .env
 
-# Recipe data (created in development)
-/prisma/data/recipes/*/
-
-# Uploaded images
-/public/uploads/

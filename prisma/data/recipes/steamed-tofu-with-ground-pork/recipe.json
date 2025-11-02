@@ -1,0 +1,194 @@
+{
+  "title": "Steamed Tofu with Ground Pork",
+  "slug": "steamed-tofu-with-ground-pork",
+  "description": "Steamed Tofu with Ground Pork features smooth silken tofu and juicy ground pork. It is light while packed with savory flavors and satisfying textures.",
+  "servings": 2,
+  "prepTimeMinutes": 5,
+  "cookTimeMinutes": 20,
+  "difficulty": "EASY",
+  "imageUrl": "/uploads/recipes/ee6d1c93-7566-4776-b9df-f9e08584f229.jpg",
+  "sourceUrl": "https://delightfulplate.com/steamed-tofu-with-ground-pork/",
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": 288,
+  "proteinG": 19,
+  "fatG": 20,
+  "carbsG": 8,
+  "cuisine": "Asian",
+  "ingredients": [
+    {
+      "name": "silken tofu",
+      "amount": "10.5",
+      "unit": "oz",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "olive oil",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "minced garlic",
+      "amount": "2",
+      "unit": "tsp",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "ground pork",
+      "amount": "4.5-5",
+      "unit": "oz",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "oyster sauce",
+      "amount": "2",
+      "unit": "tsp",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "soy sauce",
+      "amount": "1",
+      "unit": "tbsp",
+      "size": null,
+      "preparation": null,
+      "notes": "divided",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "cornstarch",
+      "amount": "2",
+      "unit": "tsp",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "water",
+      "amount": "2",
+      "unit": "tsp",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "black pepper",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "toasted sesame oil",
+      "amount": "1",
+      "unit": "tsp",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "scallions",
+      "amount": "2",
+      "unit": "tsp",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 10
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Pat dry tofu and carefully cut into thin slices, about 1/2 inch thick. Set aside.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Place a pan over medium heat and add a small amount of olive oil. Sauté garlic briefly until fragrant.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Add pork to the pan, briefly break up the pork for a few seconds and then add oyster sauce and 2 teaspoons of soy sauce. Continue to break up the pork and combine with the seasonings for about 30 seconds. Lower the heat.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Combine cornstarch with water and pour the cornstarch slurry over the pork. Mix and combine the cornstarch slurry with the pork for about 10 seconds, then sprinkle some black pepper and remove the pan from the heat.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Place the partially-cooked pork in the center of a shallow heat-proof plate. Then arrange the tofu slices around the pork, slightly overlapping.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Drizzle the remaining soy sauce and sesame oil over the tofu slices evenly. Sprinkle scallions and black pepper, then cover the plate and steam for 12-15 minutes or until the pork is fully cooked.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Take the plate out of the steamer and serve right away with rice.",
+      "groupName": null,
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Comfort Food",
+    "Savory"
+  ],
+  "categories": [
+    "Side Dish",
+    "Dinner"
+  ],
+  "allergens": []
+}

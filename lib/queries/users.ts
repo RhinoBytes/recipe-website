@@ -10,7 +10,10 @@ function getSortOrder(sort: "newest" | "oldest" | "popular") {
     case "oldest":
       return { createdAt: "asc" as const };
     case "popular":
-      return [{ averageRating: "desc" as const }, { reviewCount: "desc" as const }];
+      return [
+        { averageRating: "desc" as const },
+        { reviewCount: "desc" as const },
+      ];
     case "newest":
     default:
       return { createdAt: "desc" as const };
@@ -81,10 +84,7 @@ export async function getUserRecipes(
           secureUrl: true,
           isPrimary: true,
         },
-        orderBy: [
-          { isPrimary: "desc" },
-          { createdAt: "asc" },
-        ],
+        orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }],
       },
       tags: {
         include: {
@@ -106,9 +106,11 @@ export async function getUserRecipes(
   });
 
   return recipes.map((recipe) => {
-    const primaryImage = recipe.media?.find(m => m.isPrimary) || recipe.media?.[0];
-    const imageUrl = primaryImage?.secureUrl || primaryImage?.url || DEFAULT_RECIPE_IMAGE;
-    
+    const primaryImage =
+      recipe.media?.find((m) => m.isPrimary) || recipe.media?.[0];
+    const imageUrl =
+      primaryImage?.secureUrl || primaryImage?.url || DEFAULT_RECIPE_IMAGE;
+
     return {
       id: recipe.id,
       slug: recipe.slug,
@@ -119,7 +121,9 @@ export async function getUserRecipes(
       cookTimeMinutes: recipe.cookTimeMinutes || 0,
       servings: recipe.servings,
       status: recipe.status,
-      rating: recipe.averageRating ? parseFloat(recipe.averageRating.toString()) : 0,
+      rating: recipe.averageRating
+        ? parseFloat(recipe.averageRating.toString())
+        : 0,
       reviewCount: recipe.reviewCount,
       favoriteCount: recipe._count.favorites,
       tags: recipe.tags.map((rt) => rt.tag.name),
@@ -131,7 +135,6 @@ export async function getUserRecipes(
       },
     };
   });
-}
 }
 
 /**
@@ -261,10 +264,7 @@ export async function getUserFavorites(userId: string) {
               secureUrl: true,
               isPrimary: true,
             },
-            orderBy: [
-              { isPrimary: "desc" },
-              { createdAt: "asc" },
-            ],
+            orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }],
           },
           tags: {
             include: {
@@ -285,9 +285,11 @@ export async function getUserFavorites(userId: string) {
   });
 
   return favorites.map((fav) => {
-    const primaryImage = fav.recipe.media?.find(m => m.isPrimary) || fav.recipe.media?.[0];
-    const imageUrl = primaryImage?.secureUrl || primaryImage?.url || DEFAULT_RECIPE_IMAGE;
-    
+    const primaryImage =
+      fav.recipe.media?.find((m) => m.isPrimary) || fav.recipe.media?.[0];
+    const imageUrl =
+      primaryImage?.secureUrl || primaryImage?.url || DEFAULT_RECIPE_IMAGE;
+
     return {
       id: fav.recipe.id,
       slug: fav.recipe.slug,
@@ -298,7 +300,9 @@ export async function getUserFavorites(userId: string) {
       cookTimeMinutes: fav.recipe.cookTimeMinutes || 0,
       servings: fav.recipe.servings,
       status: fav.recipe.status,
-      rating: fav.recipe.averageRating ? parseFloat(fav.recipe.averageRating.toString()) : 0,
+      rating: fav.recipe.averageRating
+        ? parseFloat(fav.recipe.averageRating.toString())
+        : 0,
       reviewCount: fav.recipe.reviewCount,
       tags: fav.recipe.tags.map((rt) => rt.tag.name),
       categories: fav.recipe.categories.map((rc) => rc.category.name),

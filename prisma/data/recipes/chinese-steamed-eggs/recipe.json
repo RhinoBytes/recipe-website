@@ -1,0 +1,155 @@
+{
+  "title": "Chinese steamed eggs (蒸蛋羹)",
+  "slug": "chinese-steamed-eggs",
+  "description": "Smooth, slippery and heavenly soft, Chinese steamed eggs requires minimum ingredients yet delivers a delicate look and flavour. Learn how to make it flawlessly.",
+  "servings": 2,
+  "prepTimeMinutes": 3,
+  "cookTimeMinutes": 10,
+  "difficulty": "EASY",
+  "imageUrl": "",
+  "sourceUrl": "https://redhousespice.com/chinese-steamed-eggs/",
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": null,
+  "proteinG": null,
+  "fatG": null,
+  "carbsG": null,
+  "cuisine": "Chinese",
+  "ingredients": [
+    {
+      "name": "eggs",
+      "amount": "2",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "Warm water",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": "Ratio should be around 1:2 in volume",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "salt",
+      "amount": "1",
+      "unit": "pinch",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "chive",
+      "amount": "1",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": true,
+      "displayOrder": 3
+    },
+    {
+      "name": "light soy sauce",
+      "amount": "2",
+      "unit": "teaspoon",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "drop sesame oil",
+      "amount": "2",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "Prawns",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "Extra garnish (optional)",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "Asparagus & carrot",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": "Extra garnish (optional)",
+      "isOptional": false,
+      "displayOrder": 7
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Pour warm water into the beaten eggs. Add salt then stir well.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Through a sieve, pour the mixture into 2 small serving bowls. Sprinkle chive over if using.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Cover the bowls with cling film. Pierce to allow the steam to escape.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Steam for 10-12 minutes over a gentle heat (place the bowls in when the water starts to boil).",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Season with light soy sauce and sesame oil (if you wish, cut through the curd several times to let the sauce penetrate). Serve warm.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "If using extra garnish: Steam the egg as usual for 7 minutes, then place in prawns and vegetables. Steam for a further 3 minutes.",
+      "groupName": null,
+      "isOptional": true
+    }
+  ],
+  "tags": [
+    "Comfort Food"
+  ],
+  "categories": [
+    "Breakfast"
+  ],
+  "allergens": [
+    "Vegetarian"
+  ]
+}
