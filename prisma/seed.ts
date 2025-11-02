@@ -81,6 +81,8 @@ const USER_RECIPE_ASSIGNMENTS: Record<string, string[]> = {
 
 /**
  * Read recipe folders from seed-data directory
+ * This version is used exclusively for database seeding.
+ * For runtime recipe management, see lib/recipeStorage.ts
  */
 function readRecipeFolders(): Array<{
   slug: string;
