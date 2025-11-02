@@ -6,6 +6,36 @@ import path from "path";
 import { randomUUID } from "crypto";
 
 /**
+ * Helper function to mark previous profile avatars as not primary
+ */
+async function deactivatePreviousAvatars(userId: string) {
+  await prisma.media.updateMany({
+    where: {
+      userId,
+      isProfileAvatar: true,
+    },
+    data: {
+      isProfileAvatar: false,
+    },
+  });
+}
+
+/**
+ * Helper function to determine MIME type from file path
+ */
+function getMimeTypeFromPath(filePath: string): string {
+  const ext = filePath.split('.').pop()?.toLowerCase();
+  const mimeMap: Record<string, string> = {
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'webp': 'image/webp',
+    'gif': 'image/gif',
+  };
+  return mimeMap[ext || ''] || 'image/jpeg';
+}
+
+/**
  * POST /api/user/avatar
  * Upload or select a user avatar
  * 
@@ -92,15 +122,7 @@ export async function POST(request: Request) {
       const publicUrl = `/uploads/avatars/${uniqueFilename}`;
 
       // Mark previous profile avatar as not primary
-      await prisma.media.updateMany({
-        where: {
-          userId: currentUser.userId,
-          isProfileAvatar: true,
-        },
-        data: {
-          isProfileAvatar: false,
-        },
-      });
+      await deactivatePreviousAvatars(currentUser.userId);
 
       // Create Media record for the uploaded avatar
       const media = await prisma.media.create({
@@ -137,15 +159,10 @@ export async function POST(request: Request) {
     }
 
     // Mark previous profile avatar as not primary
-    await prisma.media.updateMany({
-      where: {
-        userId: currentUser.userId,
-        isProfileAvatar: true,
-      },
-      data: {
-        isProfileAvatar: false,
-      },
-    });
+    await deactivatePreviousAvatars(currentUser.userId);
+
+    // Determine correct MIME type from file extension
+    const mimeType = getMimeTypeFromPath(avatarUrl);
 
     // Create Media record for the selected avatar
     const media = await prisma.media.create({
@@ -153,7 +170,7 @@ export async function POST(request: Request) {
         publicId: `profile-photo-${Date.now()}`,
         url: avatarUrl,
         secureUrl: avatarUrl,
-        mimeType: "image/jpeg",
+        mimeType,
         size: 0, // Default avatars don't have a tracked size
         userId: currentUser.userId,
         isProfileAvatar: true,

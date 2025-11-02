@@ -1,6 +1,13 @@
 /**
  * Profile Photos Utilities
  * Functions to manage default profile avatars from public/img/profile-photos
+ * 
+ * NOTE: The following files must exist in public/img/profile-photos/:
+ * - chef.jpg
+ * - chef1.jpg
+ * - chef2.jpg
+ * - chef3.jpg
+ * - chef4.jpg
  */
 
 /**
