@@ -48,7 +48,7 @@ export interface CloudinaryUploadResponse {
  * @param paramsToSign - Parameters to include in signature
  * @returns Hex signature string
  */
-export function generateSignature(paramsToSign: Record<string, any>): string {
+export function generateSignature(paramsToSign: Record<string, string | number>): string {
   // Sort parameters alphabetically and create string to sign
   const sortedParams = Object.keys(paramsToSign)
     .sort()
@@ -86,7 +86,7 @@ export function createUploadSignature(
   }
 
   // Parameters to sign (excluding signature itself)
-  const paramsToSign: Record<string, any> = {
+  const paramsToSign: Record<string, string | number> = {
     timestamp: timestamp,
     folder: uploadFolder,
   };

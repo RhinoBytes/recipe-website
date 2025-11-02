@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import ProtectedPage from '@/components/auth/ProtectedPage';
-import { Loader2, Sparkles, Upload, AlertCircle } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import Button from '@/components/ui/Button';
 import AIRecipeModal from "@/components/ui/AIRecipeModal";
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
-import { FormattedRecipeResponse, RecipeIngredient, RecipeFormData } from "@/types/recipe";
+import MediaUploader from "@/components/MediaUploader";
+import { FormattedRecipeResponse, RecipeFormData } from "@/types/recipe";
 import { Difficulty, RecipeStatus } from "@prisma/client";
 import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
+import type { Media } from "@/types/index";
 
 interface RecipeStep {
   stepNumber: number;
@@ -77,11 +78,10 @@ export default function NewRecipePage() {
   const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState("");
-  const [imageError, setImageError] = useState(false);
   const [showAllTags, setShowAllTags] = useState(false);
+  const [uploadedMedia, setUploadedMedia] = useState<Media[]>([]);
 
   useEffect(() => {
     // Fetch categories, allergens, and tags
@@ -197,33 +197,24 @@ export default function NewRecipePage() {
   };
   console.log("formData:", formData);
   
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleMediaUploaded = (media: Media) => {
+    setUploadedMedia((prev) => [...prev, media]);
+    // Set the first uploaded media as the recipe's main image
+    if (uploadedMedia.length === 0) {
+      setFormData((prev) => ({ ...prev, imageUrl: media.secureUrl || media.url }));
+    }
+  };
 
-    setUploadingImage(true);
-    setError(null);
-
-    try {
-      const uploadFormData = new FormData();
-      uploadFormData.append("image", file);
-
-      const response = await fetch("/api/upload/image", {
-        method: "POST",
-        body: uploadFormData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to upload image");
-      }
-
-      const data = await response.json();
-      setFormData((prev) => ({ ...prev, imageUrl: data.imageUrl }));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to upload image");
-    } finally {
-      setUploadingImage(false);
+  const handleMediaDeleted = (mediaId: string) => {
+    setUploadedMedia((prev) => prev.filter((m) => m.id !== mediaId));
+    // If the deleted media was the main image, clear or update imageUrl
+    const deletedMedia = uploadedMedia.find((m) => m.id === mediaId);
+    if (deletedMedia && formData.imageUrl === (deletedMedia.secureUrl || deletedMedia.url)) {
+      const remainingMedia = uploadedMedia.filter((m) => m.id !== mediaId);
+      setFormData((prev) => ({
+        ...prev,
+        imageUrl: remainingMedia.length > 0 ? (remainingMedia[0].secureUrl || remainingMedia[0].url) : "",
+      }));
     }
   };
 
@@ -460,59 +451,17 @@ export default function NewRecipePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Recipe Image
-                      <span className="ml-2 text-xs text-gray-500">Optional - Add a photo to make your recipe more appealing</span>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Recipe Images
+                      <span className="ml-2 text-xs text-gray-500">Upload photos to make your recipe more appealing</span>
                     </label>
-                    <div className="space-y-2">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={formData.imageUrl}
-                          onChange={(e) => {
-                            setFormData({ ...formData, imageUrl: e.target.value });
-                            setImageError(false);
-                          }}
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                          placeholder="Enter image URL or upload a file below"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <label className="flex-1 cursor-pointer">
-                          <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-colors">
-                            <Upload size={18} />
-                            <span className="text-sm text-gray-600">
-                              {uploadingImage ? "Uploading..." : "Upload Image"}
-                            </span>
-                          </div>
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                            disabled={uploadingImage}
-                          />
-                        </label>
-                      </div>
-                      {formData.imageUrl && !imageError && (
-                        <div className="mt-2">
-                          <Image
-                            src={formData.imageUrl}
-                            alt="Recipe preview"
-                            width={128}
-                            height={128}
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                            onError={() => setImageError(true)}
-                          />
-                        </div>
-                      )}
-                      {imageError && formData.imageUrl && (
-                        <div className="flex items-center gap-2 text-amber-600 text-sm">
-                          <AlertCircle size={16} />
-                          <span>Image failed to load. Using default placeholder.</span>
-                        </div>
-                      )}
-                    </div>
+                    <MediaUploader
+                      onMediaUploaded={handleMediaUploaded}
+                      onMediaDeleted={handleMediaDeleted}
+                      existingMedia={uploadedMedia}
+                      maxFiles={5}
+                      accept="image/*"
+                    />
                   </div>
 
                   <div>
