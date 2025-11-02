@@ -3,12 +3,14 @@ import { faker } from "@faker-js/faker";
 import { readRecipeFolders } from "../lib/recipeStorage.js";
 import bcrypt from "bcrypt";
 import {
-  getRandomProfileAvatar,
   getRandomRecipePlaceholder,
 } from "../lib/placeholders.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createUploadSignature } from "../lib/cloudinary.js";
+import FormData from "form-data";
+import fetch from "node-fetch";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,38 +22,84 @@ const prisma = new PrismaClient({
 type DifficultyType = keyof typeof Difficulty;
 type RecipeStatusType = keyof typeof RecipeStatus;
 
-// Helper function to copy image file
-async function copyRecipeImage(
-  sourceImagePath: string,
-  recipeId: string
-): Promise<string | null> {
+/**
+ * Upload an image file to Cloudinary
+ * @param filePath Path to the image file
+ * @param folder Cloudinary folder path
+ * @param userId User ID for the media record
+ * @returns Media object or null if upload fails
+ */
+async function uploadImageToCloudinary(
+  filePath: string,
+  folder: string,
+  userId: string,
+  isProfileAvatar: boolean = false
+): Promise<any | null> {
   try {
-    // Create the target directory if it doesn't exist
-    const targetDir = path.join(
-      __dirname,
-      "..",
-      "public",
-      "uploads",
-      "recipes",
-      recipeId
-    );
-
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
+    // Check if Cloudinary is configured
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY) {
+      console.log("  ⚠️  Cloudinary not configured, skipping upload");
+      return null;
     }
 
-    // Get the file extension from the source image
-    const ext = path.extname(sourceImagePath);
-    const targetFileName = `image${ext}`;
-    const targetPath = path.join(targetDir, targetFileName);
+    console.log(`  ☁️  Uploading to Cloudinary: ${path.basename(filePath)}`);
+    
+    // Generate upload signature (simplified for seed script)
+    const timestamp = Math.round(Date.now() / 1000);
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    
+    // Create form data for upload
+    const formData = new FormData();
+    formData.append('file', fs.createReadStream(filePath));
+    formData.append('timestamp', timestamp.toString());
+    formData.append('api_key', apiKey);
+    formData.append('folder', folder);
+    
+    // For unsigned upload, we can use upload preset if available
+    if (process.env.CLOUDINARY_UPLOAD_PRESET) {
+      formData.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET);
+    }
 
-    // Copy the file
-    fs.copyFileSync(sourceImagePath, targetPath);
+    // Upload to Cloudinary
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    const response = await fetch(uploadUrl, {
+      method: 'POST',
+      body: formData as any,
+    });
 
-    // Return the public URL path
-    return `/uploads/recipes/${recipeId}/${targetFileName}`;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`  ❌ Cloudinary upload failed: ${errorText}`);
+      return null;
+    }
+
+    const uploadData = await response.json();
+    console.log(`  ✅ Uploaded to Cloudinary: ${uploadData.public_id}`);
+
+    // Create Media record in database
+    const media = await prisma.media.create({
+      data: {
+        publicId: uploadData.public_id,
+        url: uploadData.url,
+        secureUrl: uploadData.secure_url,
+        mimeType: `image/${uploadData.format}`,
+        size: uploadData.bytes,
+        width: uploadData.width || null,
+        height: uploadData.height || null,
+        originalFilename: path.basename(filePath),
+        folder: uploadData.folder || folder,
+        resourceType: 'IMAGE',
+        userId: userId,
+        isProfileAvatar: isProfileAvatar,
+        isPrimary: false, // Will be set later for recipes
+      },
+    });
+
+    console.log(`  ✅ Created Media record: ${media.id}`);
+    return media;
   } catch (error) {
-    console.error(`Failed to copy image: ${error}`);
+    console.error(`  ❌ Failed to upload image:`, error);
     return null;
   }
 }
@@ -69,6 +117,10 @@ async function main() {
   await prisma.recipeStep.deleteMany({});
   await prisma.recipeIngredient.deleteMany({});
   await prisma.review.deleteMany({});
+  await prisma.favoriteRecipe.deleteMany({});
+  
+  // Note: Media records will cascade delete when recipes/users are deleted
+  // For explicit cleanup of Cloudinary assets, run: node scripts/reset-seed-media.ts
   await prisma.recipe.deleteMany({});
   await prisma.tag.deleteMany({});
   await prisma.category.deleteMany({});
@@ -78,7 +130,7 @@ async function main() {
 
   console.log("All tables cleared.");
 
-  // Clean up old recipe uploads folder
+  // Clean up old recipe uploads folder (legacy)
   const uploadsDir = path.join(__dirname, "..", "public", "uploads", "recipes");
   if (fs.existsSync(uploadsDir)) {
     fs.rmSync(uploadsDir, { recursive: true, force: true });
@@ -96,12 +148,14 @@ async function main() {
         username,
         email: `${username.toLowerCase()}@example.com`,
         passwordHash: await bcrypt.hash("password123", 10),
-        avatarUrl: getRandomProfileAvatar(),
         bio: faker.lorem.sentence(),
       },
     });
     users.push(user);
     console.log(`Created user: ${username} (ID: ${user.id})`);
+    
+    // Note: Not creating seed avatars to keep it simple
+    // Users can upload avatars via the UI using the Media API
   }
 
   // --- CREATE CATEGORIES ---
@@ -238,7 +292,6 @@ async function main() {
           prepTimeMinutes: data.prepTimeMinutes,
           cookTimeMinutes: data.cookTimeMinutes,
           difficulty: (data.difficulty as DifficultyType) || Difficulty.MEDIUM,
-          imageUrl: data.imageUrl || getRandomRecipePlaceholder(),
           sourceUrl: data.sourceUrl,
           sourceText: data.sourceText,
           cuisineId,
@@ -250,7 +303,7 @@ async function main() {
         },
       });
 
-      // Handle image copying if there's a local image file
+      // Handle image upload if there's a local image file
       if (folderPath) {
         let sourceImagePath: string | null = null;
 
@@ -275,32 +328,35 @@ async function main() {
           }
         }
 
-        // If we found an image path, try to copy it
-        if (sourceImagePath) {
-          console.log(`  Looking for image at: ${sourceImagePath}`);
+        // If we found an image path, try to upload it to Cloudinary
+        if (sourceImagePath && fs.existsSync(sourceImagePath)) {
+          console.log(`  Image found! Uploading to Cloudinary...`);
+          const media = await uploadImageToCloudinary(
+            sourceImagePath,
+            "recipe-website/seed",
+            author.id,
+            false
+          );
 
-          if (fs.existsSync(sourceImagePath)) {
-            console.log(`  Image found! Copying...`);
-            const newImageUrl = await copyRecipeImage(
-              sourceImagePath,
-              recipe.id
-            );
-
-            if (newImageUrl) {
-              // Update the recipe with the new image URL
-              await prisma.recipe.update({
-                where: { id: recipe.id },
-                data: { imageUrl: newImageUrl },
-              });
-              console.log(`  ✓ Copied image to ${newImageUrl}`);
-            } else {
-              console.log(`  ✗ Failed to copy image`);
-            }
+          if (media) {
+            // Link media to recipe and set as primary
+            await prisma.media.update({
+              where: { id: media.id },
+              data: {
+                recipeId: recipe.id,
+                isPrimary: true,
+              },
+            });
+            console.log(`  ✓ Uploaded and linked image to recipe`);
           } else {
-            console.log(`  ✗ Image file not found at path: ${sourceImagePath}`);
+            console.log(`  ⚠️  No image uploaded - using default placeholder`);
           }
         } else {
-          console.log(`  No image file found in folder`);
+          if (sourceImagePath) {
+            console.log(`  ✗ Image file not found at path: ${sourceImagePath}`);
+          } else {
+            console.log(`  No image file found in folder`);
+          }
         }
       }
 

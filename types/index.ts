@@ -18,7 +18,7 @@ export interface Recipe {
   rating: number;
   author: {
     name: string;
-    avatar: string;
+    avatar: string; // Computed from media or default
     username?: string;
   };
 }
@@ -42,7 +42,7 @@ export interface Chef {
   id: string;
   name: string;
   title: string;
-  avatar: string;
+  avatar: string; // Computed from media or default
   quote: string;
 }
 
@@ -78,7 +78,7 @@ export interface DetailedRecipe {
     id: string;
     name: string;
     username: string;
-    avatar: string | null;
+    avatar: string | null; // Computed from media or default
   };
   tags: string[];
   categories: string[];
