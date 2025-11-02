@@ -69,7 +69,7 @@ export default function MobileMenu({ navLinks, mobileMenuOpen, setMobileMenuOpen
         </ul>
 
         {/* auth Links */}
-        <div className="border-t border-border pt-4 space-y-2">
+        <div className="border-t-2 border-border pt-4 space-y-2">
           {loading ? (
             <div className="text-text-secondary">Loading...</div>
           ) : isAuthenticated ? (
