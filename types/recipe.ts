@@ -32,8 +32,8 @@ export interface RecipeFormData {
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   difficulty: Difficulty;
-  sourceUrl: string;
-  sourceText: string;
+  source: string;
+  chefNotes: string;
   cuisineName: string;
   ingredients: RecipeIngredient[];
   tags: string[];

@@ -60,8 +60,8 @@ export default function EditRecipePage() {
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
     difficulty: Difficulty.MEDIUM,
-    sourceUrl: "",
-    sourceText: "",
+    source: "",
+    chefNotes: "",
     cuisineName: "",
     ingredients: [],
     tags: [],
@@ -169,6 +169,10 @@ export default function EditRecipePage() {
 
         const normalizedSteps = normalizeSteps(recipe.steps);
 
+        // Combine sourceUrl and sourceText into unified source field
+        // If there's a sourceUrl, use that; otherwise use sourceText
+        const combinedSource = recipe.sourceUrl || recipe.sourceText || "";
+
         // Convert to textarea format (ingredientsToText works with RecipeIngredient directly)
         setIngredientsText(ingredientsToText(normalizedIngredients));
         setStepsText(stepsToText(normalizedSteps));
@@ -181,8 +185,8 @@ export default function EditRecipePage() {
           prepTimeMinutes: typeof recipe.prepTimeMinutes === "number" ? recipe.prepTimeMinutes : 15,
           cookTimeMinutes: typeof recipe.cookTimeMinutes === "number" ? recipe.cookTimeMinutes : 30,
           difficulty: difficultyEnum,
-          sourceUrl: recipe.sourceUrl ?? "",
-          sourceText: recipe.sourceText ?? "",
+          source: combinedSource,
+          chefNotes: recipe.chefNotes ?? "",
           cuisineName: recipe.cuisine?.name ?? "",
           ingredients: normalizedIngredients, // Store full format with measurements
           tags: toNameArray(recipe.tags),
@@ -257,12 +261,24 @@ export default function EditRecipePage() {
         throw new Error("Please add at least one instruction step");
       }
 
+      // Detect if source is a URL
+      const isUrl = formData.source.trim() && (
+        formData.source.startsWith('http://') || 
+        formData.source.startsWith('https://') ||
+        formData.source.startsWith('www.')
+      );
+
       // Parsed ingredients already have dual measurements from parseIngredients()
       const submissionData = {
         ...formData,
         ingredients: parsedIngredients,
         steps: parsedSteps,
+        sourceUrl: isUrl ? formData.source : "",
+        sourceText: isUrl ? "" : formData.source,
       };
+
+      // Remove the 'source' field as it's been split into sourceUrl/sourceText
+      delete (submissionData as any).source;
 
       const response = await fetch(`/api/recipes/${encodeURIComponent(slug)}`, {
         method: "PATCH",
@@ -497,29 +513,29 @@ export default function EditRecipePage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Source URL
-                      <span className="ml-2 text-xs text-gray-500">Optional - If adapted from another recipe</span>
+                      Source
+                      <span className="ml-2 text-xs text-gray-500">Optional - URL or text (e.g., &ldquo;From Grandma&apos;s cookbook&rdquo;)</span>
                     </label>
                     <input
-                      type="url"
-                      value={formData.sourceUrl}
-                      onChange={(e) => setFormData({ ...formData, sourceUrl: e.target.value })}
+                      type="text"
+                      value={formData.source}
+                      onChange={(e) => setFormData({ ...formData, source: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                      placeholder="https://..."
+                      placeholder="https://... or text like 'From Grandma's cookbook'"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Source Text
-                      <span className="ml-2 text-xs text-gray-500">Optional - e.g., &ldquo;From Grandma&apos;s cookbook&rdquo;</span>
+                      Chef&apos;s Notes
+                      <span className="ml-2 text-xs text-gray-500">Optional - Tips, substitutions, or personal notes</span>
                     </label>
-                    <input
-                      type="text"
-                      value={formData.sourceText}
-                      onChange={(e) => setFormData({ ...formData, sourceText: e.target.value })}
+                    <textarea
+                      value={formData.chefNotes}
+                      onChange={(e) => setFormData({ ...formData, chefNotes: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                      placeholder="e.g., From Grandma's cookbook"
+                      rows={3}
+                      placeholder="Add any helpful tips, substitutions, or personal notes about this recipe..."
                     />
                   </div>
                 </div>

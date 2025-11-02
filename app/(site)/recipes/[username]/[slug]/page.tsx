@@ -371,7 +371,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
             </div>
 
             {/* Chef Notes */}
-            <ChefNotes notes={recipe.sourceText} />
+            <ChefNotes notes={recipe.chefNotes} />
 
             {/* Cuisine & Source */}
             {(recipe.cuisine || recipe.sourceUrl) && (
