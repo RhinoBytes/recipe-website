@@ -5,7 +5,7 @@
 // Default image paths
 export const DEFAULT_RECIPE_IMAGE = "/img/default/default.jpg";
 export const DEFAULT_USER_AVATAR = "/img/users/default-avatar.png";
-export const DEFAULT_CHEF_AVATAR = "/img/default/default.jpg";
+export const DEFAULT_CHEF_AVATAR = "/img/users/default-avatar.png";
 
 // Pagination defaults
 export const DEFAULT_PAGE_SIZE = 12;
