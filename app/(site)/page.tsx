@@ -7,7 +7,6 @@ import ChefSpotlight from "@/components/ui/ChefSpotlight";
 import Button from '@/components/ui/Button';
 import { Flame, Compass } from "lucide-react";
 import Link from "next/link";
-import { getCategoryImage } from "@/lib/placeholders";
 import { getPopularRecipes, getRecentRecipes, getFeaturedRecipe } from "@/lib/queries/recipes";
 import { getSpotlightChef } from "@/lib/queries/users";
 

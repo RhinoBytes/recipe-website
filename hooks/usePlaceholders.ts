@@ -1,13 +1,14 @@
-import { getRandomRecipePlaceholder, getRandomProfileAvatar } from '@/lib/placeholders';
+import { getRandomRecipePlaceholder } from '@/lib/recipePlaceholders';
+import { getRandomProfilePhoto } from '@/lib/profilePhotos';
 
 /**
- * Custom hook for cottagecore placeholders
+ * Custom hook for placeholder images
  * Provides easy access to placeholder images throughout the app
  */
 
 /**
  * Get a fallback recipe image
- * Returns a cottagecore-themed placeholder if the provided image is invalid or missing
+ * Returns a themed placeholder if the provided image is invalid or missing
  */
 export function useRecipePlaceholder(imageUrl?: string | null): string {
   if (!imageUrl || imageUrl.trim() === '') {
@@ -18,11 +19,11 @@ export function useRecipePlaceholder(imageUrl?: string | null): string {
 
 /**
  * Get a fallback profile avatar
- * Returns a cottagecore-themed avatar if the provided avatar is invalid or missing
+ * Returns a default profile photo if the provided avatar is invalid or missing
  */
 export function useProfileAvatar(avatarUrl?: string | null): string {
   if (!avatarUrl || avatarUrl.trim() === '') {
-    return getRandomProfileAvatar();
+    return getRandomProfilePhoto();
   }
   return avatarUrl;
 }

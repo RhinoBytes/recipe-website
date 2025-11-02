@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, Star } from "lucide-react";
 import type { Recipe } from "@/types";
-import { useRecipePlaceholder, useProfileAvatar } from "@/hooks/useCottagecorePlaceholders";
+import { useRecipePlaceholder, useProfileAvatar } from "@/hooks/usePlaceholders";
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -16,7 +16,7 @@ export default function RecipeCard({ recipe, priority = false }: RecipeCardProps
     ? `/recipes/${recipe.author.username}/${recipe.id}`
     : `/recipes/${recipe.id}`;
   
-  // Use cottagecore placeholders for missing images
+  // Use placeholders for missing images
   const recipeImage = useRecipePlaceholder(recipe.image);
   const authorAvatar = useProfileAvatar(recipe.author.avatar);
     

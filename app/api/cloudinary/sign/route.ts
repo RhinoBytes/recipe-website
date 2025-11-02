@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { createUploadSignature, validateCloudinaryConfig } from "@/lib/cloudinary";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 /**
  * POST /api/cloudinary/sign

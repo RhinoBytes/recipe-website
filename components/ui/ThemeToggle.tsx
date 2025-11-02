@@ -1,18 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Moon, Sun, Palette } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 
 // Available themes
 export const THEMES = {
-  LIGHT: 'light-cottagecore',
-  DARK: 'dark-cottagecore',
   TERRACOTTA: 'terracotta',
+  DARK_TERRACOTTA: 'dark-terracotta',
 } as const;
 
 export type ThemeName = typeof THEMES[keyof typeof THEMES];
 
-const THEME_STORAGE_KEY = 'cottagecore-theme';
+const THEME_STORAGE_KEY = 'app-theme';
 
 /**
  * Sets the theme on the document element and saves to localStorage
@@ -24,7 +23,7 @@ export function setTheme(theme: ThemeName) {
 
 /**
  * Gets the current theme from localStorage or returns default
- * ✅ Default is now TERRACOTTA
+ * Default is TERRACOTTA (light mode)
  */
 export function getStoredTheme(): ThemeName {
   if (typeof window === 'undefined') return THEMES.TERRACOTTA;
@@ -35,7 +34,7 @@ export function getStoredTheme(): ThemeName {
 
 /**
  * Theme toggle button component
- * Cycles between light, dark, and terracotta themes
+ * Toggles between terracotta (light) and dark-terracotta (dark) themes
  */
 export default function ThemeToggle() {
   const [currentTheme, setCurrentTheme] = useState<ThemeName>(THEMES.TERRACOTTA);
@@ -49,14 +48,11 @@ export default function ThemeToggle() {
     setMounted(true);
   }, []);
 
-  // Cycle through the available themes in order
+  // Toggle between light and dark themes
   const toggleTheme = () => {
-    const nextTheme =
-      currentTheme === THEMES.LIGHT
-        ? THEMES.DARK
-        : currentTheme === THEMES.DARK
-        ? THEMES.TERRACOTTA
-        : THEMES.LIGHT;
+    const nextTheme = currentTheme === THEMES.TERRACOTTA 
+      ? THEMES.DARK_TERRACOTTA 
+      : THEMES.TERRACOTTA;
 
     setCurrentTheme(nextTheme);
     setTheme(nextTheme);
@@ -70,22 +66,15 @@ export default function ThemeToggle() {
         aria-label="Loading theme toggle"
         disabled
       >
-        {/* Show terracotta icon as default to match server-side rendering */}
-        <Palette size={20} className="text-text opacity-50" />
+        {/* Show sun icon as default to match server-side rendering */}
+        <Sun size={20} className="text-text opacity-50" />
       </button>
     );
   }
 
-  // Determine icon and labels
-  let nextThemeName = 'dark';
-
-  if (currentTheme === THEMES.LIGHT) {
-    nextThemeName = 'dark';
-  } else if (currentTheme === THEMES.DARK) {
-    nextThemeName = 'terracotta';
-  } else if (currentTheme === THEMES.TERRACOTTA) {
-    nextThemeName = 'light';
-  }
+  // Determine next theme name and icon
+  const isDark = currentTheme === THEMES.DARK_TERRACOTTA;
+  const nextThemeName = isDark ? 'light' : 'dark';
 
   return (
     <button
@@ -94,11 +83,11 @@ export default function ThemeToggle() {
       aria-label={`Switch to ${nextThemeName} theme`}
       title={`Switch to ${nextThemeName} theme`}
     >
-      {/* All icons absolutely positioned with crossfade effect */}
+      {/* Icons with smooth transition */}
       <Sun 
         size={20} 
         className={`absolute text-text transition-all duration-300 ${
-          currentTheme === THEMES.LIGHT 
+          !isDark
             ? 'opacity-100 rotate-0 scale-100' 
             : 'opacity-0 rotate-180 scale-50'
         }`}
@@ -106,17 +95,9 @@ export default function ThemeToggle() {
       <Moon 
         size={20} 
         className={`absolute text-text transition-all duration-300 ${
-          currentTheme === THEMES.DARK 
+          isDark
             ? 'opacity-100 rotate-0 scale-100' 
             : 'opacity-0 -rotate-180 scale-50'
-        }`}
-      />
-      <Palette 
-        size={20} 
-        className={`absolute text-text transition-all duration-300 ${
-          currentTheme === THEMES.TERRACOTTA 
-            ? 'opacity-100 rotate-0 scale-100' 
-            : 'opacity-0 rotate-90 scale-50'
         }`}
       />
     </button>

@@ -41,7 +41,7 @@ export default function PrintButton() {
         @media print {
           /* Force light theme colors for print */
           :root,
-          :root[data-theme="dark-cottagecore"],
+          :root[data-theme="dark-terracotta"],
           :root[data-theme="terracotta"] {
             --bg: #ffffff !important;
             --bg-secondary: #ffffff !important;

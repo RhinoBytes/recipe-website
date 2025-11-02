@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { RecipeData } from "@/types/recipe";
+import type { RecipeData } from "@/types/recipe";
 
 /**
  * Save recipe data to JSON file in development mode
