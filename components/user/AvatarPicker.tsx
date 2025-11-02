@@ -140,6 +140,12 @@ export default function AvatarPicker({ currentAvatar, onSelect, className = '' }
               fill
               className="object-cover"
               sizes="(max-width: 640px) 20vw, 15vw"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (target.src !== '/img/profile-photos/default.jpg') {
+                  target.src = '/img/profile-photos/default.jpg';
+                }
+              }}
             />
             {selectedAvatar === avatar && (
               <div className="absolute inset-0 bg-accent/30 flex items-center justify-center">
