@@ -1,0 +1,173 @@
+{
+  "title": "Lemon Blueberry Scones",
+  "slug": "lemon-blueberry-scones",
+  "description": "Buttery, flaky scones studded with fresh blueberries and brightened with lemon zest. These elegant pastries are perfect for brunch or afternoon tea.",
+  "cuisine": "British / English",
+  "difficulty": "MEDIUM",
+  "servings": 8,
+  "prepTimeMinutes": 20,
+  "cookTimeMinutes": 18,
+  "calories": 285,
+  "proteinG": 4,
+  "fatG": 14,
+  "carbsG": 37,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "all-purpose flour",
+      "amount": "2",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "granulated sugar",
+      "amount": "1/3",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "baking powder",
+      "amount": "1",
+      "unit": "tbsp",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "salt",
+      "amount": "1/2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "lemon zest",
+      "amount": "1",
+      "unit": "tbsp",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "cold unsalted butter",
+      "amount": "1/2",
+      "unit": "cup",
+      "preparation": "cubed",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "heavy cream",
+      "amount": "1/2",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "large egg",
+      "amount": "1",
+      "unit": "whole",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "vanilla extract",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "fresh blueberries",
+      "amount": "1",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "heavy cream",
+      "amount": "2",
+      "unit": "tbsp",
+      "groupName": "Glaze",
+      "isOptional": false,
+      "displayOrder": 10
+    },
+    {
+      "name": "powdered sugar",
+      "amount": "1",
+      "unit": "cup",
+      "groupName": "Glaze",
+      "isOptional": false,
+      "displayOrder": 11
+    },
+    {
+      "name": "lemon juice",
+      "amount": "2",
+      "unit": "tbsp",
+      "groupName": "Glaze",
+      "isOptional": false,
+      "displayOrder": 12
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Preheat oven to 400°F (200°C). Line a baking sheet with parchment paper.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "In a large bowl, whisk together flour, sugar, baking powder, salt, and lemon zest.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Cut in cold butter using a pastry cutter or fork until mixture resembles coarse crumbs.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "In a small bowl, whisk together cream, egg, and vanilla.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Pour wet ingredients into dry ingredients and stir until just combined.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Gently fold in blueberries, being careful not to break them.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Turn dough onto a floured surface and pat into an 8-inch circle about 3/4 inch thick.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Cut into 8 wedges and place on prepared baking sheet, spacing 2 inches apart.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Bake for 18-20 minutes until golden brown.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 10,
+      "instruction": "While scones cool, whisk together glaze ingredients. Drizzle over warm scones before serving.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Party / Entertaining"
+  ],
+  "categories": [
+    "Breakfast",
+    "Dessert"
+  ],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}

@@ -1,0 +1,176 @@
+{
+  "title": "Grilled Chicken Caesar Salad",
+  "slug": "grilled-chicken-caesar-salad",
+  "description": "Crisp romaine lettuce topped with juicy grilled chicken, homemade Caesar dressing, parmesan cheese, and crunchy croutons. A satisfying and refreshing meal.",
+  "cuisine": "American",
+  "difficulty": "EASY",
+  "servings": 4,
+  "prepTimeMinutes": 20,
+  "cookTimeMinutes": 15,
+  "calories": 385,
+  "proteinG": 34,
+  "fatG": 22,
+  "carbsG": 18,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "chicken breast",
+      "amount": "1.5",
+      "unit": "lbs",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "olive oil",
+      "amount": "2",
+      "unit": "tbsp",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "salt and pepper",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "romaine lettuce",
+      "amount": "2",
+      "unit": "heads",
+      "preparation": "chopped",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "parmesan cheese",
+      "amount": "1",
+      "unit": "cup",
+      "preparation": "shaved or grated",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "croutons",
+      "amount": "1 1/2",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "mayonnaise",
+      "amount": "1/2",
+      "unit": "cup",
+      "groupName": "Caesar Dressing",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "lemon juice",
+      "amount": "2",
+      "unit": "tbsp",
+      "groupName": "Caesar Dressing",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "Dijon mustard",
+      "amount": "1",
+      "unit": "tsp",
+      "groupName": "Caesar Dressing",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "garlic",
+      "amount": "2",
+      "unit": "cloves",
+      "preparation": "minced",
+      "groupName": "Caesar Dressing",
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "anchovy paste",
+      "amount": "1",
+      "unit": "tsp",
+      "groupName": "Caesar Dressing",
+      "isOptional": true,
+      "displayOrder": 10
+    },
+    {
+      "name": "Worcestershire sauce",
+      "amount": "1/2",
+      "unit": "tsp",
+      "groupName": "Caesar Dressing",
+      "isOptional": false,
+      "displayOrder": 11
+    },
+    {
+      "name": "parmesan cheese",
+      "amount": "1/4",
+      "unit": "cup",
+      "preparation": "grated",
+      "groupName": "Caesar Dressing",
+      "isOptional": false,
+      "displayOrder": 12
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Brush chicken breasts with olive oil and season with salt and pepper.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Grill chicken over medium-high heat for 6-7 minutes per side until internal temperature reaches 165°F (74°C).",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Let chicken rest for 5 minutes, then slice into strips.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "For dressing: Whisk together mayonnaise, lemon juice, Dijon mustard, garlic, anchovy paste, Worcestershire sauce, and parmesan.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Thin with water if needed to reach desired consistency.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "In a large bowl, toss romaine lettuce with Caesar dressing until well coated.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Divide salad among plates.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Top each with sliced chicken, croutons, and shaved parmesan.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Serve immediately with additional dressing on the side.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Easy",
+    "Quick"
+  ],
+  "categories": [
+    "Salad",
+    "Lunch"
+  ],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}

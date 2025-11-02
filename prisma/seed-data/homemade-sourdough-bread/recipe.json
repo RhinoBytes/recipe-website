@@ -1,0 +1,113 @@
+{
+  "title": "Homemade Sourdough Bread",
+  "slug": "homemade-sourdough-bread",
+  "description": "Artisan sourdough bread with a crispy crust and chewy interior. This recipe uses a simple sourdough starter and requires minimal kneading for authentic rustic bread.",
+  "cuisine": "French",
+  "difficulty": "HARD",
+  "servings": 12,
+  "prepTimeMinutes": 720,
+  "cookTimeMinutes": 45,
+  "calories": 220,
+  "proteinG": 7,
+  "fatG": 2,
+  "carbsG": 45,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "sourdough starter",
+      "amount": "1",
+      "unit": "cup",
+      "preparation": "active and fed",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "bread flour",
+      "amount": "4",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "warm water",
+      "amount": "1 1/2",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "salt",
+      "amount": "2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "olive oil",
+      "amount": "2",
+      "unit": "tbsp",
+      "isOptional": true,
+      "displayOrder": 4
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "In a large bowl, mix sourdough starter, water, and flour until a shaggy dough forms.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Cover and let rest for 30 minutes (autolyse method).",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Add salt and knead for 10 minutes until smooth and elastic.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Place in a lightly oiled bowl, cover, and let rise at room temperature for 4-6 hours until doubled.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Fold dough every hour during bulk fermentation for better structure.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Shape into a round loaf and place in a proofing basket or bowl lined with a floured towel.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Cover and refrigerate overnight (8-12 hours) for cold fermentation.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Preheat oven to 450°F (230°C) with a Dutch oven inside for 30 minutes.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Score the top of the dough with a sharp knife and carefully place in the hot Dutch oven.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 10,
+      "instruction": "Bake covered for 30 minutes, then uncover and bake for 15 more minutes until deep golden brown.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Comfort Food"
+  ],
+  "categories": [
+    "Bread / Baking"
+  ],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}

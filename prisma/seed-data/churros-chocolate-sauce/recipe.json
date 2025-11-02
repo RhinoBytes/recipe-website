@@ -1,0 +1,154 @@
+{
+  "title": "Churros with Chocolate Sauce",
+  "slug": "churros-chocolate-sauce",
+  "description": "Crispy, golden churros dusted with cinnamon sugar and served with rich chocolate dipping sauce. A beloved Mexican dessert that's irresistibly delicious.",
+  "cuisine": "Mexican",
+  "difficulty": "MEDIUM",
+  "servings": 8,
+  "prepTimeMinutes": 20,
+  "cookTimeMinutes": 20,
+  "calories": 295,
+  "proteinG": 4,
+  "fatG": 16,
+  "carbsG": 36,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "water",
+      "amount": "1",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "unsalted butter",
+      "amount": "1/2",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "salt",
+      "amount": "1/4",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "all-purpose flour",
+      "amount": "1",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "large eggs",
+      "amount": "3",
+      "unit": "whole",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "vegetable oil",
+      "amount": "4",
+      "unit": "cups",
+      "notes": "for frying",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "granulated sugar",
+      "amount": "1/2",
+      "unit": "cup",
+      "groupName": "Coating",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "ground cinnamon",
+      "amount": "1",
+      "unit": "tsp",
+      "groupName": "Coating",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "semi-sweet chocolate",
+      "amount": "8",
+      "unit": "oz",
+      "preparation": "chopped",
+      "groupName": "Chocolate Sauce",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "heavy cream",
+      "amount": "1",
+      "unit": "cup",
+      "groupName": "Chocolate Sauce",
+      "isOptional": false,
+      "displayOrder": 9
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "In a saucepan, bring water, butter, and salt to a boil.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Remove from heat and stir in flour until mixture forms a ball.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Let cool for 5 minutes, then beat in eggs one at a time until smooth.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Transfer dough to a piping bag fitted with a large star tip.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Heat oil in a deep pot to 375°F (190°C).",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Pipe 6-inch strips of dough into hot oil, cutting with scissors. Fry 2-3 at a time.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Cook for 2-3 minutes per side until golden brown. Drain on paper towels.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Mix cinnamon and sugar. Roll warm churros in mixture to coat.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "For chocolate sauce: Heat cream until simmering, pour over chopped chocolate. Stir until smooth.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 10,
+      "instruction": "Serve churros warm with chocolate sauce for dipping.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Kid-Friendly",
+    "Party / Entertaining"
+  ],
+  "categories": [
+    "Dessert"
+  ],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}

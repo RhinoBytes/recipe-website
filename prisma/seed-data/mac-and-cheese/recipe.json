@@ -1,0 +1,156 @@
+{
+  "title": "Creamy Mac and Cheese",
+  "slug": "mac-and-cheese",
+  "description": "Ultra-creamy, cheesy macaroni and cheese made from scratch with a blend of sharp cheddar and Gruyère. This comfort food classic beats any box version.",
+  "cuisine": "American",
+  "difficulty": "EASY",
+  "servings": 6,
+  "prepTimeMinutes": 10,
+  "cookTimeMinutes": 20,
+  "calories": 485,
+  "proteinG": 18,
+  "fatG": 28,
+  "carbsG": 42,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "elbow macaroni",
+      "amount": "1",
+      "unit": "lb",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "unsalted butter",
+      "amount": "4",
+      "unit": "tbsp",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "all-purpose flour",
+      "amount": "1/4",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "whole milk",
+      "amount": "3",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "heavy cream",
+      "amount": "1",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "sharp cheddar cheese",
+      "amount": "3",
+      "unit": "cups",
+      "preparation": "shredded",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "Gruyère cheese",
+      "amount": "1",
+      "unit": "cup",
+      "preparation": "shredded",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "salt",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "black pepper",
+      "amount": "1/2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "paprika",
+      "amount": "1/4",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "garlic powder",
+      "amount": "1/4",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 10
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Cook macaroni according to package directions until al dente. Drain and set aside.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "In a large pot, melt butter over medium heat.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Whisk in flour and cook for 1-2 minutes to create a roux.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Gradually whisk in milk and cream, stirring constantly until smooth.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Cook, stirring frequently, until sauce thickens (about 5 minutes).",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Reduce heat to low and stir in cheeses, a handful at a time, until melted and smooth.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Add salt, pepper, paprika, and garlic powder. Taste and adjust seasoning.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Add cooked macaroni to cheese sauce and stir until well coated.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Serve immediately for creamy texture, or transfer to baking dish, top with breadcrumbs, and broil for crispy top.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Easy",
+    "Kid-Friendly",
+    "Comfort Food"
+  ],
+  "categories": [
+    "Dinner",
+    "Side Dish"
+  ],
+  "allergens": [
+    "Vegetarian"
+  ],
+  "imageUrl": "image.jpg"
+}

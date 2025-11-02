@@ -1,0 +1,162 @@
+{
+  "title": "Authentic Street Tacos",
+  "slug": "authentic-street-tacos",
+  "description": "Classic Mexican street tacos with marinated carne asada, fresh cilantro, onions, and a squeeze of lime on warm corn tortillas. Simple, authentic, and absolutely delicious.",
+  "cuisine": "Mexican",
+  "difficulty": "EASY",
+  "servings": 4,
+  "prepTimeMinutes": 120,
+  "cookTimeMinutes": 10,
+  "calories": 380,
+  "proteinG": 32,
+  "fatG": 18,
+  "carbsG": 24,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "flank steak",
+      "amount": "1.5",
+      "unit": "lbs",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "lime juice",
+      "amount": "1/3",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "orange juice",
+      "amount": "1/4",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "garlic",
+      "amount": "4",
+      "unit": "cloves",
+      "preparation": "minced",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "ground cumin",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "chili powder",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "olive oil",
+      "amount": "2",
+      "unit": "tbsp",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "salt and pepper",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "corn tortillas",
+      "amount": "12",
+      "unit": "small",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "white onion",
+      "amount": "1",
+      "unit": "whole",
+      "preparation": "finely diced",
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "fresh cilantro",
+      "amount": "1",
+      "unit": "cup",
+      "preparation": "chopped",
+      "isOptional": false,
+      "displayOrder": 10
+    },
+    {
+      "name": "limes",
+      "amount": "2",
+      "unit": "whole",
+      "preparation": "cut into wedges",
+      "isOptional": false,
+      "displayOrder": 11
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "In a bowl, combine lime juice, orange juice, garlic, cumin, chili powder, olive oil, salt, and pepper.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Place flank steak in a resealable bag and pour marinade over it. Refrigerate for at least 2 hours or overnight.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Remove steak from marinade and pat dry. Let come to room temperature for 20 minutes.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Heat a grill or cast-iron skillet over high heat.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Cook steak for 4-5 minutes per side for medium-rare, or to desired doneness.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Let steak rest for 10 minutes, then slice thinly against the grain.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Warm tortillas on the grill or in a dry skillet until slightly charred.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Assemble tacos by placing sliced steak on tortillas.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Top with diced onion and cilantro. Serve with lime wedges.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Easy",
+    "Quick"
+  ],
+  "categories": [
+    "Dinner",
+    "Lunch"
+  ],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}

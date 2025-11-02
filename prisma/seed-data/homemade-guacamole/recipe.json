@@ -1,0 +1,134 @@
+{
+  "title": "Homemade Guacamole",
+  "slug": "homemade-guacamole",
+  "description": "Fresh, chunky guacamole made with ripe avocados, lime juice, cilantro, and a touch of jalapeño. Perfect as a dip, topping, or side dish for any Mexican meal.",
+  "cuisine": "Mexican",
+  "difficulty": "EASY",
+  "servings": 6,
+  "prepTimeMinutes": 10,
+  "cookTimeMinutes": 0,
+  "calories": 120,
+  "proteinG": 2,
+  "fatG": 11,
+  "carbsG": 8,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "ripe avocados",
+      "amount": "4",
+      "unit": "whole",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "lime juice",
+      "amount": "3",
+      "unit": "tbsp",
+      "preparation": "freshly squeezed",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "white onion",
+      "amount": "1/4",
+      "unit": "cup",
+      "preparation": "finely diced",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "jalapeño pepper",
+      "amount": "1",
+      "unit": "whole",
+      "preparation": "seeded and minced",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "fresh cilantro",
+      "amount": "1/4",
+      "unit": "cup",
+      "preparation": "chopped",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "roma tomato",
+      "amount": "1",
+      "unit": "whole",
+      "preparation": "seeded and diced",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "garlic",
+      "amount": "1",
+      "unit": "clove",
+      "preparation": "minced",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "salt",
+      "amount": "1/2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "cumin",
+      "amount": "1/4",
+      "unit": "tsp",
+      "isOptional": true,
+      "displayOrder": 8
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Cut avocados in half, remove pits, and scoop flesh into a bowl.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Add lime juice immediately to prevent browning.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Mash avocados with a fork to desired consistency (chunky or smooth).",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Fold in onion, jalapeño, cilantro, tomato, and garlic.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Season with salt and cumin (if using). Mix well.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Taste and adjust seasoning as needed. Serve immediately with tortilla chips.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Easy",
+    "Quick",
+    "Dairy-Free"
+  ],
+  "categories": [
+    "Appetizer / Starter",
+    "Snack"
+  ],
+  "allergens": [
+    "Vegan",
+    "Vegetarian",
+    "Dairy Free",
+    "Gluten Free"
+  ],
+  "imageUrl": "image.jpg"
+}
