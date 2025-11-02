@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { RecipeIngredient, RecipeStep, RecipeData } from "@/types/recipe";
+import { RecipeData } from "@/types/recipe";
 
 /**
  * Save recipe data to JSON file in development mode
@@ -100,6 +100,8 @@ export async function saveRecipeImage(
 
 /**
  * Read all recipe folders and their JSON files
+ * This version is used by API routes for runtime recipe management in development.
+ * For database seeding, see prisma/seed.ts
  */
 export function readRecipeFolders(): Array<{
   slug: string;

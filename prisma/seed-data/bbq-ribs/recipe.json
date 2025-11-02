@@ -1,0 +1,155 @@
+{
+  "title": "BBQ Baby Back Ribs",
+  "slug": "bbq-ribs",
+  "description": "Fall-off-the-bone tender baby back ribs with a sweet and tangy barbecue sauce. Low and slow cooking creates the most flavorful, juicy ribs imaginable.",
+  "cuisine": "American",
+  "difficulty": "MEDIUM",
+  "servings": 4,
+  "prepTimeMinutes": 20,
+  "cookTimeMinutes": 180,
+  "calories": 680,
+  "proteinG": 42,
+  "fatG": 48,
+  "carbsG": 22,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "baby back ribs",
+      "amount": "2",
+      "unit": "racks",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "brown sugar",
+      "amount": "1/4",
+      "unit": "cup",
+      "groupName": "Dry Rub",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "paprika",
+      "amount": "2",
+      "unit": "tbsp",
+      "groupName": "Dry Rub",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "black pepper",
+      "amount": "1",
+      "unit": "tbsp",
+      "groupName": "Dry Rub",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "salt",
+      "amount": "1",
+      "unit": "tbsp",
+      "groupName": "Dry Rub",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "chili powder",
+      "amount": "1",
+      "unit": "tbsp",
+      "groupName": "Dry Rub",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "garlic powder",
+      "amount": "1",
+      "unit": "tbsp",
+      "groupName": "Dry Rub",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "onion powder",
+      "amount": "1",
+      "unit": "tsp",
+      "groupName": "Dry Rub",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "cayenne pepper",
+      "amount": "1/2",
+      "unit": "tsp",
+      "groupName": "Dry Rub",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "BBQ sauce",
+      "amount": "2",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 9
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Remove membrane from back of ribs by sliding a knife under it and pulling off with paper towel.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Mix all dry rub ingredients together in a bowl.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Pat ribs dry and generously coat both sides with dry rub. Let sit for 30 minutes at room temperature.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Preheat oven to 275°F (135°C).",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Wrap ribs tightly in aluminum foil and place on a baking sheet.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Bake for 2.5 to 3 hours until meat is tender and pulling away from bones.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Remove from oven and carefully unwrap. Preheat grill or broiler to high.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Brush ribs generously with BBQ sauce on both sides.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Grill or broil for 3-5 minutes per side, basting with more sauce, until caramelized.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 10,
+      "instruction": "Let rest for 5 minutes, then cut between bones and serve with extra BBQ sauce.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Comfort Food"
+  ],
+  "categories": [
+    "Dinner"
+  ],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}

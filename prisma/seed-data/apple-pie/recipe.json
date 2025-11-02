@@ -1,0 +1,193 @@
+{
+  "title": "Classic Apple Pie",
+  "slug": "apple-pie",
+  "description": "Traditional American apple pie with a flaky butter crust and cinnamon-spiced apple filling. Nothing says comfort like a slice of warm apple pie with vanilla ice cream.",
+  "cuisine": "American",
+  "difficulty": "MEDIUM",
+  "servings": 8,
+  "prepTimeMinutes": 45,
+  "cookTimeMinutes": 50,
+  "calories": 420,
+  "proteinG": 4,
+  "fatG": 20,
+  "carbsG": 58,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "all-purpose flour",
+      "amount": "2 1/2",
+      "unit": "cups",
+      "groupName": "Pie Crust",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "salt",
+      "amount": "1",
+      "unit": "tsp",
+      "groupName": "Pie Crust",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "sugar",
+      "amount": "1",
+      "unit": "tbsp",
+      "groupName": "Pie Crust",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "cold butter",
+      "amount": "1",
+      "unit": "cup",
+      "preparation": "cubed",
+      "groupName": "Pie Crust",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "ice water",
+      "amount": "6-8",
+      "unit": "tbsp",
+      "groupName": "Pie Crust",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "apples",
+      "amount": "6",
+      "unit": "cups",
+      "preparation": "peeled and sliced",
+      "groupName": "Filling",
+      "notes": "Granny Smith or Honeycrisp",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "granulated sugar",
+      "amount": "3/4",
+      "unit": "cup",
+      "groupName": "Filling",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "brown sugar",
+      "amount": "1/4",
+      "unit": "cup",
+      "groupName": "Filling",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "all-purpose flour",
+      "amount": "2",
+      "unit": "tbsp",
+      "groupName": "Filling",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "ground cinnamon",
+      "amount": "1",
+      "unit": "tsp",
+      "groupName": "Filling",
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "nutmeg",
+      "amount": "1/4",
+      "unit": "tsp",
+      "groupName": "Filling",
+      "isOptional": false,
+      "displayOrder": 10
+    },
+    {
+      "name": "lemon juice",
+      "amount": "1",
+      "unit": "tbsp",
+      "groupName": "Filling",
+      "isOptional": false,
+      "displayOrder": 11
+    },
+    {
+      "name": "butter",
+      "amount": "2",
+      "unit": "tbsp",
+      "groupName": "Filling",
+      "preparation": "cut into small pieces",
+      "isOptional": false,
+      "displayOrder": 12
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "For crust: Mix flour, salt, and sugar in a bowl. Cut in cold butter until mixture resembles coarse crumbs.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Add ice water 1 tablespoon at a time until dough comes together. Divide in half, form into disks, wrap, and refrigerate for 1 hour.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "For filling: Toss apples with sugars, flour, cinnamon, nutmeg, and lemon juice. Let sit for 15 minutes.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Preheat oven to 425°F (220°C).",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Roll out one disk of dough and fit into a 9-inch pie pan. Trim excess, leaving 1-inch overhang.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Pour apple filling into crust and dot with butter pieces.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Roll out second disk of dough. Place over filling and trim to 1-inch overhang.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Fold edges under and crimp. Cut several slits in top crust for steam vents.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Brush with egg wash and sprinkle with sugar. Cover edges with foil to prevent over-browning.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 10,
+      "instruction": "Bake at 425°F for 15 minutes, then reduce to 375°F and bake for 40-50 more minutes until golden brown and bubbling.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 11,
+      "instruction": "Cool for at least 2 hours before slicing. Serve with vanilla ice cream.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Comfort Food",
+    "Family-Friendly"
+  ],
+  "categories": [
+    "Dessert"
+  ],
+  "allergens": [
+    "Vegetarian"
+  ],
+  "imageUrl": "image.jpg"
+}

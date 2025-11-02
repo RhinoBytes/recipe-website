@@ -1,0 +1,133 @@
+{
+  "title": "Classic Chocolate Chip Cookies",
+  "slug": "classic-chocolate-chip-cookies",
+  "description": "Soft, chewy chocolate chip cookies with crispy edges and gooey centers. This timeless recipe uses brown butter for extra depth of flavor and creates the perfect cookie every time.",
+  "cuisine": "American",
+  "difficulty": "EASY",
+  "servings": 24,
+  "prepTimeMinutes": 15,
+  "cookTimeMinutes": 12,
+  "calories": 180,
+  "proteinG": 2,
+  "fatG": 9,
+  "carbsG": 24,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "all-purpose flour",
+      "amount": "2 1/4",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "baking soda",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "salt",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "unsalted butter",
+      "amount": "1",
+      "unit": "cup",
+      "preparation": "softened",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "granulated sugar",
+      "amount": "3/4",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "brown sugar",
+      "amount": "3/4",
+      "unit": "cup",
+      "preparation": "packed",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "vanilla extract",
+      "amount": "2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "large eggs",
+      "amount": "2",
+      "unit": "whole",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "semi-sweet chocolate chips",
+      "amount": "2",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 8
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Preheat oven to 375°F (190°C). Line baking sheets with parchment paper.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "In a medium bowl, whisk together flour, baking soda, and salt. Set aside.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "In a large bowl, cream together softened butter, granulated sugar, and brown sugar until light and fluffy, about 3-4 minutes.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Beat in eggs one at a time, then add vanilla extract. Mix until well combined.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Gradually fold in the flour mixture until just combined. Do not overmix.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Fold in chocolate chips until evenly distributed throughout the dough.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Drop rounded tablespoons of dough onto prepared baking sheets, spacing them 2 inches apart.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Bake for 10-12 minutes, or until edges are golden brown but centers still look slightly underdone.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Cool on baking sheet for 5 minutes before transferring to a wire rack. Cookies will continue to firm up as they cool.",
+      "isOptional": false
+    }
+  ],
+  "tags": ["Easy", "Kid-Friendly", "Comfort Food"],
+  "categories": ["Dessert", "Snack"],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}

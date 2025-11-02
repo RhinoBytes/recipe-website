@@ -1,0 +1,169 @@
+{
+  "title": "Vanilla Cupcakes with Buttercream Frosting",
+  "slug": "vanilla-cupcakes-buttercream",
+  "description": "Light and fluffy vanilla cupcakes topped with rich, creamy buttercream frosting. Perfect for birthdays, celebrations, or anytime you need a sweet treat.",
+  "cuisine": "American",
+  "difficulty": "EASY",
+  "servings": 12,
+  "prepTimeMinutes": 20,
+  "cookTimeMinutes": 18,
+  "calories": 310,
+  "proteinG": 3,
+  "fatG": 16,
+  "carbsG": 42,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "all-purpose flour",
+      "amount": "1 1/2",
+      "unit": "cups",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "baking powder",
+      "amount": "1 1/2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "salt",
+      "amount": "1/2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "unsalted butter",
+      "amount": "1/2",
+      "unit": "cup",
+      "preparation": "softened",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "granulated sugar",
+      "amount": "1",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "large eggs",
+      "amount": "2",
+      "unit": "whole",
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "vanilla extract",
+      "amount": "2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "whole milk",
+      "amount": "1/2",
+      "unit": "cup",
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "powdered sugar",
+      "amount": "4",
+      "unit": "cups",
+      "groupName": "Frosting",
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "unsalted butter",
+      "amount": "1",
+      "unit": "cup",
+      "preparation": "softened",
+      "groupName": "Frosting",
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "heavy cream",
+      "amount": "3",
+      "unit": "tbsp",
+      "groupName": "Frosting",
+      "isOptional": false,
+      "displayOrder": 10
+    },
+    {
+      "name": "vanilla extract",
+      "amount": "1",
+      "unit": "tsp",
+      "groupName": "Frosting",
+      "isOptional": false,
+      "displayOrder": 11
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Preheat oven to 350°F (175°C). Line a 12-cup muffin tin with cupcake liners.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Whisk together flour, baking powder, and salt in a medium bowl.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Beat butter and sugar until light and fluffy, about 3 minutes.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Add eggs one at a time, beating well after each addition. Stir in vanilla.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Alternately add flour mixture and milk, beginning and ending with flour mixture.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Divide batter evenly among cupcake liners, filling each about 2/3 full.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Bake for 18-20 minutes until a toothpick inserted in center comes out clean.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Cool in pan for 5 minutes, then transfer to a wire rack to cool completely.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "For frosting: Beat butter until creamy. Gradually add powdered sugar, alternating with cream.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 10,
+      "instruction": "Add vanilla and beat until light and fluffy. Frost cooled cupcakes using a piping bag or spatula.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Easy",
+    "Kid-Friendly",
+    "Party / Entertaining"
+  ],
+  "categories": [
+    "Dessert"
+  ],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}

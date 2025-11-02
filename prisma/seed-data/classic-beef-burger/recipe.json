@@ -1,0 +1,155 @@
+{
+  "title": "Classic Beef Burger",
+  "slug": "classic-beef-burger",
+  "description": "Juicy, perfectly seasoned beef burgers grilled to perfection. Simple ingredients let the quality beef shine through in this all-American favorite.",
+  "cuisine": "American",
+  "difficulty": "EASY",
+  "servings": 4,
+  "prepTimeMinutes": 15,
+  "cookTimeMinutes": 10,
+  "calories": 520,
+  "proteinG": 32,
+  "fatG": 28,
+  "carbsG": 35,
+  "status": "PUBLISHED",
+  "ingredients": [
+    {
+      "name": "ground beef",
+      "amount": "1.5",
+      "unit": "lbs",
+      "notes": "80/20 blend",
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "salt",
+      "amount": "1",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "black pepper",
+      "amount": "1/2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "garlic powder",
+      "amount": "1/2",
+      "unit": "tsp",
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "hamburger buns",
+      "amount": "4",
+      "unit": "whole",
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "cheddar cheese",
+      "amount": "4",
+      "unit": "slices",
+      "isOptional": true,
+      "displayOrder": 5
+    },
+    {
+      "name": "lettuce",
+      "amount": "4",
+      "unit": "leaves",
+      "isOptional": true,
+      "displayOrder": 6
+    },
+    {
+      "name": "tomato",
+      "amount": "1",
+      "unit": "large",
+      "preparation": "sliced",
+      "isOptional": true,
+      "displayOrder": 7
+    },
+    {
+      "name": "red onion",
+      "amount": "1/2",
+      "unit": "whole",
+      "preparation": "sliced",
+      "isOptional": true,
+      "displayOrder": 8
+    },
+    {
+      "name": "pickles",
+      "amount": "8",
+      "unit": "slices",
+      "isOptional": true,
+      "displayOrder": 9
+    },
+    {
+      "name": "condiments",
+      "amount": "as needed",
+      "notes": "ketchup, mustard, mayo",
+      "isOptional": true,
+      "displayOrder": 10
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Divide ground beef into 4 equal portions (about 6 oz each). Gently form into patties about 3/4 inch thick.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Make a slight indentation in the center of each patty with your thumb to prevent bulging during cooking.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Season both sides generously with salt, pepper, and garlic powder.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Preheat grill or cast-iron skillet to medium-high heat.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Cook burgers for 4-5 minutes on the first side without moving them.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Flip once and cook for another 3-4 minutes for medium doneness.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "If adding cheese, place on patties during last minute of cooking and cover to melt.",
+      "isOptional": true
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Toast buns on the grill for 30 seconds.",
+      "isOptional": false
+    },
+    {
+      "stepNumber": 9,
+      "instruction": "Assemble burgers with desired toppings and condiments. Serve immediately.",
+      "isOptional": false
+    }
+  ],
+  "tags": [
+    "Easy",
+    "Quick",
+    "Family-Friendly"
+  ],
+  "categories": [
+    "Dinner",
+    "Lunch"
+  ],
+  "allergens": [],
+  "imageUrl": "image.jpg"
+}
