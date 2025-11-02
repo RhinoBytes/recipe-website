@@ -1,5 +1,4 @@
 import Link from 'next/link';
-
 import UserDropdown from './UserDropdown';
 import MobileMenuButton from './MobileMenuButton';
 import SearchBar from './SearchBar';
@@ -16,10 +15,10 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-5 w-full h-full flex items-center">
         {/* Desktop Navigation */}
         <nav
-          className="hidden md:flex items-center justify-between gap-8 h-full"
+          className="hidden md:flex items-center w-full h-full"
           aria-label="Main Navigation"
         >
-          {/* Logo */}
+          {/* Left: Logo */}
           <Link
             href="/"
             className="flex items-center gap-2 text-2xl font-bold font-heading text-accent hover:text-accent-hover transition-colors whitespace-nowrap flex-shrink-0"
@@ -28,10 +27,12 @@ export default function Navbar() {
             <span>Cookbook</span>
           </Link>
 
-          {/* Search Bar - Client Component */}
-          <SearchBar />
+          {/* Middle: Search Bar */}
+          <div className="flex-grow mx-6">
+            <SearchBar />
+          </div>
 
-          {/* Nav Links & Actions */}
+          {/* Right: Links & Actions */}
           <div className="flex items-center gap-4 flex-shrink-0">
             <ul className="flex gap-8 items-center m-0 p-0 list-none">
               {NAV_LINKS.map(({ label, href }) => (
@@ -46,16 +47,13 @@ export default function Navbar() {
               ))}
             </ul>
 
-            {/* Theme Toggle */}
             <ThemeToggle />
-
-            {/* User Actions Dropdown - Client Component */}
             <UserDropdown />
           </div>
         </nav>
 
         {/* Mobile Navigation */}
-        <nav className="md:hidden flex items-center justify-between h-full">
+        <nav className="md:hidden flex items-center justify-between w-full h-full">
           <Link
             href="/"
             className="flex items-center gap-2 text-2xl font-bold font-heading text-accent"

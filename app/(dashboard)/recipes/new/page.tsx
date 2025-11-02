@@ -699,21 +699,21 @@ export default function NewRecipePage() {
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Popular Tags</h4>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {availableTags.slice(0, showAllTags ? undefined : 8).map((tag) => (
-                        <button
-                          key={tag.id}
-                          type="button"
-                          onClick={() => toggleTag(tag.name)}
-                          className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                            formData.tags.includes(tag.name)
-                              ? "border-amber-600 bg-amber-50 text-amber-800 font-medium"
-                              : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
-                          }`}
-                        >
-                          {tag.name}
-                          {tag.count && tag.count > 0 && (
-                            <span className="ml-1 text-xs opacity-70">({tag.count})</span>
-                          )}
-                        </button>
+                       <button
+  key={tag.id}
+  type="button"
+  onClick={() => toggleTag(tag.name)}
+  className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+    formData.tags.includes(tag.name)
+      ? "border-amber-600 bg-amber-50 text-amber-800 font-medium"
+      : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+  }`}
+>
+  {tag.name}
+  {typeof tag.count === "number" && tag.count > 0 && (
+    <span className="ml-1 text-xs opacity-70">({tag.count})</span>
+  )}
+</button>
                       ))}
                     </div>
                     {availableTags.length > 8 && (

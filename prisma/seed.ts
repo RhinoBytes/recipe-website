@@ -110,47 +110,90 @@ async function main() {
     "Breakfast",
     "Lunch",
     "Dinner",
-    "Dessert",
+    "Appetizer / Starter",
     "Snack",
+    "Dessert",
+    "Beverage / Drink",
+    "Sauce / Condiment",
     "Salad",
+    "Soup",
+    "Bread / Baking",
+    "Side Dish",
   ];
-  const categories = [];
   for (const name of categoryNames) {
-    const category = await prisma.category.create({ data: { name } });
-    categories.push(category);
-    console.log(`Created category: ${name} (ID: ${category.id})`);
+    await prisma.category.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
   }
+  console.log("Categories seeded successfully.");
 
   // --- CREATE TAGS ---
   console.log("Creating tags...");
   const tagNames = [
+    "Dairy-Free",
+    "Low-Carb",
     "Easy",
     "Quick",
-    "Healthy",
-    "Vegan",
-    "Gluten-Free",
-    "Vegetarian",
-    "Low-Carb",
+    "One-Pot",
+    "Air Fryer",
     "Kid-Friendly",
+    "Family-Friendly",
+    "Party / Entertaining",
+    "Comfort Food",
   ];
-  const tags = [];
   for (const name of tagNames) {
-    const tag = await prisma.tag.create({ data: { name } });
-    tags.push(tag);
-    console.log(`Created tag: ${name} (ID: ${tag.id})`);
+    await prisma.tag.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
   }
+  console.log("Tags seeded successfully.");
+
+  // --- CREATE CUISINES ---
+  console.log("Creating cuisines...");
+  const cuisineNames = [
+    "American",
+    "Italian",
+    "Mexican",
+    "French",
+    "Chinese",
+    "Japanese",
+    "Thai",
+    "Indian",
+    "Mediterranean",
+    "Middle Eastern",
+    "Korean",
+    "Vietnamese",
+    "Spanish",
+    "Greek",
+    "Moroccan",
+    "Caribbean",
+    "German",
+    "British / English",
+    "Brazilian",
+    "African",
+  ];
+  for (const name of cuisineNames) {
+    await prisma.cuisine.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
+  console.log("Cuisines seeded successfully.");
 
   // --- CREATE ALLERGENS ---
   console.log("Creating allergens...");
   const allergenNames = [
-    "Peanuts",
-    "Tree Nuts",
-    "Dairy",
-    "Gluten",
-    "Eggs",
-    "Soy",
-    "Fish",
-    "Shellfish",
+    "Vegetarian",
+    "Vegan",
+    "Dairy Free",
+    "Gluten Free",
+    "Egg Free",
+    "Soy Free",
   ];
   const allergens = [];
   for (const name of allergenNames) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -18,31 +18,34 @@ export default function Modal({
   children,
   size = "md",
 }: ModalProps) {
-  // Handle ESC key to close modal
+  const [mounted, setMounted] = useState(false);
+
+  // Only render modal after client mounts
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Handle ESC key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
         onClose();
       }
     };
-
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    if (isOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "unset";
     return () => {
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!mounted || !isOpen) return null; // ✅ prevent SSR render
 
   const sizeClasses = {
     sm: "max-w-md",
@@ -69,10 +72,7 @@ export default function Modal({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2
-            id="modal-title"
-            className="text-2xl font-bold text-gray-900"
-          >
+          <h2 id="modal-title" className="text-2xl font-bold text-gray-900">
             {title}
           </h2>
           <button
@@ -85,9 +85,7 @@ export default function Modal({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto p-6">{children}</div>
       </div>
     </div>
   );

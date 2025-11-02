@@ -230,7 +230,7 @@ Each ingredient should have:
 For counted items (eggs, apples): include amount and unit (e.g., amount: "2", unit: "eggs")
 For measured items: include amount and unit in their ORIGINAL measurement system
 
-Extract ALL steps from the recipe. Estimate missing nutrition/cuisine. NO tags/categories/allergens.
+Extract ALL steps from the recipe. Always estimate nutrition for the recipe per serving (calories, proteinG, fatG, carbsG). NO tags/categories/allergens.
 
 Recipe:
 ${text}`;
@@ -253,6 +253,7 @@ ${text}`;
   if (!result) throw new Error("Empty response from OpenAI");
 
   const parsed = parseJSONSafe(result);
+  console.log("Parsed recipe from AI:", parsed);
   return RecipeSchema.parse(parsed);
 }
 
