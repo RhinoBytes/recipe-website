@@ -57,7 +57,23 @@ export async function POST(request: Request) {
       }
 
       // Generate unique filename
-      const fileExtension = file.name.split(".").pop();
+      let fileExtension = file.name.includes(".") ? file.name.split(".").pop() : undefined;
+      // If no extension, infer from MIME type
+      if (!fileExtension || fileExtension === file.name) {
+        const mimeToExt: Record<string, string> = {
+          "image/jpeg": "jpg",
+          "image/jpg": "jpg",
+          "image/png": "png",
+          "image/webp": "webp",
+        };
+        fileExtension = mimeToExt[file.type];
+        if (!fileExtension) {
+          return NextResponse.json(
+            { error: "Could not determine file extension from MIME type" },
+            { status: 400 }
+          );
+        }
+      }
       const uniqueFilename = `avatar-${currentUser.userId}-${randomUUID()}.${fileExtension}`;
       
       // Define upload path for avatars
