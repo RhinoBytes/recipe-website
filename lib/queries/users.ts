@@ -27,10 +27,18 @@ export async function getUserById(userId: string) {
       id: true,
       username: true,
       email: true,
-      avatarUrl: true,
       bio: true,
       role: true,
       createdAt: true,
+      media: {
+        where: { isProfileAvatar: true },
+        select: {
+          url: true,
+          secureUrl: true,
+          isProfileAvatar: true,
+        },
+        take: 1,
+      },
     },
   });
 }
@@ -54,7 +62,6 @@ export async function getUserRecipes(
       slug: true,
       title: true,
       description: true,
-      imageUrl: true,
       prepTimeMinutes: true,
       cookTimeMinutes: true,
       servings: true,
@@ -67,6 +74,17 @@ export async function getUserRecipes(
         select: {
           username: true,
         },
+      },
+      media: {
+        select: {
+          url: true,
+          secureUrl: true,
+          isPrimary: true,
+        },
+        orderBy: [
+          { isPrimary: "desc" },
+          { createdAt: "asc" },
+        ],
       },
       tags: {
         include: {
@@ -87,27 +105,33 @@ export async function getUserRecipes(
     orderBy,
   });
 
-  return recipes.map((recipe) => ({
-    id: recipe.id,
-    slug: recipe.slug,
-    title: recipe.title,
-    description: recipe.description,
-    imageUrl: recipe.imageUrl || DEFAULT_RECIPE_IMAGE,
-    prepTimeMinutes: recipe.prepTimeMinutes || 0,
-    cookTimeMinutes: recipe.cookTimeMinutes || 0,
-    servings: recipe.servings,
-    status: recipe.status,
-    rating: recipe.averageRating ? parseFloat(recipe.averageRating.toString()) : 0,
-    reviewCount: recipe.reviewCount,
-    favoriteCount: recipe._count.favorites,
-    tags: recipe.tags.map((rt) => rt.tag.name),
-    categories: recipe.categories.map((rc) => rc.category.name),
-    createdAt: recipe.createdAt.toISOString(),
-    updatedAt: recipe.updatedAt.toISOString(),
-    author: {
-      username: recipe.author.username,
-    },
-  }));
+  return recipes.map((recipe) => {
+    const primaryImage = recipe.media?.find(m => m.isPrimary) || recipe.media?.[0];
+    const imageUrl = primaryImage?.secureUrl || primaryImage?.url || DEFAULT_RECIPE_IMAGE;
+    
+    return {
+      id: recipe.id,
+      slug: recipe.slug,
+      title: recipe.title,
+      description: recipe.description,
+      imageUrl,
+      prepTimeMinutes: recipe.prepTimeMinutes || 0,
+      cookTimeMinutes: recipe.cookTimeMinutes || 0,
+      servings: recipe.servings,
+      status: recipe.status,
+      rating: recipe.averageRating ? parseFloat(recipe.averageRating.toString()) : 0,
+      reviewCount: recipe.reviewCount,
+      favoriteCount: recipe._count.favorites,
+      tags: recipe.tags.map((rt) => rt.tag.name),
+      categories: recipe.categories.map((rc) => rc.category.name),
+      createdAt: recipe.createdAt.toISOString(),
+      updatedAt: recipe.updatedAt.toISOString(),
+      author: {
+        username: recipe.author.username,
+      },
+    };
+  });
+}
 }
 
 /**
@@ -125,8 +149,16 @@ export async function getSpotlightChef() {
     select: {
       id: true,
       username: true,
-      avatarUrl: true,
       bio: true,
+      media: {
+        where: { isProfileAvatar: true },
+        select: {
+          url: true,
+          secureUrl: true,
+          isProfileAvatar: true,
+        },
+        take: 1,
+      },
       recipes: {
         select: {
           reviews: {
@@ -177,11 +209,12 @@ export async function getSpotlightChef() {
 
     if (avgRating > highestAvgRating) {
       highestAvgRating = avgRating;
+      const avatar = user.media[0];
       spotlight = {
         id: user.id,
         name: user.username,
         title: "Home Cook & Food Blogger",
-        avatar: user.avatarUrl || DEFAULT_CHEF_AVATAR,
+        avatar: avatar?.secureUrl || avatar?.url || DEFAULT_CHEF_AVATAR,
         quote:
           user.bio ||
           "Cooking is my passion, and I love sharing family recipes that have been passed down through generations. My goal is to help others discover the joy of creating delicious meals from scratch.",
@@ -191,11 +224,12 @@ export async function getSpotlightChef() {
 
   if (!spotlight && users.length > 0) {
     const topContributor = users[0];
+    const avatar = topContributor.media[0];
     spotlight = {
       id: topContributor.id,
       name: topContributor.username,
       title: "Home Cook & Food Blogger",
-      avatar: topContributor.avatarUrl || DEFAULT_CHEF_AVATAR,
+      avatar: avatar?.secureUrl || avatar?.url || DEFAULT_CHEF_AVATAR,
       quote:
         topContributor.bio ||
         "Sharing my passion for food through delicious recipes.",
@@ -221,6 +255,17 @@ export async function getUserFavorites(userId: string) {
               username: true,
             },
           },
+          media: {
+            select: {
+              url: true,
+              secureUrl: true,
+              isPrimary: true,
+            },
+            orderBy: [
+              { isPrimary: "desc" },
+              { createdAt: "asc" },
+            ],
+          },
           tags: {
             include: {
               tag: true,
@@ -239,24 +284,29 @@ export async function getUserFavorites(userId: string) {
     },
   });
 
-  return favorites.map((fav) => ({
-    id: fav.recipe.id,
-    slug: fav.recipe.slug,
-    title: fav.recipe.title,
-    description: fav.recipe.description,
-    imageUrl: fav.recipe.imageUrl || DEFAULT_RECIPE_IMAGE,
-    prepTimeMinutes: fav.recipe.prepTimeMinutes || 0,
-    cookTimeMinutes: fav.recipe.cookTimeMinutes || 0,
-    servings: fav.recipe.servings,
-    status: fav.recipe.status,
-    rating: fav.recipe.averageRating ? parseFloat(fav.recipe.averageRating.toString()) : 0,
-    reviewCount: fav.recipe.reviewCount,
-    tags: fav.recipe.tags.map((rt) => rt.tag.name),
-    categories: fav.recipe.categories.map((rc) => rc.category.name),
-    createdAt: fav.recipe.createdAt.toISOString(),
-    updatedAt: fav.recipe.updatedAt.toISOString(),
-    author: {
-      username: fav.recipe.author.username,
-    },
-  }));
+  return favorites.map((fav) => {
+    const primaryImage = fav.recipe.media?.find(m => m.isPrimary) || fav.recipe.media?.[0];
+    const imageUrl = primaryImage?.secureUrl || primaryImage?.url || DEFAULT_RECIPE_IMAGE;
+    
+    return {
+      id: fav.recipe.id,
+      slug: fav.recipe.slug,
+      title: fav.recipe.title,
+      description: fav.recipe.description,
+      imageUrl,
+      prepTimeMinutes: fav.recipe.prepTimeMinutes || 0,
+      cookTimeMinutes: fav.recipe.cookTimeMinutes || 0,
+      servings: fav.recipe.servings,
+      status: fav.recipe.status,
+      rating: fav.recipe.averageRating ? parseFloat(fav.recipe.averageRating.toString()) : 0,
+      reviewCount: fav.recipe.reviewCount,
+      tags: fav.recipe.tags.map((rt) => rt.tag.name),
+      categories: fav.recipe.categories.map((rc) => rc.category.name),
+      createdAt: fav.recipe.createdAt.toISOString(),
+      updatedAt: fav.recipe.updatedAt.toISOString(),
+      author: {
+        username: fav.recipe.author.username,
+      },
+    };
+  });
 }

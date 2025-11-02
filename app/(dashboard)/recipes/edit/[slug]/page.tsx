@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Image from "next/image";
 import ProtectedPage from '@/components/auth/ProtectedPage';
-import { Loader2, Upload, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Button from '@/components/ui/Button';
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
+import MediaUploader from "@/components/MediaUploader";
 import { Difficulty, RecipeStatus } from "@prisma/client";
 import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
-import { RecipeIngredient, RecipeFormData } from "@/types/recipe";
+import { RecipeFormData } from "@/types/recipe";
+import type { Media } from "@/types/index";
 
 interface RecipeStep {
   stepNumber: number;
@@ -59,7 +60,6 @@ export default function EditRecipePage() {
     prepTimeMinutes: 15,
     cookTimeMinutes: 30,
     difficulty: Difficulty.MEDIUM,
-    imageUrl: "",
     sourceUrl: "",
     sourceText: "",
     cuisineName: "",
@@ -80,9 +80,9 @@ export default function EditRecipePage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState("");
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const [showAllTags, setShowAllTags] = useState(false);
+  const [recipeId, setRecipeId] = useState<string | null>(null);
+  const [uploadedMedia, setUploadedMedia] = useState<Media[]>([]);
 
   useEffect(() => {
     // Fetch recipe data, categories, and allergens
@@ -106,6 +106,22 @@ export default function EditRecipePage() {
         }
 
         const recipe = await recipeRes.json();
+        
+        // Store recipe ID for media uploads
+        setRecipeId(recipe.id);
+
+        // Fetch existing media if recipe has media relation
+        if (recipe.id) {
+          try {
+            const mediaRes = await fetch(`/api/media?recipeId=${recipe.id}`);
+            if (mediaRes.ok) {
+              const mediaData = await mediaRes.json();
+              setUploadedMedia(mediaData.media || []);
+            }
+          } catch (mediaErr) {
+            console.error("Failed to fetch media:", mediaErr);
+          }
+        }
         
         // Normalize ingredients from API response
         const normalizedIngredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
@@ -165,7 +181,6 @@ export default function EditRecipePage() {
           prepTimeMinutes: typeof recipe.prepTimeMinutes === "number" ? recipe.prepTimeMinutes : 15,
           cookTimeMinutes: typeof recipe.cookTimeMinutes === "number" ? recipe.cookTimeMinutes : 30,
           difficulty: difficultyEnum,
-          imageUrl: recipe.imageUrl ?? "",
           sourceUrl: recipe.sourceUrl ?? "",
           sourceText: recipe.sourceText ?? "",
           cuisineName: recipe.cuisine?.name ?? "",
@@ -205,34 +220,20 @@ export default function EditRecipePage() {
     fetchData();
   }, [slug]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingImage(true);
-    setError(null);
-
-    try {
-      const uploadFormData = new FormData();
-      uploadFormData.append("image", file);
-
-      const response = await fetch("/api/upload/image", {
-        method: "POST",
-        body: uploadFormData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to upload image");
-      }
-
-      const data = await response.json();
-      setFormData((prev) => ({ ...prev, imageUrl: data.imageUrl }));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to upload image");
-    } finally {
-      setUploadingImage(false);
+  const handleMediaUploaded = (media: Media) => {
+    setUploadedMedia((prev) => [...prev, media]);
+    // Mark first uploaded media as primary
+    if (uploadedMedia.length === 0 && media.id) {
+      fetch(`/api/media/${media.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPrimary: true }),
+      }).catch(console.error);
     }
+  };
+
+  const handleMediaDeleted = (mediaId: string) => {
+    setUploadedMedia((prev) => prev.filter((m) => m.id !== mediaId));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -466,59 +467,18 @@ export default function EditRecipePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Recipe Image
-                      <span className="ml-2 text-xs text-gray-500">Optional - Add a photo to make your recipe more appealing</span>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Recipe Images
+                      <span className="ml-2 text-xs text-gray-500">Upload photos to make your recipe more appealing</span>
                     </label>
-                    <div className="space-y-2">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={formData.imageUrl}
-                          onChange={(e) => {
-                            setFormData({ ...formData, imageUrl: e.target.value });
-                            setImageError(false);
-                          }}
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                          placeholder="Enter image URL or upload a file below"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <label className="flex-1 cursor-pointer">
-                          <div className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-amber-500 hover:bg-amber-50 transition-colors">
-                            <Upload size={18} />
-                            <span className="text-sm text-gray-600">
-                              {uploadingImage ? "Uploading..." : "Upload Image"}
-                            </span>
-                          </div>
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                            disabled={uploadingImage}
-                          />
-                        </label>
-                      </div>
-                      {formData.imageUrl && !imageError && (
-                        <div className="mt-2">
-                          <Image
-                            src={formData.imageUrl}
-                            alt="Recipe preview"
-                            width={128}
-                            height={128}
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                            onError={() => setImageError(true)}
-                          />
-                        </div>
-                      )}
-                      {imageError && formData.imageUrl && (
-                        <div className="flex items-center gap-2 text-amber-600 text-sm">
-                          <AlertCircle size={16} />
-                          <span>Image failed to load. Using default placeholder.</span>
-                        </div>
-                      )}
-                    </div>
+                    <MediaUploader
+                      recipeId={recipeId || undefined}
+                      onMediaUploaded={handleMediaUploaded}
+                      onMediaDeleted={handleMediaDeleted}
+                      existingMedia={uploadedMedia}
+                      maxFiles={5}
+                      accept="image/*"
+                    />
                   </div>
 
                   <div>

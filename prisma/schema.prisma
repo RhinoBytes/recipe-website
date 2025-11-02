@@ -27,12 +27,16 @@ enum RecipeStatus {
   PUBLISHED
 }
 
+enum MediaResourceType {
+  IMAGE
+  VIDEO
+}
+
 model User {
   id           String   @id @default(uuid())
   username     String   @unique
   email        String   @unique
   passwordHash String
-  avatarUrl    String?
   bio          String?
   role         UserRole @default(USER)
   createdAt    DateTime @default(now())
@@ -41,6 +45,7 @@ model User {
   recipes         Recipe[]
   reviews         Review[]
   favoriteRecipes FavoriteRecipe[]
+  media           Media[]
 }
 
 model Recipe {
@@ -53,7 +58,6 @@ model Recipe {
   prepTimeMinutes Int?
   cookTimeMinutes Int?
   difficulty      Difficulty?
-  imageUrl        String?
   status          RecipeStatus @default(DRAFT)
   sourceUrl       String?
   sourceText      String?
@@ -76,6 +80,7 @@ model Recipe {
   reviews     Review[]
   favorites   FavoriteRecipe[]
   allergens   RecipesAllergens[]
+  media       Media[]
 }
 
 model RecipeIngredient {
@@ -183,4 +188,34 @@ model RecipesAllergens {
   allergen Allergen @relation(fields: [allergenId], references: [id])
 
   @@id([recipeId, allergenId])
+}
+
+model Media {
+  id               String              @id @default(uuid())
+  publicId         String              @unique
+  url              String
+  secureUrl        String?
+  mimeType         String
+  size             Int
+  width            Int?
+  height           Int?
+  originalFilename String?
+  folder           String?
+  altText          String?
+  caption          String?
+  resourceType     MediaResourceType   @default(IMAGE)
+  userId           String
+  recipeId         String?
+  isProfileAvatar  Boolean             @default(false)
+  isPrimary        Boolean             @default(false)
+  createdAt        DateTime            @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe? @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([recipeId])
+  @@index([publicId])
+  @@index([userId, isProfileAvatar])
+  @@index([recipeId, isPrimary])
 }

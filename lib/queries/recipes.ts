@@ -3,6 +3,33 @@ import { RecipeStatus, Prisma, Difficulty } from "@prisma/client";
 import { DEFAULT_RECIPE_IMAGE, DEFAULT_USER_AVATAR } from "@/lib/constants";
 
 /**
+ * Extract primary image URL from media array
+ */
+function getPrimaryImageUrl(media?: Array<{ url: string; secureUrl: string | null; isPrimary: boolean }>): string {
+  if (!media || media.length === 0) {
+    return DEFAULT_RECIPE_IMAGE;
+  }
+  const primary = media.find(m => m.isPrimary);
+  const fallback = media[0];
+  const selected = primary || fallback;
+  return selected?.secureUrl || selected?.url || DEFAULT_RECIPE_IMAGE;
+}
+
+/**
+ * Extract profile avatar URL from media array
+ */
+function getProfileAvatarUrl(media?: Array<{ url: string; secureUrl: string | null; isProfileAvatar: boolean }>): string {
+  if (!media || media.length === 0) {
+    return DEFAULT_USER_AVATAR;
+  }
+  const avatar = media.find(m => m.isProfileAvatar);
+  if (!avatar) {
+    return DEFAULT_USER_AVATAR;
+  }
+  return avatar.secureUrl || avatar.url || DEFAULT_USER_AVATAR;
+}
+
+/**
  * Format recipe data with calculated ratings
  */
 export function formatRecipeWithRatings(recipe: {
@@ -10,13 +37,13 @@ export function formatRecipeWithRatings(recipe: {
   slug: string | null;
   title: string;
   description: string | null;
-  imageUrl: string | null;
   prepTimeMinutes: number | null;
   cookTimeMinutes: number | null;
   author: {
     username: string;
-    avatarUrl: string | null;
+    media?: Array<{ url: string; secureUrl: string | null; isProfileAvatar: boolean }>;
   };
+  media?: Array<{ url: string; secureUrl: string | null; isPrimary: boolean }>;
   reviews?: { rating: number }[];
 }) {
   const reviews = recipe.reviews || [];
@@ -28,13 +55,13 @@ export function formatRecipeWithRatings(recipe: {
     slug: recipe.slug,
     title: recipe.title,
     description: recipe.description,
-    image: recipe.imageUrl || DEFAULT_RECIPE_IMAGE,
+    image: getPrimaryImageUrl(recipe.media),
     time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
     rating: Math.round(averageRating),
     author: {
       name: recipe.author.username,
       username: recipe.author.username,
-      avatar: recipe.author.avatarUrl || DEFAULT_USER_AVATAR,
+      avatar: getProfileAvatarUrl(recipe.author.media),
     },
   };
 }
@@ -54,14 +81,33 @@ export async function getPopularRecipes(limit: number = 6) {
       id: true,
       title: true,
       slug: true,
-      imageUrl: true,
       prepTimeMinutes: true,
       cookTimeMinutes: true,
+      description: true,
       author: {
         select: {
           username: true,
-          avatarUrl: true,
+          media: {
+            where: { isProfileAvatar: true },
+            select: {
+              url: true,
+              secureUrl: true,
+              isProfileAvatar: true,
+            },
+            take: 1,
+          },
         },
+      },
+      media: {
+        select: {
+          url: true,
+          secureUrl: true,
+          isPrimary: true,
+        },
+        orderBy: [
+          { isPrimary: "desc" },
+          { createdAt: "asc" },
+        ],
       },
       reviews: {
         select: {
@@ -99,14 +145,33 @@ export async function getRecentRecipes(limit: number = 4) {
       id: true,
       title: true,
       slug: true,
-      imageUrl: true,
+      description: true,
       prepTimeMinutes: true,
       cookTimeMinutes: true,
       author: {
         select: {
           username: true,
-          avatarUrl: true,
+          media: {
+            where: { isProfileAvatar: true },
+            select: {
+              url: true,
+              secureUrl: true,
+              isProfileAvatar: true,
+            },
+            take: 1,
+          },
         },
+      },
+      media: {
+        select: {
+          url: true,
+          secureUrl: true,
+          isPrimary: true,
+        },
+        orderBy: [
+          { isPrimary: "desc" },
+          { createdAt: "asc" },
+        ],
       },
       reviews: {
         select: {
@@ -137,13 +202,23 @@ export async function getFeaturedRecipe() {
       slug: true,
       title: true,
       description: true,
-      imageUrl: true,
       reviews: { select: { rating: true } },
       _count: { select: { reviews: true } },
       author: {
         select: {
           username: true,
         },
+      },
+      media: {
+        select: {
+          url: true,
+          secureUrl: true,
+          isPrimary: true,
+        },
+        orderBy: [
+          { isPrimary: "desc" },
+          { createdAt: "asc" },
+        ],
       },
     },
     orderBy: { createdAt: "desc" },
@@ -175,7 +250,7 @@ export async function getFeaturedRecipe() {
     description:
       featured.description ||
       "Every day we feature an exceptional recipe that showcases the creativity and skill of our community. Today's featured dish combines fresh seasonal ingredients with classic techniques for an unforgettable dining experience.",
-    image: featured.imageUrl || DEFAULT_RECIPE_IMAGE,
+    image: getPrimaryImageUrl(featured.media),
   };
 }
 
@@ -195,8 +270,16 @@ export async function getRecipeBySlug(username: string, slug: string) {
         select: {
           id: true,
           username: true,
-          avatarUrl: true,
           bio: true,
+          media: {
+            where: { isProfileAvatar: true },
+            select: {
+              url: true,
+              secureUrl: true,
+              isProfileAvatar: true,
+            },
+            take: 1,
+          },
         },
       },
       cuisine: true,
@@ -262,14 +345,39 @@ export async function getRelatedRecipes(recipeId: string, categoryIds: string[],
       id: true,
       title: true,
       slug: true,
-      imageUrl: true,
       prepTimeMinutes: true,
       cookTimeMinutes: true,
       difficulty: true,
       averageRating: true,
+      description: true,
       author: {
         select: {
           username: true,
+          media: {
+            where: { isProfileAvatar: true },
+            select: {
+              url: true,
+              secureUrl: true,
+              isProfileAvatar: true,
+            },
+            take: 1,
+          },
+        },
+      },
+      media: {
+        select: {
+          url: true,
+          secureUrl: true,
+          isPrimary: true,
+        },
+        orderBy: [
+          { isPrimary: "desc" },
+          { createdAt: "asc" },
+        ],
+      },
+      reviews: {
+        select: {
+          rating: true,
         },
       },
     },
@@ -406,8 +514,27 @@ export async function searchRecipes({
         select: {
           id: true,
           username: true,
-          avatarUrl: true,
+          media: {
+            where: { isProfileAvatar: true },
+            select: {
+              url: true,
+              secureUrl: true,
+              isProfileAvatar: true,
+            },
+            take: 1,
+          },
         },
+      },
+      media: {
+        select: {
+          url: true,
+          secureUrl: true,
+          isPrimary: true,
+        },
+        orderBy: [
+          { isPrimary: "desc" },
+          { createdAt: "asc" },
+        ],
       },
       tags: {
         include: {
@@ -437,7 +564,7 @@ export async function searchRecipes({
     slug: recipe.slug,
     title: recipe.title,
     description: recipe.description,
-    image: recipe.imageUrl || DEFAULT_RECIPE_IMAGE,
+    image: getPrimaryImageUrl(recipe.media),
     time: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
     prepTimeMinutes: recipe.prepTimeMinutes,
     cookTimeMinutes: recipe.cookTimeMinutes,
@@ -448,7 +575,7 @@ export async function searchRecipes({
     author: {
       id: recipe.author.id,
       name: recipe.author.username,
-      avatar: recipe.author.avatarUrl || recipe.author.username.charAt(0),
+      avatar: getProfileAvatarUrl(recipe.author.media),
       username: recipe.author.username,
     },
     tags: recipe.tags.map((rt) => rt.tag.name),

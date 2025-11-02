@@ -20,9 +20,32 @@ export async function GET(
           select: {
             id: true,
             username: true,
-            avatarUrl: true,
             bio: true,
+            media: {
+              where: { isProfileAvatar: true },
+              select: {
+                url: true,
+                secureUrl: true,
+                isProfileAvatar: true,
+              },
+              take: 1,
+            },
           },
+        },
+        media: {
+          select: {
+            id: true,
+            url: true,
+            secureUrl: true,
+            isPrimary: true,
+            altText: true,
+            width: true,
+            height: true,
+          },
+          orderBy: [
+            { isPrimary: "desc" },
+            { createdAt: "asc" },
+          ],
         },
         cuisine: true,
         ingredients: {
@@ -126,7 +149,6 @@ export async function PATCH(
       prepTimeMinutes,
       cookTimeMinutes,
       difficulty,
-      imageUrl,
       sourceUrl,
       sourceText,
       cuisineName,
@@ -198,7 +220,6 @@ export async function PATCH(
           prepTimeMinutes,
           cookTimeMinutes,
           difficulty: difficulty ?? existingRecipe.difficulty,
-          imageUrl,
           sourceUrl,
           sourceText,
           cuisineId,

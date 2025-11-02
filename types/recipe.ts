@@ -32,7 +32,6 @@ export interface RecipeFormData {
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   difficulty: Difficulty;
-  imageUrl: string;
   sourceUrl: string;
   sourceText: string;
   cuisineName: string;
@@ -56,7 +55,6 @@ export interface FormattedRecipeResponse {
   prepTimeMinutes?: number;
   cookTimeMinutes?: number;
   difficulty?: string;
-  imageUrl?: string;
   cuisineName?: string;
   ingredients?: RecipeIngredient[];
   steps?: RecipeStep[];
@@ -78,7 +76,6 @@ export interface RecipeData {
   prepTimeMinutes: number | null;
   cookTimeMinutes: number | null;
   difficulty: string | null;
-  imageUrl: string | null;
   sourceUrl: string | null;
   sourceText: string | null;
   status: string | null;
