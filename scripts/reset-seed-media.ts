@@ -138,7 +138,7 @@ async function deleteFromDatabase(mediaId: string): Promise<boolean> {
  */
 async function cleanupSeedMedia() {
   console.log("\n🧹 Starting seed media cleanup...");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   // Find all seed media
   const seedMedia = await findSeedMedia();
@@ -190,13 +190,13 @@ async function cleanupSeedMedia() {
   // Print summary
   console.log("\n" + "=".repeat(60));
   console.log("📊 Cleanup Summary:");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
   console.log(`Media records found:           ${stats.mediaRecordsFound}`);
   console.log(`Media records deleted:         ${stats.mediaRecordsDeleted}`);
   console.log(`Cloudinary assets deleted:     ${stats.cloudinaryAssetsDeleted}`);
   console.log(`Cloudinary deletion errors:    ${stats.cloudinaryErrors}`);
   console.log(`Database deletion errors:      ${stats.databaseErrors}`);
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   if (stats.cloudinaryErrors > 0 || stats.databaseErrors > 0) {
     console.log("\n⚠️  Some deletions failed. Check errors above.");
