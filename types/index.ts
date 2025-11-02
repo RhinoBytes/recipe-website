@@ -96,3 +96,31 @@ export interface PaginationInfo {
   totalPages: number;
 }
 
+// Media types for Cloudinary integration
+export interface Media {
+  id: string;
+  publicId: string;
+  url: string;
+  secureUrl: string | null;
+  mimeType: string;
+  size: number;
+  width: number | null;
+  height: number | null;
+  originalFilename: string | null;
+  folder: string | null;
+  altText: string | null;
+  caption: string | null;
+  resourceType: "IMAGE" | "VIDEO";
+  userId: string;
+  recipeId: string | null;
+  createdAt: Date | string;
+}
+
+export interface MediaWithUser extends Media {
+  user: {
+    id: string;
+    username: string;
+    avatarUrl: string | null;
+  };
+}
+
