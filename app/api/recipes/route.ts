@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { Difficulty, RecipeStatus } from "@prisma/client";
 import { saveRecipeToFile } from "@/lib/recipeStorage";
 import { searchRecipes } from "@/lib/queries/recipes";
+import { log } from "@/lib/logger";
 
 export async function GET(request: Request) {
   try {
@@ -50,9 +51,20 @@ export async function GET(request: Request) {
       perPage,
     });
 
+    log.info({ 
+      total: result.total, 
+      page, 
+      perPage, 
+      hasQuery: !!query,
+      filters: { categories: categories.length, tags: tags.length, cuisines: cuisines.length }
+    }, "Fetched recipes successfully");
+
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Error fetching recipes:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Error fetching recipes"
+    );
     return NextResponse.json(
       { error: "Failed to fetch recipes" },
       { status: 500 }
@@ -68,6 +80,7 @@ export async function POST(request: Request) {
     const currentUser = await getCurrentUser();
 
     if (!currentUser) {
+      log.warn({}, "Unauthorized recipe creation attempt");
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -97,10 +110,10 @@ export async function POST(request: Request) {
       allergens,
       status,
     } = body;
-    console.log("Received recipe data:", body);
 
     // Validate required fields
     if (!title) {
+      log.warn({ userId: currentUser.userId }, "Recipe creation attempt without title");
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
 
@@ -129,6 +142,7 @@ export async function POST(request: Request) {
     });
 
     if (existingRecipe) {
+      log.warn({ userId: currentUser.userId, title, slug }, "Recipe creation attempt with duplicate slug");
       return NextResponse.json(
         { error: "A recipe with this title already exists" },
         { status: 409 }
@@ -382,6 +396,11 @@ export async function POST(request: Request) {
       select: { username: true },
     });
 
+    log.info(
+      { userId: currentUser.userId, recipeId: recipe.id, slug: recipe.slug, status: recipe.status },
+      "Recipe created successfully"
+    );
+
     return NextResponse.json(
       {
         ...recipe,
@@ -391,7 +410,13 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Create recipe error:", error);
+    log.error(
+      { 
+        userId: (await getCurrentUser())?.userId,
+        error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) 
+      },
+      "Create recipe error"
+    );
     return NextResponse.json(
       { error: "Failed to create recipe" },
       { status: 500 }

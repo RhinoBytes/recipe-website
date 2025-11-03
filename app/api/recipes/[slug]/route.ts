@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { log } from "@/lib/logger";
 
 /**
  * GET /api/recipes/[slug]
@@ -77,6 +78,7 @@ export async function GET(
     });
 
     if (!recipe) {
+      log.warn({ slug }, "Recipe not found");
       return NextResponse.json(
         { error: "Recipe not found" },
         { status: 404 }
@@ -91,9 +93,14 @@ export async function GET(
       allergens: recipe.allergens.map(ra => ra.allergen),
     };
 
+    log.info({ slug, recipeId: recipe.id }, "Recipe fetched successfully");
+
     return NextResponse.json(transformedRecipe);
   } catch (error) {
-    console.error("Get recipe by slug error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Get recipe by slug error"
+    );
     return NextResponse.json(
       { error: "Failed to fetch recipe" },
       { status: 500 }
@@ -134,6 +141,7 @@ export async function PATCH(
     }
 
     if (existingRecipe.authorId !== currentUser.userId) {
+      log.warn({ userId: currentUser.userId, recipeId: existingRecipe.id, slug }, "User attempted to edit recipe they don't own");
       return NextResponse.json(
         { error: "You don't have permission to edit this recipe" },
         { status: 403 }
@@ -365,13 +373,18 @@ export async function PATCH(
       select: { username: true }
     });
 
+    log.info({ userId: currentUser.userId, recipeId: updatedRecipe.id, slug }, "Recipe updated successfully");
+
     return NextResponse.json({
       ...updatedRecipe,
       slug: updatedRecipe.slug,
       username: author?.username,
     });
   } catch (error) {
-    console.error("Update recipe error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Update recipe error"
+    );
     return NextResponse.json(
       { error: "Failed to update recipe" },
       { status: 500 }
@@ -391,6 +404,7 @@ export async function DELETE(
     const currentUser = await getCurrentUser();
     
     if (!currentUser) {
+      log.warn({}, "Unauthorized recipe deletion attempt");
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -423,11 +437,16 @@ export async function DELETE(
       where: { id: existingRecipe.id },
     });
 
+    log.info({ userId: currentUser.userId, recipeId: existingRecipe.id, slug }, "Recipe deleted successfully");
+
     return NextResponse.json({
       message: "Recipe deleted successfully",
     });
   } catch (error) {
-    console.error("Delete recipe error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Delete recipe error"
+    );
     return NextResponse.json(
       { error: "Failed to delete recipe" },
       { status: 500 }

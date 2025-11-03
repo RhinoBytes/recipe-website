@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyPassword, createToken, setAuthCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sanitizeInput } from "@/utils/validation";
+import { log } from "@/lib/logger";
 
 /**
  * POST /api/auth/login
@@ -40,6 +41,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
+      log.warn({ email }, "Failed login attempt - user not found");
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
@@ -50,6 +52,7 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await verifyPassword(password, user.passwordHash);
 
     if (!isValidPassword) {
+      log.warn({ email, userId: user.id }, "Failed login attempt - invalid password");
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
@@ -71,12 +74,17 @@ export async function POST(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, ...userWithoutPassword } = user;
 
+    log.info({ userId: user.id, email: user.email, username: user.username }, "User logged in successfully");
+
     return NextResponse.json({
       message: "Login successful",
       user: userWithoutPassword,
     });
   } catch (error) {
-    console.error("Login error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Login error"
+    );
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
