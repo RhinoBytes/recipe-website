@@ -50,10 +50,19 @@ export async function POST(request: Request) {
     }
 
     // Validate file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed" },
+        {
+          error:
+            "Invalid file type. Only JPEG, JPG, PNG, WebP, and GIF are allowed",
+        },
         { status: 400 }
       );
     }
@@ -68,7 +77,9 @@ export async function POST(request: Request) {
     }
 
     // Generate unique filename
-    let fileExtension = file.name.includes(".") ? file.name.split(".").pop() : undefined;
+    let fileExtension = file.name.includes(".")
+      ? file.name.split(".").pop()
+      : undefined;
     // If no extension, infer from MIME type
     if (!fileExtension) {
       const mimeToExt: Record<string, string> = {
@@ -85,7 +96,9 @@ export async function POST(request: Request) {
         );
       }
     }
-    const uniqueFilename = `recipe-${currentUser.userId}-${randomUUID()}.${fileExtension}`;
+    const uniqueFilename = `recipe-${
+      currentUser.userId
+    }-${randomUUID()}.${fileExtension}`;
 
     // Upload to Supabase Storage
     const filePath = `recipes/${uniqueFilename}`;
@@ -122,7 +135,12 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     log.error(
-      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      {
+        error:
+          error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : String(error),
+      },
       "Image upload error"
     );
     return NextResponse.json(
