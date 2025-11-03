@@ -1,18 +1,19 @@
 {
   "title": "Greek Lemon Rice Pilaf",
   "slug": "greek-lemon-rice-pilaf",
-  "description": "This lemon rice pilaf is loaded with bright zesty flavors from lemon juice and layers of extra flavor from garlic, onion, and chicken broth.",
+  "description": "This lemon rice pilaf is so delicious, you can eat it plain! Loaded with bright zesty flavours from lemon juice and layers of extra flavour from garlic, onion and chicken broth.",
   "servings": 6,
   "prepTimeMinutes": 10,
   "cookTimeMinutes": 20,
   "difficulty": "EASY",
   "sourceUrl": null,
   "sourceText": null,
+  "chefNotes": null,
   "status": "PUBLISHED",
-  "calories": 216,
+  "calories": 245,
   "proteinG": 4,
-  "fatG": 4,
-  "carbsG": 39,
+  "fatG": 5,
+  "carbsG": 45,
   "cuisine": "Greek",
   "ingredients": [
     {
@@ -82,7 +83,7 @@
       "displayOrder": 5
     },
     {
-      "name": "lemon",
+      "name": "large lemon",
       "amount": "1",
       "unit": null,
       "size": null,
@@ -170,19 +171,19 @@
     },
     {
       "stepNumber": 6,
-      "instruction": "Remove from stove and rest for 10 minutes (keep the lid on).",
+      "instruction": "Remove from from stove and rest for 10 minutes (keep the lid on).",
       "groupName": null,
       "isOptional": false
     },
     {
       "stepNumber": 7,
-      "instruction": "Remove lid. Stir through lemon zest, lemon juice, herbs, and salt and pepper to taste.",
+      "instruction": "Remove lid. stir through lemon zest, lemon juice, herbs and salt and pepper to taste.",
       "groupName": null,
       "isOptional": false
     },
     {
       "stepNumber": 8,
-      "instruction": "Serve warm or at room temperature.",
+      "instruction": "Lovey served warm or at room temperature.",
       "groupName": null,
       "isOptional": false
     }

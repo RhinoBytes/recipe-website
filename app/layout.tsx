@@ -6,6 +6,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Playfair_Display, Lora, Dancing_Script } from 'next/font/google';
 import { getUserFromSession } from "@/lib/auth";
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 export const metadata: Metadata = {
   title: "CookBook - Discover Amazing Recipes",
   description: "Join thousands of home cooks sharing their favorite recipes and culinary adventures. Discover, create, and share amazing recipes.",
@@ -55,6 +57,7 @@ export default async function RootLayout({
           {children}
           <Footer />
           <Analytics />
+          <SpeedInsights />
         </AuthProvider>
       </body>
     </html>
