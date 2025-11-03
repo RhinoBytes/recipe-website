@@ -17,6 +17,13 @@ const prisma = new PrismaClient({
 type DifficultyType = keyof typeof Difficulty;
 type RecipeStatusType = keyof typeof RecipeStatus;
 
+/**
+ * RecipeData interface for seed file processing
+ * Note: This is similar to but distinct from types/recipe.ts RecipeData
+ * - Seed version: All fields optional (?) for flexible JSON parsing
+ * - Types version: Required fields with nullable (| null) for strict typing
+ * This separation is intentional to handle incomplete seed data gracefully.
+ */
 interface RecipeData {
   title: string;
   slug?: string;
@@ -166,7 +173,7 @@ async function clearExistingData() {
       }
     } catch (error) {
       failedCount++;
-      console.warn(`  Failed to delete ${media.publicId} from Cloudinary:`, error instanceof Error ? error.message : "Unknown error");
+      console.warn(`  Failed to delete ${media.resourceType} ${media.publicId} from Cloudinary:`, error instanceof Error ? error.message : "Unknown error");
       // Continue even if deletion fails - the image might not exist or credentials might be missing
     }
   }
