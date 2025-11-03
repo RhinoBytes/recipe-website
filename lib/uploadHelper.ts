@@ -1,105 +1,77 @@
 import fs from "fs";
-import FormData from "form-data";
-
-import { generateSignature } from "./cloudinary.js";
+import { supabaseAdmin } from "./supabase/server.js";
 import { PrismaClient, Media } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Cloudinary configuration
-const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || "";
-const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || "";
-const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || "";
-
-interface CloudinaryUploadResponse {
-  public_id: string;
-  url: string;
-  secure_url: string;
-  format: string;
-  bytes: number;
-  width?: number;
-  height?: number;
-  folder?: string;
-}
-
 /**
- * Upload an image file to Cloudinary and create a Media record
+ * Upload an image file to Supabase Storage and create a Media record
  * @param filePath Path to the local image file
- * @param folder Cloudinary folder path
+ * @param folder Supabase storage folder path
  * @param userId User ID for the media record
  * @param isProfileAvatar Whether this is a profile avatar
  * @returns Media object or null if upload fails
  */
-export async function uploadImageToCloudinary(
+export async function uploadImageToSupabase(
   filePath: string,
   folder: string,
   userId: string,
   isProfileAvatar: boolean = false
 ): Promise<Media | null> {
   try {
-    // Check if Cloudinary is configured
-    if (
-      !CLOUDINARY_CLOUD_NAME ||
-      !CLOUDINARY_API_KEY ||
-      !CLOUDINARY_API_SECRET
-    ) {
-      console.log("  ⚠️  Cloudinary not configured, skipping upload");
-      return null;
-    }
-
     // Check if file exists
     if (!fs.existsSync(filePath)) {
       console.error(`  ❌ File not found: ${filePath}`);
       return null;
     }
 
-    console.log(`  ☁️  Uploading to Cloudinary: ${filePath}`);
+    console.log(`  ☁️  Uploading to Supabase: ${filePath}`);
 
-    // Generate upload signature using the helper from lib/cloudinary.ts
-    const timestamp = Math.round(Date.now() / 1000);
-    const paramsToSign: Record<string, string | number> = {
-      timestamp,
-      folder,
-    };
+    // Read file
+    const fileBuffer = fs.readFileSync(filePath);
+    const fileName = filePath.split("/").pop() || "image.jpg";
+    const fileExt = fileName.split(".").pop() || "jpg";
+    
+    // Generate unique storage path
+    const timestamp = Date.now();
+    const storagePath = `${folder}/${timestamp}-${fileName}`;
 
-    const signature = generateSignature(paramsToSign);
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+      .from("recipe-builder")
+      .upload(storagePath, fileBuffer, {
+        contentType: `image/${fileExt}`,
+        cacheControl: "3600",
+        upsert: false,
+      });
 
-    // Create form data for upload
-    const formData = new FormData();
-    formData.append("file", fs.createReadStream(filePath));
-    formData.append("timestamp", timestamp.toString());
-    formData.append("api_key", CLOUDINARY_API_KEY);
-    formData.append("folder", folder);
-    formData.append("signature", signature);
-
-    // Upload to Cloudinary
-    const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-    const response = await fetch(uploadUrl, {
-      method: "POST",
-      body: formData as unknown as BodyInit,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`  ❌ Cloudinary upload failed: ${errorText}`);
+    if (uploadError) {
+      console.error(`  ❌ Supabase upload failed: ${uploadError.message}`);
       return null;
     }
 
-    const uploadData = (await response.json()) as CloudinaryUploadResponse;
-    console.log(`  ✅ Uploaded to Cloudinary: ${uploadData.public_id}`);
+    console.log(`  ✅ Uploaded to Supabase: ${uploadData.path}`);
+
+    // Get public URL
+    const { data: urlData } = supabaseAdmin.storage
+      .from("recipe-builder")
+      .getPublicUrl(uploadData.path);
+
+    // Get file stats for size
+    const stats = fs.statSync(filePath);
 
     // Create Media record in database
     const media = await prisma.media.create({
       data: {
-        publicId: uploadData.public_id,
-        url: uploadData.url,
-        secureUrl: uploadData.secure_url,
-        mimeType: `image/${uploadData.format}`,
-        size: uploadData.bytes,
-        width: uploadData.width || null,
-        height: uploadData.height || null,
-        originalFilename: filePath.split("/").pop() || "image.jpg",
-        folder: uploadData.folder || folder,
+        publicId: uploadData.path,
+        url: urlData.publicUrl,
+        secureUrl: urlData.publicUrl,
+        mimeType: `image/${fileExt}`,
+        size: stats.size,
+        width: null,
+        height: null,
+        originalFilename: fileName,
+        folder: folder,
         resourceType: "IMAGE",
         userId: userId,
         isProfileAvatar: isProfileAvatar,
