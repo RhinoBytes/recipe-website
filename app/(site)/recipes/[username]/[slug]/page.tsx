@@ -329,7 +329,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                   : 0;
               return (
                 <div className="lg:hidden bg-bg-secondary rounded-lg shadow-md overflow-hidden">
-                  <AccordionSection title="Quick Actions" defaultOpen={false}>
+                  <AccordionSection title="Quick Actions" defaultOpen={true}>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="col-span-2">
                         <FavoriteButton recipeId={recipe.id} />

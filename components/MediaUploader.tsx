@@ -193,14 +193,14 @@ export default function MediaUploader({
             )}
           </Button>
         </label>
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="text-sm text-text-secondary mt-2">
           {media.length} / {maxFiles} images uploaded
         </p>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md text-red-700">
+        <div className="flex items-center gap-2 p-3 bg-error/10 border border-error/20 rounded-md text-error">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span className="text-sm">{error}</span>
         </div>
@@ -212,7 +212,7 @@ export default function MediaUploader({
           {media.map((item) => (
             <div
               key={item.id}
-              className="relative group border border-gray-200 rounded-lg overflow-hidden bg-gray-50"
+              className="relative group border border-border rounded-lg overflow-hidden bg-bg"
             >
               <div className="aspect-square relative">
                 <Image
@@ -223,18 +223,18 @@ export default function MediaUploader({
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
               </div>
-              <div className="p-2 bg-white">
-                <p className="text-xs text-gray-600 truncate">
+              <div className="p-2 bg-bg-secondary">
+                <p className="text-xs text-text-secondary truncate">
                   {item.originalFilename || "Uploaded image"}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-text-muted">
                   {item.width && item.height && `${item.width}×${item.height} • `}
                   {formatFileSize(item.size)}
                 </p>
               </div>
               <button
                 onClick={() => handleDelete(item.id)}
-                className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                className="absolute top-2 right-2 p-1.5 bg-error text-bg rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error/90"
                 title="Delete image"
               >
                 <X className="w-4 h-4" />
