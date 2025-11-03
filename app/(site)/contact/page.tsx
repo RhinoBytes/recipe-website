@@ -155,7 +155,7 @@ export default function ContactPage() {
             <button
               type="button"
               disabled
-              className="w-full px-6 py-3 bg-muted text-bg font-medium rounded-2xl cursor-not-allowed opacity-60"
+              className="w-full px-6 py-3 bg-text-muted text-bg font-medium rounded-2xl cursor-not-allowed opacity-60"
             >
               Form Coming Soon
             </button>
