@@ -7,6 +7,7 @@ import { Playfair_Display, Lora, Dancing_Script } from 'next/font/google';
 import { getUserFromSession } from "@/lib/auth";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import ThemeScript from "@/components/ui/ThemeScript";
 
 export const metadata: Metadata = {
   title: "CookBook - Discover Amazing Recipes",
@@ -50,26 +51,13 @@ export default async function RootLayout({
   const user = await getUserFromSession();
   return (
     <html lang="en" suppressHydrationWarning className={`${playfair.variable} ${lora.variable} ${dancing.variable}`}>
-      <head>
+      <body className="antialiased">
         {/* 
           Inline script to prevent theme flickering (FOUC - Flash of Unstyled Content).
           This script runs before React hydration to apply the saved theme from localStorage.
-          suppressHydrationWarning is used because the data-theme attribute is set by this script.
+          suppressHydrationWarning on html element is used because the data-theme attribute is set by this script.
         */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('app-theme') || 'terracotta';
-                  document.documentElement.setAttribute('data-theme', theme);
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
-      <body className="antialiased">
+        <ThemeScript />
         <AuthProvider initialUser={user}>
           <Navbar /> 
         

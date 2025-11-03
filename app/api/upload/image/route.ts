@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     }
 
     // Validate file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         { error: "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed" },
@@ -73,7 +73,6 @@ export async function POST(request: Request) {
     if (!fileExtension) {
       const mimeToExt: Record<string, string> = {
         "image/jpeg": "jpg",
-        "image/jpg": "jpg",
         "image/png": "png",
         "image/webp": "webp",
         "image/gif": "gif",

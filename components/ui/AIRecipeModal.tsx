@@ -13,7 +13,6 @@ interface AIRecipeModalProps {
 }
 
 const MAX_CHARACTERS = 2000;
-const BUFFER_CHARACTERS = 100; // Allow typing slightly over limit to show error
 
 // Error types for better error handling
 enum ErrorType {
@@ -37,7 +36,11 @@ export default function AIRecipeModal({
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
-    setPasteText(newText);
+    
+    // Enforce hard limit at MAX_CHARACTERS
+    if (newText.length <= MAX_CHARACTERS) {
+      setPasteText(newText);
+    }
     
     // Clear error when user starts typing if it was a length error
     if (errorType === ErrorType.LENGTH_ERROR) {
@@ -122,7 +125,7 @@ export default function AIRecipeModal({
           <textarea
             value={pasteText}
             onChange={handleTextChange}
-            maxLength={MAX_CHARACTERS + BUFFER_CHARACTERS}
+            maxLength={MAX_CHARACTERS}
             className="w-full h-64 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#d4735a] focus:border-transparent resize-none"
             placeholder="Example:
 
