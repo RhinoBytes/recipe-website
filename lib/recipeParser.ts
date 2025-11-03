@@ -9,7 +9,7 @@ import { RecipeIngredient, RecipeStep } from "@/types/recipe";
  * Groups: "For the sauce:"
  */
 export function parseIngredients(text: string): RecipeIngredient[] {
-  const lines = text.split('\n').filter(l => l.trim());
+  const lines = text.split("\n").filter((l) => l.trim());
   const ingredients: RecipeIngredient[] = [];
   let currentGroup: string | null = null;
   let displayOrder = 0;
@@ -17,18 +17,22 @@ export function parseIngredients(text: string): RecipeIngredient[] {
   for (const line of lines) {
     // Check for group header (e.g., "For the sauce:")
     if (line.match(/^(?:for\s+)?(?:the\s+)?(.+?):\s*$/i)) {
-      currentGroup = line.match(/^(?:for\s+)?(?:the\s+)?(.+?):\s*$/i)![1].trim();
+      currentGroup = line
+        .match(/^(?:for\s+)?(?:the\s+)?(.+?):\s*$/i)![1]
+        .trim();
       continue;
     }
 
     // Check if optional
     const isOptional = /\b(optional|garnish)\b/i.test(line);
-    const cleanLine = line.replace(/\s*\(?(optional|garnish)\)?\s*$/i, '').trim();
+    const cleanLine = line
+      .replace(/\s*\(?(optional|garnish)\)?\s*$/i, "")
+      .trim();
 
     // Extract notes in parentheses
     const notesMatch = cleanLine.match(/\(([^)]+)\)/);
     const notes = notesMatch ? notesMatch[1].trim() : null;
-    const withoutNotes = cleanLine.replace(/\s*\([^)]+\)\s*/g, ' ').trim();
+    const withoutNotes = cleanLine.replace(/\s*\([^)]+\)\s*/g, " ").trim();
 
     // Parse: [amount] [unit] [name]
     const parts = withoutNotes.split(/\s+/);
@@ -38,22 +42,52 @@ export function parseIngredients(text: string): RecipeIngredient[] {
 
     // Common units to check for
     const commonUnits = [
-      'cup', 'cups', 'tbsp', 'tablespoon', 'tablespoons', 'tsp', 'teaspoon', 'teaspoons',
-      'oz', 'ounce', 'ounces', 'lb', 'pound', 'pounds', 'fl oz',
-      'ml', 'milliliter', 'milliliters', 'l', 'liter', 'liters',
-      'g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms',
-      'clove', 'cloves', 'pinch', 'dash', 'piece', 'pieces', 'slice', 'slices'
+      "cup",
+      "cups",
+      "tbsp",
+      "tablespoon",
+      "tablespoons",
+      "tsp",
+      "teaspoon",
+      "teaspoons",
+      "oz",
+      "ounce",
+      "ounces",
+      "lb",
+      "pound",
+      "pounds",
+      "fl oz",
+      "ml",
+      "milliliter",
+      "milliliters",
+      "l",
+      "liter",
+      "liters",
+      "g",
+      "gram",
+      "grams",
+      "kg",
+      "kilogram",
+      "kilograms",
+      "clove",
+      "cloves",
+      "pinch",
+      "dash",
+      "piece",
+      "pieces",
+      "slice",
+      "slices",
     ];
 
     if (parts.length >= 2 && /^[\d\/\-\.]+$/.test(parts[0])) {
       amount = parts[0];
-      
+
       // Check if second part is a unit
       if (commonUnits.includes(parts[1].toLowerCase())) {
         unit = parts[1];
-        name = parts.slice(2).join(' ');
+        name = parts.slice(2).join(" ");
       } else {
-        name = parts.slice(1).join(' ');
+        name = parts.slice(1).join(" ");
       }
     }
 
@@ -80,7 +114,7 @@ export function parseIngredients(text: string): RecipeIngredient[] {
  * Optional: add "(optional)" at end
  */
 export function parseSteps(text: string): RecipeStep[] {
-  const lines = text.split('\n').filter(l => l.trim());
+  const lines = text.split("\n").filter((l) => l.trim());
   const steps: RecipeStep[] = [];
   let currentGroup: string | null = null;
   let stepNumber = 1;
@@ -88,16 +122,18 @@ export function parseSteps(text: string): RecipeStep[] {
   for (const line of lines) {
     // Check for group header
     if (line.match(/^(?:for\s+)?(?:the\s+)?(.+?):\s*$/i)) {
-      currentGroup = line.match(/^(?:for\s+)?(?:the\s+)?(.+?):\s*$/i)![1].trim();
+      currentGroup = line
+        .match(/^(?:for\s+)?(?:the\s+)?(.+?):\s*$/i)![1]
+        .trim();
       stepNumber = 1;
       continue;
     }
 
     const isOptional = /\b(optional|garnish)\b/i.test(line);
     const instruction = line
-      .replace(/^\d+[\.\)]\s*/, '')
-      .replace(/^[-*•]\s*/, '')
-      .replace(/\s*\(?(optional|garnish)\)?\s*$/i, '')
+      .replace(/^\d+[\.\)]\s*/, "")
+      .replace(/^[-*•]\s*/, "")
+      .replace(/\s*\(?(optional|garnish)\)?\s*$/i, "")
       .trim();
 
     if (instruction) {
@@ -121,14 +157,15 @@ export function ingredientsToText(ingredients: RecipeIngredient[]): string {
   let lastGroup: string | null = null;
 
   for (const ing of ingredients) {
-    if (ing.groupName !== lastGroup) {
-      if (ing.groupName) {
-        lines.push(`\nFor the ${ing.groupName}:`);
+    const currentGroupName = ing.groupName ?? null;
+    if (currentGroupName !== lastGroup) {
+      if (currentGroupName) {
+        lines.push(`\nFor the ${currentGroupName}:`);
       }
-      lastGroup = ing.groupName;
+      lastGroup = currentGroupName;
     }
 
-    let line = '';
+    let line = "";
     if (ing.amount && ing.unit) {
       line += `${ing.amount} ${ing.unit} `;
     } else if (ing.amount) {
@@ -136,12 +173,12 @@ export function ingredientsToText(ingredients: RecipeIngredient[]): string {
     }
     line += ing.name;
     if (ing.notes) line += ` (${ing.notes})`;
-    if (ing.isOptional) line += ' (optional)';
-    
+    if (ing.isOptional) line += " (optional)";
+
     lines.push(line.trim());
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -152,17 +189,18 @@ export function stepsToText(steps: RecipeStep[]): string {
   let lastGroup: string | null = null;
 
   for (const step of steps) {
-    if (step.groupName !== lastGroup) {
-      if (step.groupName) {
-        lines.push(`\nFor the ${step.groupName}:`);
+    const currentGroupName = step.groupName ?? null;
+    if (currentGroupName !== lastGroup) {
+      if (currentGroupName) {
+        lines.push(`\nFor the ${currentGroupName}:`);
       }
-      lastGroup = step.groupName;
+      lastGroup = currentGroupName;
     }
 
     let line = step.instruction;
-    if (step.isOptional) line += ' (optional)';
+    if (step.isOptional) line += " (optional)";
     lines.push(line);
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

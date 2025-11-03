@@ -1,19 +1,18 @@
 {
-  "title": "Chinese steamed eggs (蒸蛋羹)",
+  "title": "Chinese Steamed Eggs (蒸蛋羹)",
   "slug": "chinese-steamed-eggs",
   "description": "Smooth, slippery and heavenly soft, Chinese steamed eggs requires minimum ingredients yet delivers a delicate look and flavour. Learn how to make it flawlessly.",
   "servings": 2,
   "prepTimeMinutes": 3,
   "cookTimeMinutes": 10,
   "difficulty": "EASY",
-  "imageUrl": "",
   "sourceUrl": "https://redhousespice.com/chinese-steamed-eggs/",
-  "sourceText": null,
+  "sourceText": "rwhyerwhewrthw",
   "status": "PUBLISHED",
-  "calories": null,
-  "proteinG": null,
-  "fatG": null,
-  "carbsG": null,
+  "calories": 76,
+  "proteinG": 6,
+  "fatG": 5,
+  "carbsG": 1,
   "cuisine": "Chinese",
   "ingredients": [
     {
@@ -33,7 +32,7 @@
       "unit": null,
       "size": null,
       "preparation": null,
-      "notes": "Ratio should be around 1:2 in volume",
+      "notes": "See note 1 & 2",
       "groupName": null,
       "isOptional": false,
       "displayOrder": 1
@@ -50,12 +49,12 @@
       "displayOrder": 2
     },
     {
-      "name": "chive",
+      "name": "chive )",
       "amount": "1",
       "unit": "teaspoon",
       "size": null,
       "preparation": null,
-      "notes": null,
+      "notes": "(optional",
       "groupName": null,
       "isOptional": true,
       "displayOrder": 3
@@ -144,12 +143,11 @@
     }
   ],
   "tags": [
-    "Comfort Food"
+    "Comfort Food",
+    "Easy"
   ],
   "categories": [
     "Breakfast"
   ],
-  "allergens": [
-    "Vegetarian"
-  ]
+  "allergens": []
 }

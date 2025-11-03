@@ -4,19 +4,8 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, X, Loader2, AlertCircle } from "lucide-react";
 import Button from "@/components/ui/Button";
-
-interface Media {
-  id: string;
-  url: string;
-  secureUrl: string | null;
-  publicId: string;
-  originalFilename: string | null;
-  altText: string | null;
-  width: number | null;
-  height: number | null;
-  size: number;
-  createdAt: string;
-}
+// Import the shared Media type
+import type { Media } from "@/types/index";
 
 interface MediaUploaderProps {
   recipeId?: string;
@@ -199,7 +188,7 @@ export default function MediaUploader({
         />
         <label htmlFor="media-upload-input">
           <Button
-            as="span"
+            as="button"
             disabled={uploading || media.length >= maxFiles}
             className="cursor-pointer"
           >

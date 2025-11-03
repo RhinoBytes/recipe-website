@@ -2,24 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock, Star, Heart } from "lucide-react";
 import { DEFAULT_RECIPE_IMAGE } from "@/lib/constants";
-
-interface RelatedRecipe {
-  id: string;
-  title: string;
-  slug: string;
-  prepTimeMinutes: number | null;
-  cookTimeMinutes: number | null;
-  difficulty: string | null;
-  averageRating: number;
-  media: Array<{
-    url: string;
-    secureUrl: string | null;
-    isPrimary: boolean;
-  }>;
-  author: {
-    username: string;
-  };
-}
+import { RelatedRecipe } from "@/types";
 
 interface RelatedRecipesProps {
   recipes: RelatedRecipe[];

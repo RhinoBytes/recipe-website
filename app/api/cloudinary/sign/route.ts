@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { createUploadSignature, validateCloudinaryConfig } from "@/lib/cloudinary";
+import {
+  createUploadSignature,
+  validateCloudinaryConfig,
+} from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -40,7 +43,7 @@ export async function POST(request: Request) {
         );
       }
 
-      if (recipe.authorId !== currentUser.id) {
+      if (recipe.authorId !== currentUser.userId) {
         return NextResponse.json(
           { error: "Unauthorized: You are not the owner of this recipe" },
           { status: 403 }

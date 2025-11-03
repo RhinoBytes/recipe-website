@@ -1,0 +1,193 @@
+{
+  "title": "Greek Lemon Rice Pilaf",
+  "slug": "greek-lemon-rice-pilaf",
+  "description": "This lemon rice pilaf is loaded with bright zesty flavors from lemon juice and layers of extra flavor from garlic, onion, and chicken broth.",
+  "servings": 6,
+  "prepTimeMinutes": 10,
+  "cookTimeMinutes": 20,
+  "difficulty": "EASY",
+  "sourceUrl": null,
+  "sourceText": null,
+  "status": "PUBLISHED",
+  "calories": 216,
+  "proteinG": 4,
+  "fatG": 4,
+  "carbsG": 39,
+  "cuisine": "Greek",
+  "ingredients": [
+    {
+      "name": "1/2 tbsp extra virgin oil",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": "or butter",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 0
+    },
+    {
+      "name": "garlic clove",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 1
+    },
+    {
+      "name": "onion",
+      "amount": "1/2",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": "white, brown, yellow",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 2
+    },
+    {
+      "name": "1/2 cups long grain white rice",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 3
+    },
+    {
+      "name": "1/4 cups chicken broth",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 4
+    },
+    {
+      "name": "water",
+      "amount": "1",
+      "unit": "cup",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 5
+    },
+    {
+      "name": "lemon",
+      "amount": "1",
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": "1 tsp zest + 3 – 4 tbsp lemon juice",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 6
+    },
+    {
+      "name": "parsley",
+      "amount": "3",
+      "unit": "tbsp",
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 7
+    },
+    {
+      "name": "dill",
+      "amount": "3",
+      "unit": "tbsp",
+      "size": null,
+      "preparation": null,
+      "notes": "or sub with parsley, oregano, basil chives, mint",
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 8
+    },
+    {
+      "name": "Salt",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 9
+    },
+    {
+      "name": "pepper",
+      "amount": null,
+      "unit": null,
+      "size": null,
+      "preparation": null,
+      "notes": null,
+      "groupName": null,
+      "isOptional": false,
+      "displayOrder": 10
+    }
+  ],
+  "steps": [
+    {
+      "stepNumber": 1,
+      "instruction": "Heat oil over medium heat in large saucepan or small pot.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 2,
+      "instruction": "Add garlic and onion. Cook for 5 minutes or until translucent and sweet.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 3,
+      "instruction": "Add rice and stir until rice turns mostly translucent.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 4,
+      "instruction": "Add broth and water. Place lid on, bring to simmer then turn heat down to low.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 5,
+      "instruction": "Cook for 12 minutes or until water is evaporated.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 6,
+      "instruction": "Remove from stove and rest for 10 minutes (keep the lid on).",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 7,
+      "instruction": "Remove lid. Stir through lemon zest, lemon juice, herbs, and salt and pepper to taste.",
+      "groupName": null,
+      "isOptional": false
+    },
+    {
+      "stepNumber": 8,
+      "instruction": "Serve warm or at room temperature.",
+      "groupName": null,
+      "isOptional": false
+    }
+  ],
+  "tags": [],
+  "categories": [],
+  "allergens": []
+}

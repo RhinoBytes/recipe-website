@@ -1,18 +1,25 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deleteCloudinaryAsset } from "@/lib/cloudinary";
+
+// Define the correct context type based on the error message
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
 /**
  * DELETE /api/media/[id]
  * Delete media from Cloudinary and database
  * Requires authentication and ownership
  */
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: RouteContext) {
   try {
+    // Await the params promise to resolve
+    const { id: mediaId } = await params;
+
     // Check authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
@@ -21,8 +28,6 @@ export async function DELETE(
         { status: 401 }
       );
     }
-
-    const mediaId = params.id;
 
     // Find media record
     const media = await prisma.media.findUnique({
@@ -38,16 +43,13 @@ export async function DELETE(
     });
 
     if (!media) {
-      return NextResponse.json(
-        { error: "Media not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Media not found" }, { status: 404 });
     }
 
     // Check authorization
-    // User can delete if they are the uploader or recipe owner (or admin)
-    const isUploader = media.userId === currentUser.id;
-    const isRecipeOwner = media.recipe && media.recipe.authorId === currentUser.id;
+    const isUploader = media.userId === currentUser.userId;
+    const isRecipeOwner =
+      media.recipe && media.recipe.authorId === currentUser.userId;
     const isAdmin = currentUser.role === "ADMIN";
 
     if (!isUploader && !isRecipeOwner && !isAdmin) {
@@ -59,14 +61,19 @@ export async function DELETE(
 
     // Delete from Cloudinary first
     try {
-      const resourceType = media.resourceType.toLowerCase() as "image" | "video";
+      const resourceType = media.resourceType.toLowerCase() as
+        | "image"
+        | "video";
       await deleteCloudinaryAsset(media.publicId, resourceType);
     } catch (cloudinaryError) {
       console.error("Cloudinary deletion failed:", cloudinaryError);
       return NextResponse.json(
         {
           error: "Failed to delete media from Cloudinary",
-          details: cloudinaryError instanceof Error ? cloudinaryError.message : "Unknown error",
+          details:
+            cloudinaryError instanceof Error
+              ? cloudinaryError.message
+              : "Unknown error",
         },
         { status: 500 }
       );
@@ -86,7 +93,8 @@ export async function DELETE(
       });
       return NextResponse.json(
         {
-          error: "Media deleted from Cloudinary but failed to delete from database. Please contact support.",
+          error:
+            "Media deleted from Cloudinary but failed to delete from database. Please contact support.",
           details: dbError instanceof Error ? dbError.message : "Unknown error",
         },
         { status: 500 }
@@ -113,11 +121,11 @@ export async function DELETE(
  * PATCH /api/media/[id]
  * Update media metadata (isPrimary, isProfileAvatar, altText, etc.)
  */
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
+    // Await the params promise to resolve
+    const { id: mediaId } = await params;
+
     // Check authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
@@ -127,7 +135,6 @@ export async function PATCH(
       );
     }
 
-    const mediaId = params.id;
     const body = await request.json();
     const { isPrimary, isProfileAvatar, altText, caption } = body;
 
@@ -145,15 +152,13 @@ export async function PATCH(
     });
 
     if (!media) {
-      return NextResponse.json(
-        { error: "Media not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Media not found" }, { status: 404 });
     }
 
     // Check authorization
-    const isOwner = media.userId === currentUser.id;
-    const isRecipeOwner = media.recipe && media.recipe.authorId === currentUser.id;
+    const isOwner = media.userId === currentUser.userId;
+    const isRecipeOwner =
+      media.recipe && media.recipe.authorId === currentUser.userId;
     const isAdmin = currentUser.role === "ADMIN";
 
     if (!isOwner && !isRecipeOwner && !isAdmin) {

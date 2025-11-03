@@ -60,7 +60,7 @@ export async function POST(request: Request) {
         );
       }
 
-      if (recipe.authorId !== currentUser.id) {
+      if (recipe.authorId !== currentUser.userId) {
         return NextResponse.json(
           { error: "Unauthorized: You are not the owner of this recipe" },
           { status: 403 }
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
         folder: folder || null,
         altText: altText || null,
         resourceType,
-        userId: currentUser.id,
+        userId: currentUser.userId,
         recipeId: recipeId || null,
         isPrimary: isPrimary || false,
         isProfileAvatar: isProfileAvatar || false,

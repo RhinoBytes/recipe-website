@@ -1,6 +1,6 @@
 import fs from "fs";
 import FormData from "form-data";
-import fetch from "node-fetch";
+
 import { generateSignature } from "./cloudinary.js";
 import { PrismaClient, Media } from "@prisma/client";
 
@@ -38,7 +38,11 @@ export async function uploadImageToCloudinary(
 ): Promise<Media | null> {
   try {
     // Check if Cloudinary is configured
-    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+    if (
+      !CLOUDINARY_CLOUD_NAME ||
+      !CLOUDINARY_API_KEY ||
+      !CLOUDINARY_API_SECRET
+    ) {
       console.log("  ⚠️  Cloudinary not configured, skipping upload");
       return null;
     }
@@ -81,7 +85,7 @@ export async function uploadImageToCloudinary(
       return null;
     }
 
-    const uploadData = await response.json() as CloudinaryUploadResponse;
+    const uploadData = (await response.json()) as CloudinaryUploadResponse;
     console.log(`  ✅ Uploaded to Cloudinary: ${uploadData.public_id}`);
 
     // Create Media record in database

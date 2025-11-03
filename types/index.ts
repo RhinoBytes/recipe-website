@@ -32,11 +32,29 @@ export interface Category {
 
 export interface FeaturedRecipe {
   id: string;
-  slug: string;
+  slug: string | null;
   username: string;
   title: string;
   description: string;
   image: string;
+}
+
+export interface RelatedRecipe {
+  id: string;
+  title: string;
+  slug: string | null;
+  prepTimeMinutes: number | null;
+  cookTimeMinutes: number | null;
+  difficulty: string | null;
+  averageRating: number;
+  media: Array<{
+    url: string;
+    secureUrl: string | null;
+    isPrimary: boolean;
+  }>;
+  author: {
+    username: string;
+  };
 }
 
 export interface Chef {
@@ -123,4 +141,3 @@ export interface MediaWithUser extends Media {
     username: string;
   };
 }
-

@@ -181,6 +181,13 @@ export async function POST(request: Request) {
       formattedRecipe = await parseRecipeWithOpenAI(text);
     } else if (data) {
       formattedRecipe = await completeRecipeWithAI(data);
+    } else {
+      // This else block makes it clear to TypeScript that all paths are handled.
+      // Even though zod's .refine should prevent this, it satisfies the compiler.
+      return NextResponse.json(
+        { error: "Invalid request: 'text' or 'data' must be provided." },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({ recipe: formattedRecipe, source: "ai" });
