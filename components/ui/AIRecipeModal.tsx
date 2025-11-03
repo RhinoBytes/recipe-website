@@ -15,6 +15,12 @@ interface AIRecipeModalProps {
 const MAX_CHARACTERS = 2000;
 const BUFFER_CHARACTERS = 100; // Allow typing slightly over limit to show error
 
+// Error types for better error handling
+enum ErrorType {
+  LENGTH_ERROR = 'LENGTH_ERROR',
+  SUBMISSION_ERROR = 'SUBMISSION_ERROR',
+}
+
 export default function AIRecipeModal({
   isOpen,
   onClose,
@@ -23,6 +29,7 @@ export default function AIRecipeModal({
   const [pasteText, setPasteText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<ErrorType | null>(null);
 
   const characterCount = pasteText.length;
   const isOverLimit = characterCount > MAX_CHARACTERS;
@@ -33,24 +40,28 @@ export default function AIRecipeModal({
     setPasteText(newText);
     
     // Clear error when user starts typing if it was a length error
-    if (error && error.includes("too long")) {
+    if (errorType === ErrorType.LENGTH_ERROR) {
       setError(null);
+      setErrorType(null);
     }
   };
 
   const handleFormatWithAI = async () => {
     if (!pasteText.trim()) {
       setError("Please paste a recipe first");
+      setErrorType(ErrorType.SUBMISSION_ERROR);
       return;
     }
 
     if (isOverLimit) {
       setError(`Recipe text is too long. Please reduce it to ${MAX_CHARACTERS} characters or less.`);
+      setErrorType(ErrorType.LENGTH_ERROR);
       return;
     }
 
     setLoading(true);
     setError(null);
+    setErrorType(null);
 
     try {
       const response = await fetch("/api/ai/format-recipe", {
@@ -75,6 +86,7 @@ export default function AIRecipeModal({
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to format recipe");
+      setErrorType(ErrorType.SUBMISSION_ERROR);
     } finally {
       setLoading(false);
     }
@@ -84,6 +96,7 @@ export default function AIRecipeModal({
     if (!loading) {
       setPasteText("");
       setError(null);
+      setErrorType(null);
       onClose();
     }
   };

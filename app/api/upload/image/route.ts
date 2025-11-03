@@ -5,8 +5,17 @@ import { log } from "@/lib/logger";
 import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase client for server-side operations
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || "";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+if (!supabaseUrl) {
+  throw new Error("NEXT_PUBLIC_SUPABASE_URL environment variable is not set");
+}
+
+if (!supabaseServiceKey) {
+  throw new Error("SUPABASE_SERVICE_KEY environment variable is not set");
+}
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export const config = {
