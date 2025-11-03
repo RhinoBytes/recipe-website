@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { deleteCloudinaryAsset } from "@/lib/cloudinary";
+import { supabaseAdmin } from "@/lib/supabase/server";
 
 // Define the correct context type based on the error message
 type RouteContext = {
@@ -59,20 +59,23 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
       );
     }
 
-    // Delete from Cloudinary first
+    // Delete from Supabase Storage first
     try {
-      const resourceType = media.resourceType.toLowerCase() as
-        | "image"
-        | "video";
-      await deleteCloudinaryAsset(media.publicId, resourceType);
-    } catch (cloudinaryError) {
-      console.error("Cloudinary deletion failed:", cloudinaryError);
+      const { error: storageError } = await supabaseAdmin.storage
+        .from("recipe-builder")
+        .remove([media.publicId]);
+
+      if (storageError) {
+        throw storageError;
+      }
+    } catch (storageError) {
+      console.error("Supabase Storage deletion failed:", storageError);
       return NextResponse.json(
         {
-          error: "Failed to delete media from Cloudinary",
+          error: "Failed to delete media from storage",
           details:
-            cloudinaryError instanceof Error
-              ? cloudinaryError.message
+            storageError instanceof Error
+              ? storageError.message
               : "Unknown error",
         },
         { status: 500 }
@@ -85,16 +88,16 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
         where: { id: mediaId },
       });
     } catch (dbError) {
-      // Log error for manual cleanup - Cloudinary asset is already deleted
-      console.error("Database deletion failed after Cloudinary deletion:", {
+      // Log error for manual cleanup - Storage asset is already deleted
+      console.error("Database deletion failed after storage deletion:", {
         mediaId,
-        publicId: media.publicId,
+        storagePath: media.publicId,
         error: dbError,
       });
       return NextResponse.json(
         {
           error:
-            "Media deleted from Cloudinary but failed to delete from database. Please contact support.",
+            "Media deleted from storage but failed to delete from database. Please contact support.",
           details: dbError instanceof Error ? dbError.message : "Unknown error",
         },
         { status: 500 }

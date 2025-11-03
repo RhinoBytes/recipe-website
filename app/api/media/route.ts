@@ -19,11 +19,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Parse Cloudinary upload response from request body
+    // Parse upload data from request body
     const body = await request.json();
     const {
-      public_id,
-      secure_url,
+      storage_path,
       url,
       bytes,
       width,
@@ -31,7 +30,6 @@ export async function POST(request: Request) {
       format,
       resource_type,
       original_filename,
-      folder,
       recipeId,
       altText,
       isPrimary,
@@ -39,9 +37,9 @@ export async function POST(request: Request) {
     } = body;
 
     // Validate required fields
-    if (!public_id || !secure_url || !bytes) {
+    if (!storage_path || !url || !bytes) {
       return NextResponse.json(
-        { error: "Missing required fields from Cloudinary response" },
+        { error: "Missing required fields from upload" },
         { status: 400 }
       );
     }
@@ -80,15 +78,15 @@ export async function POST(request: Request) {
     // Create Media record
     const media = await prisma.media.create({
       data: {
-        publicId: public_id,
-        url: url || secure_url,
-        secureUrl: secure_url,
+        publicId: storage_path,
+        url: url,
+        secureUrl: url,
         mimeType,
         size: bytes,
         width: width || null,
         height: height || null,
         originalFilename: original_filename || null,
-        folder: folder || null,
+        folder: storage_path.split("/").slice(0, -1).join("/") || null,
         altText: altText || null,
         resourceType,
         userId: currentUser.userId,

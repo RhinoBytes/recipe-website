@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, X, Loader2, AlertCircle } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { supabase } from "@/lib/supabase/client";
 // Import the shared Media type
 import type { Media } from "@/types/index";
 
@@ -65,64 +66,49 @@ export default function MediaUploader({
   };
 
   const uploadFile = async (file: File) => {
-    // Step 1: Get upload signature from server
-    const signResponse = await fetch("/api/cloudinary/sign", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recipeId }),
-    });
+    // Generate unique file path
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const filePath = recipeId 
+      ? `recipes/${recipeId}/${fileName}`
+      : `uploads/${fileName}`;
 
-    if (!signResponse.ok) {
-      const errorData = await signResponse.json();
-      throw new Error(errorData.error || "Failed to get upload signature");
+    // Step 1: Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("recipe-builder")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      throw new Error(uploadError.message || "Upload failed");
     }
 
-    const signData = await signResponse.json();
-    const { signature, timestamp, apiKey, cloudName, folder } = signData;
-
-    // Step 2: Upload directly to Cloudinary
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("signature", signature);
-    formData.append("timestamp", timestamp.toString());
-    formData.append("api_key", apiKey);
-    formData.append("folder", folder);
-
-    const uploadResponse = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    if (!uploadResponse.ok) {
-      throw new Error("Cloudinary upload failed");
-    }
-
-    const cloudinaryData = await uploadResponse.json();
+    // Step 2: Get public URL
+    const { data: urlData } = supabase.storage
+      .from("recipe-builder")
+      .getPublicUrl(uploadData.path);
 
     // Step 3: Persist Media record to database
     const mediaResponse = await fetch("/api/media", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        public_id: cloudinaryData.public_id,
-        secure_url: cloudinaryData.secure_url,
-        url: cloudinaryData.url,
-        bytes: cloudinaryData.bytes,
-        width: cloudinaryData.width,
-        height: cloudinaryData.height,
-        format: cloudinaryData.format,
-        resource_type: cloudinaryData.resource_type,
-        original_filename: cloudinaryData.original_filename,
-        folder: cloudinaryData.folder,
+        storage_path: uploadData.path,
+        url: urlData.publicUrl,
+        bytes: file.size,
+        format: fileExt,
+        resource_type: file.type.startsWith("video/") ? "video" : "image",
+        original_filename: file.name,
         recipeId: recipeId || null,
         altText: null,
       }),
     });
 
     if (!mediaResponse.ok) {
+      // If database save fails, try to clean up the uploaded file
+      await supabase.storage.from("recipe-builder").remove([uploadData.path]);
       const errorData = await mediaResponse.json();
       throw new Error(errorData.error || "Failed to save media record");
     }

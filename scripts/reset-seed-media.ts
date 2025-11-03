@@ -17,7 +17,7 @@
  */
 
 import { PrismaClient } from "@prisma/client";
-import { deleteCloudinaryAsset } from "../lib/cloudinary.js";
+import { supabaseAdmin } from "../lib/supabase/server.js";
 
 const prisma = new PrismaClient({
   log: ["query", "info", "warn", "error"],
@@ -34,16 +34,16 @@ const SEED_FOLDER_PREFIX = "recipe-website/seed";
 interface CleanupStats {
   mediaRecordsFound: number;
   mediaRecordsDeleted: number;
-  cloudinaryAssetsDeleted: number;
-  cloudinaryErrors: number;
+  storageAssetsDeleted: number;
+  storageErrors: number;
   databaseErrors: number;
 }
 
 const stats: CleanupStats = {
   mediaRecordsFound: 0,
   mediaRecordsDeleted: 0,
-  cloudinaryAssetsDeleted: 0,
-  cloudinaryErrors: 0,
+  storageAssetsDeleted: 0,
+  storageErrors: 0,
   databaseErrors: 0,
 };
 
@@ -96,20 +96,23 @@ async function findSeedMedia() {
 }
 
 /**
- * Delete a single media asset from Cloudinary
+ * Delete a single media asset from Supabase Storage
  */
-async function deleteFromCloudinary(
-  publicId: string,
-  resourceType: string
+async function deleteFromStorage(
+  storagePath: string
 ): Promise<boolean> {
   try {
-    const type = resourceType.toLowerCase() as "image" | "video";
-    await deleteCloudinaryAsset(publicId, type);
-    stats.cloudinaryAssetsDeleted++;
+    const { error } = await supabaseAdmin.storage
+      .from("recipe-builder")
+      .remove([storagePath]);
+    
+    if (error) throw error;
+    
+    stats.storageAssetsDeleted++;
     return true;
   } catch (error) {
-    stats.cloudinaryErrors++;
-    console.error(`  ❌ Failed to delete from Cloudinary: ${publicId}`);
+    stats.storageErrors++;
+    console.error(`  ❌ Failed to delete from storage: ${storagePath}`);
     console.error(`     Error: ${error instanceof Error ? error.message : "Unknown error"}`);
     return false;
   }
@@ -166,18 +169,15 @@ async function cleanupSeedMedia() {
     console.log(`   Folder: ${media.folder || "N/A"}`);
     console.log(`   Type: ${media.resourceType}`);
 
-    // Delete from Cloudinary first
-    console.log("   ☁️  Deleting from Cloudinary...");
-    const cloudinaryDeleted = await deleteFromCloudinary(
-      media.publicId,
-      media.resourceType
-    );
+    // Delete from Supabase Storage first
+    console.log("   ☁️  Deleting from storage...");
+    const storageDeleted = await deleteFromStorage(media.publicId);
 
-    if (cloudinaryDeleted) {
-      console.log("   ✅ Cloudinary asset deleted");
+    if (storageDeleted) {
+      console.log("   ✅ Storage asset deleted");
     }
 
-    // Delete from database (even if Cloudinary deletion failed)
+    // Delete from database (even if storage deletion failed)
     // This prevents orphaned database records
     console.log("   🗄️  Deleting from database...");
     const dbDeleted = await deleteFromDatabase(media.id);
@@ -193,12 +193,12 @@ async function cleanupSeedMedia() {
   console.log("=".repeat(60));
   console.log(`Media records found:           ${stats.mediaRecordsFound}`);
   console.log(`Media records deleted:         ${stats.mediaRecordsDeleted}`);
-  console.log(`Cloudinary assets deleted:     ${stats.cloudinaryAssetsDeleted}`);
-  console.log(`Cloudinary deletion errors:    ${stats.cloudinaryErrors}`);
+  console.log(`Storage assets deleted:        ${stats.storageAssetsDeleted}`);
+  console.log(`Storage deletion errors:       ${stats.storageErrors}`);
   console.log(`Database deletion errors:      ${stats.databaseErrors}`);
   console.log("=".repeat(60));
 
-  if (stats.cloudinaryErrors > 0 || stats.databaseErrors > 0) {
+  if (stats.storageErrors > 0 || stats.databaseErrors > 0) {
     console.log("\n⚠️  Some deletions failed. Check errors above.");
     console.log("   You may need to manually clean up failed items.");
   } else {

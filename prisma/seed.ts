@@ -4,8 +4,8 @@ import bcrypt from "bcrypt";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { uploadImageToCloudinary } from "../lib/uploadHelper.js";
-import { deleteCloudinaryAsset } from "../lib/cloudinary.js";
+import { uploadImageToSupabase } from "../lib/uploadHelper.js";
+import { supabaseAdmin } from "../lib/supabase/server.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -158,23 +158,25 @@ async function clearExistingData() {
 
   console.log(`Found ${allMedia.length} media files to delete from Cloudinary...`);
 
-  // Delete media from Cloudinary
+  // Delete media from Supabase Storage
   let deletedCount = 0;
   let failedCount = 0;
   for (const media of allMedia) {
     try {
-      await deleteCloudinaryAsset(
-        media.publicId,
-        media.resourceType === "VIDEO" ? "video" : "image"
-      );
+      const { error } = await supabaseAdmin.storage
+        .from("recipe-builder")
+        .remove([media.publicId]);
+      
+      if (error) throw error;
+      
       deletedCount++;
       if (deletedCount % 10 === 0) {
         console.log(`  Deleted ${deletedCount}/${allMedia.length} media files...`);
       }
     } catch (error) {
       failedCount++;
-      console.warn(`  Failed to delete ${media.resourceType} ${media.publicId} from Cloudinary:`, error instanceof Error ? error.message : "Unknown error");
-      // Continue even if deletion fails - the image might not exist or credentials might be missing
+      console.warn(`  Failed to delete ${media.resourceType} ${media.publicId} from storage:`, error instanceof Error ? error.message : "Unknown error");
+      // Continue even if deletion fails - the file might not exist or credentials might be missing
     }
   }
 
@@ -375,7 +377,7 @@ async function importRecipes(users: User[]) {
       const imagePath = path.join(folderPath, "image.jpg");
       if (fs.existsSync(imagePath)) {
         console.log(`  Uploading image...`);
-        media = await uploadImageToCloudinary(
+        media = await uploadImageToSupabase(
           imagePath,
           "recipe-website/seed",
           author.id,

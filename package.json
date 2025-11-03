@@ -16,6 +16,7 @@
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
     "@prisma/client": "^6.18.0",
+    "@supabase/supabase-js": "^2.78.0",
     "bcrypt": "^6.0.0",
     "cookie": "^1.0.2",
     "jsonwebtoken": "^9.0.2",
