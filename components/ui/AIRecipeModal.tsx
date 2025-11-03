@@ -13,6 +13,7 @@ interface AIRecipeModalProps {
 }
 
 const MAX_CHARACTERS = 2000;
+const BUFFER_CHARACTERS = 100; // Allow typing slightly over limit to show error
 
 export default function AIRecipeModal({
   isOpen,
@@ -108,7 +109,7 @@ export default function AIRecipeModal({
           <textarea
             value={pasteText}
             onChange={handleTextChange}
-            maxLength={MAX_CHARACTERS + 100} // Allow typing a bit over to show error
+            maxLength={MAX_CHARACTERS + BUFFER_CHARACTERS}
             className="w-full h-64 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#d4735a] focus:border-transparent resize-none"
             placeholder="Example:
 

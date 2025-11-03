@@ -51,6 +51,11 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${playfair.variable} ${lora.variable} ${dancing.variable}`}>
       <head>
+        {/* 
+          Inline script to prevent theme flickering (FOUC - Flash of Unstyled Content).
+          This script runs before React hydration to apply the saved theme from localStorage.
+          suppressHydrationWarning is used because the data-theme attribute is set by this script.
+        */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

@@ -106,14 +106,14 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
   const renderStars = (count: number, interactive = false) => {
     const currentRating = interactive && hoveredRating > 0 ? hoveredRating : count;
     return (
-      <div className="flex gap-1">
+      <div className="flex gap-0.5 sm:gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            size={interactive ? 28 : 20}
+            size={interactive ? 28 : 18}
             className={`${
               star <= currentRating ? "fill-amber-400 text-amber-400" : "text-gray-300"
-            } ${interactive ? "cursor-pointer" : ""}`}
+            } ${interactive ? "cursor-pointer hover:scale-110 transition-transform" : ""}`}
             onClick={interactive ? () => setRating(star) : undefined}
             onMouseEnter={interactive ? () => setHoveredRating(star) : undefined}
             onMouseLeave={interactive ? () => setHoveredRating(0) : undefined}
@@ -125,7 +125,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
 
   if (loading)
     return (
-      <div className="bg-bg-secondary rounded-lg shadow-md p-6">
+      <div className="bg-bg-secondary rounded-lg shadow-md p-4 sm:p-6">
         <div className="flex justify-center py-8">
           <Loader2 className="animate-spin text-accent" size={32} />
         </div>
@@ -133,41 +133,44 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
     );
 
   return (
-    <div className="bg-bg-secondary rounded-lg shadow-md p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-text mb-2">Reviews & Ratings</h2>
-          <div className="flex items-center gap-4">
+    <div className="bg-bg-secondary rounded-lg shadow-md p-4 sm:p-6">
+      {/* Header - Mobile First */}
+      <div className="mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-text mb-3">Reviews & Ratings</h2>
+        
+        {/* Rating Summary - Stacked on mobile, inline on larger screens */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-2">
               {renderStars(Math.round(averageRating))}
-              <span className="text-2xl font-bold text-text">
+              <span className="text-xl sm:text-2xl font-bold text-text">
                 {averageRating.toFixed(1)}
               </span>
             </div>
-            <span className="text-text-secondary">
+            <span className="text-sm sm:text-base text-text-secondary">
               ({totalReviews} {totalReviews === 1 ? "review" : "reviews"})
             </span>
           </div>
-        </div>
 
-        {isAuthenticated && !isAuthor && (
-          <Button
-            onClick={() => setShowReviewForm(!showReviewForm)}
-            variant="primary"
-          >
-            {reviews.some((r) => r.user.id === user?.id) ? "Update Review" : "Write a Review"}
-          </Button>
-        )}
+          {isAuthenticated && !isAuthor && (
+            <Button
+              onClick={() => setShowReviewForm(!showReviewForm)}
+              variant="primary"
+              className="w-full sm:w-auto"
+            >
+              {reviews.some((r) => r.user.id === user?.id) ? "Update Review" : "Write a Review"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Review Form */}
       {showReviewForm && isAuthenticated && !isAuthor && (
-        <form onSubmit={handleSubmitReview} className="mb-6 p-4 bg-bg rounded-lg border border-border">
-          <h3 className="text-lg font-semibold text-text mb-4">Your Review</h3>
+        <form onSubmit={handleSubmitReview} className="mb-6 p-3 sm:p-4 bg-bg rounded-lg border border-border">
+          <h3 className="text-base sm:text-lg font-semibold text-text mb-4">Your Review</h3>
 
           {error && (
-            <div className="mb-4 p-3 bg-error/10 border border-error/20 text-error rounded-lg">
+            <div className="mb-4 p-3 bg-error/10 border border-error/20 text-error rounded-lg text-sm">
               {error}
             </div>
           )}
@@ -186,14 +189,14 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="w-full px-4 py-2 border border-border rounded-lg bg-bg-secondary text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="w-full px-3 sm:px-4 py-2 border border-border rounded-lg bg-bg-secondary text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm sm:text-base"
               rows={4}
               placeholder="Share your thoughts about this recipe..."
             />
           </div>
 
-          <div className="flex gap-3">
-            <Button type="submit" disabled={submitting} variant="primary">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button type="submit" disabled={submitting} variant="primary" className="w-full sm:w-auto">
               {submitting ? (
                 <>
                   <Loader2 className="animate-spin" size={18} />
@@ -203,7 +206,12 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
                 "Submit Review"
               )}
             </Button>
-            <Button type="button" onClick={() => { setShowReviewForm(false); setError(null); }} variant="secondary">
+            <Button 
+              type="button" 
+              onClick={() => { setShowReviewForm(false); setError(null); }} 
+              variant="secondary"
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
           </div>
@@ -213,35 +221,49 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
       {/* Reviews List */}
       <div className="space-y-4">
         {reviews.length === 0 ? (
-          <p className="text-text-secondary text-center py-8">
+          <p className="text-text-secondary text-center py-8 text-sm sm:text-base">
             No reviews yet. Be the first to review this recipe!
           </p>
         ) : (
           reviews.map((review) => (
-            <div key={review.id} className="border-t border-border pt-4">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 relative rounded-full overflow-hidden flex-shrink-0">
+            <div key={review.id} className="border-t border-border pt-4 first:border-t-0 first:pt-0">
+              <div className="flex items-start gap-3 sm:gap-4">
+                {/* Avatar - Smaller on mobile */}
+                <div className="w-10 h-10 sm:w-12 sm:h-12 relative rounded-full overflow-hidden flex-shrink-0">
                   <Image
                     src={review.user.avatarUrl || "/img/users/default-avatar.png"}
                     alt={review.user.username}
                     fill
                     className="object-cover"
-                    sizes="48px"
+                    sizes="(max-width: 640px) 40px, 48px"
                   />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-text">{review.user.username}</span>
-                    {renderStars(review.rating)}
-                    <span className="text-sm text-text-muted">
-                      {new Date(review.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                
+                {/* Review Content - Flexible layout */}
+                <div className="flex-1 min-w-0">
+                  {/* User info and rating - Stack on small mobile, wrap on larger screens */}
+                  <div className="flex flex-wrap items-start sm:items-center gap-2 mb-2">
+                    <span className="font-semibold text-text text-sm sm:text-base truncate max-w-[150px] sm:max-w-none">
+                      {review.user.username}
                     </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {renderStars(review.rating)}
+                      <span className="text-xs sm:text-sm text-text-muted whitespace-nowrap">
+                        {new Date(review.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
                   </div>
-                  {review.comment && <p className="text-text">{review.comment}</p>}
+                  
+                  {/* Comment - Allow text to wrap naturally */}
+                  {review.comment && (
+                    <p className="text-text text-sm sm:text-base break-words">
+                      {review.comment}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

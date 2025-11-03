@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase client for server-side operations
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export const config = {
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     // Generate unique filename
     let fileExtension = file.name.includes(".") ? file.name.split(".").pop() : undefined;
     // If no extension, infer from MIME type
-    if (!fileExtension || fileExtension === file.name) {
+    if (!fileExtension) {
       const mimeToExt: Record<string, string> = {
         "image/jpeg": "jpg",
         "image/jpg": "jpg",
