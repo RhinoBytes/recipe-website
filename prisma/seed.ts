@@ -1,14 +1,38 @@
-import { PrismaClient, Difficulty, RecipeStatus, User, Media } from "@prisma/client";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import {
+  PrismaClient,
+  Difficulty,
+  RecipeStatus,
+  User,
+  Media,
+} from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import bcrypt from "bcrypt";
 import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import { uploadImageToSupabase } from "../lib/uploadHelper.js";
-import { supabaseAdmin } from "../lib/supabase/server.js";
 
+// --- Step 1: Explicitly load .env file from the project root ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+// --- Step 2: Add debugging right after loading variables ---
+console.log("--- DEBUGGING ENVIRONMENT VARIABLES ---");
+const supUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supKey = process.env.SUPABASE_SERVICE_KEY;
+console.log(`NEXT_PUBLIC_SUPABASE_URL: ${supUrl || "NOT FOUND"}`);
+console.log(
+  `SUPABASE_SERVICE_KEY: ${
+    supKey ? supKey.slice(0, 5) + "..." + supKey.slice(-5) : "NOT FOUND"
+  }`
+);
+console.log("---------------------------------------");
+// --- END OF DEBUGGING BLOCK ---
+
+// --- Step 3: Import Supabase modules AFTER variables are loaded ---
+import { uploadImageToSupabase } from "../lib/uploadHelper.js";
+import { supabaseAdmin } from "../lib/supabase/server.js";
 
 const prisma = new PrismaClient({
   log: ["query", "info", "warn", "error"],
@@ -17,13 +41,6 @@ const prisma = new PrismaClient({
 type DifficultyType = keyof typeof Difficulty;
 type RecipeStatusType = keyof typeof RecipeStatus;
 
-/**
- * RecipeData interface for seed file processing
- * Note: This is similar to but distinct from types/recipe.ts RecipeData
- * - Seed version: All fields optional (?) for flexible JSON parsing
- * - Types version: Required fields with nullable (| null) for strict typing
- * This separation is intentional to handle incomplete seed data gracefully.
- */
 interface RecipeData {
   title: string;
   slug?: string;
@@ -63,7 +80,6 @@ interface RecipeData {
   imageUrl?: string;
 }
 
-// User assignments for recipes
 const USER_RECIPE_ASSIGNMENTS: Record<string, string[]> = {
   HomeBaker: [
     "classic-chocolate-chip-cookies",
@@ -88,39 +104,29 @@ const USER_RECIPE_ASSIGNMENTS: Record<string, string[]> = {
   ],
 };
 
-/**
- * Read recipe folders from seed-data directory
- * This version is used exclusively for database seeding.
- * For runtime recipe management, see lib/recipeStorage.ts
- */
 function readRecipeFolders(): Array<{
   slug: string;
   data: RecipeData;
   folderPath: string;
 }> {
   const recipesPath = path.join(__dirname, "seed-data");
-
   if (!fs.existsSync(recipesPath)) {
     console.log("No seed-data directory found");
     return [];
   }
-
   const recipes: Array<{
     slug: string;
     data: RecipeData;
     folderPath: string;
   }> = [];
-
   try {
     const folders = fs
       .readdirSync(recipesPath, { withFileTypes: true })
       .filter((dirent) => dirent.isDirectory())
       .map((dirent) => dirent.name);
-
     for (const folder of folders) {
       const folderPath = path.join(recipesPath, folder);
       const jsonPath = path.join(folderPath, "recipe.json");
-
       if (fs.existsSync(jsonPath)) {
         try {
           const jsonContent = fs.readFileSync(jsonPath, "utf-8");
@@ -138,27 +144,20 @@ function readRecipeFolders(): Array<{
   } catch (error) {
     console.error("Error reading recipe folders:", error);
   }
-
   return recipes;
 }
 
-/**
- * Clean up existing data from database
- */
 async function clearExistingData() {
   console.log("Deleting all existing data...");
-
-  // First, fetch all media records to delete from Cloudinary
   const allMedia = await prisma.media.findMany({
     select: {
       publicId: true,
       resourceType: true,
     },
   });
-
-  console.log(`Found ${allMedia.length} media files to delete from Cloudinary...`);
-
-  // Delete media from Supabase Storage
+  console.log(
+    `Found ${allMedia.length} media files to delete from Supabase...`
+  );
   let deletedCount = 0;
   let failedCount = 0;
   for (const media of allMedia) {
@@ -166,25 +165,26 @@ async function clearExistingData() {
       const { error } = await supabaseAdmin.storage
         .from("recipe-builder")
         .remove([media.publicId]);
-      
       if (error) throw error;
-      
       deletedCount++;
       if (deletedCount % 10 === 0) {
-        console.log(`  Deleted ${deletedCount}/${allMedia.length} media files...`);
+        console.log(
+          `  Deleted ${deletedCount}/${allMedia.length} media files...`
+        );
       }
     } catch (error) {
       failedCount++;
-      console.warn(`  Failed to delete ${media.resourceType} ${media.publicId} from storage:`, error instanceof Error ? error.message : "Unknown error");
-      // Continue even if deletion fails - the file might not exist or credentials might be missing
+      console.warn(
+        `  Failed to delete ${media.resourceType} ${media.publicId} from storage:`,
+        error instanceof Error ? error.message : "Unknown error"
+      );
     }
   }
-
   if (allMedia.length > 0) {
-    console.log(`Cloudinary cleanup complete: ${deletedCount} deleted, ${failedCount} failed`);
+    console.log(
+      `Supabase cleanup complete: ${deletedCount} deleted, ${failedCount} failed`
+    );
   }
-
-  // Delete child tables first to avoid foreign key constraints
   await prisma.recipesAllergens.deleteMany({});
   await prisma.recipesCategories.deleteMany({});
   await prisma.recipesTags.deleteMany({});
@@ -199,24 +199,11 @@ async function clearExistingData() {
   await prisma.allergen.deleteMany({});
   await prisma.cuisine.deleteMany({});
   await prisma.user.deleteMany({});
-
   console.log("All tables cleared.");
-
-  // Clean up old recipe uploads folder (legacy)
-  const uploadsDir = path.join(__dirname, "..", "public", "uploads", "recipes");
-  if (fs.existsSync(uploadsDir)) {
-    fs.rmSync(uploadsDir, { recursive: true, force: true });
-    console.log("Cleaned up old recipe uploads folder.");
-  }
 }
 
-/**
- * Seed static reference data (categories, tags, cuisines, allergens)
- */
 async function seedStaticData() {
   console.log("Creating static data...");
-
-  // Create categories
   const categoryNames = [
     "Breakfast",
     "Lunch",
@@ -231,14 +218,11 @@ async function seedStaticData() {
     "Bread / Baking",
     "Side Dish",
   ];
-  
   await prisma.category.createMany({
-    data: categoryNames.map(name => ({ name })),
+    data: categoryNames.map((name) => ({ name })),
     skipDuplicates: true,
   });
   console.log(`Created ${categoryNames.length} categories`);
-
-  // Create tags
   const tagNames = [
     "Dairy-Free",
     "Low-Carb",
@@ -251,14 +235,11 @@ async function seedStaticData() {
     "Party / Entertaining",
     "Comfort Food",
   ];
-  
   await prisma.tag.createMany({
-    data: tagNames.map(name => ({ name })),
+    data: tagNames.map((name) => ({ name })),
     skipDuplicates: true,
   });
   console.log(`Created ${tagNames.length} tags`);
-
-  // Create cuisines
   const cuisineNames = [
     "American",
     "Italian",
@@ -281,14 +262,11 @@ async function seedStaticData() {
     "Brazilian",
     "African",
   ];
-  
   await prisma.cuisine.createMany({
-    data: cuisineNames.map(name => ({ name })),
+    data: cuisineNames.map((name) => ({ name })),
     skipDuplicates: true,
   });
   console.log(`Created ${cuisineNames.length} cuisines`);
-
-  // Create allergens
   const allergenNames = [
     "Vegetarian",
     "Vegan",
@@ -297,22 +275,17 @@ async function seedStaticData() {
     "Egg Free",
     "Soy Free",
   ];
-  
   await prisma.allergen.createMany({
-    data: allergenNames.map(name => ({ name })),
+    data: allergenNames.map((name) => ({ name })),
     skipDuplicates: true,
   });
   console.log(`Created ${allergenNames.length} allergens`);
 }
 
-/**
- * Create seed users
- */
 async function createUsers(): Promise<User[]> {
   console.log("Creating seed users...");
   const seedUsernames = ["HomeBaker", "ChefDad", "TheRealSpiceGirl"];
   const users: User[] = [];
-
   for (const username of seedUsernames) {
     const user = await prisma.user.create({
       data: {
@@ -325,43 +298,34 @@ async function createUsers(): Promise<User[]> {
     users.push(user);
     console.log(`Created user: ${username} (ID: ${user.id})`);
   }
-
   return users;
 }
 
-/**
- * Import recipes from seed-data directory
- */
 async function importRecipes(users: User[]) {
   console.log("Reading recipe folders from seed-data...");
   const recipeFolders = readRecipeFolders();
   console.log(`Found ${recipeFolders.length} recipe(s) to import.`);
-
-  // Create a map of usernames to user objects for easy lookup
-  const userMap = new Map(users.map(u => [u.username, u]));
-
+  const userMap = new Map(users.map((u) => [u.username, u]));
   for (const { slug, data, folderPath } of recipeFolders) {
     console.log(`\nImporting recipe: ${data.title}`);
-    
     try {
-      // Determine the author based on recipe assignment
       let author: User | undefined = undefined;
-      for (const [username, recipeList] of Object.entries(USER_RECIPE_ASSIGNMENTS)) {
+      for (const [username, recipeList] of Object.entries(
+        USER_RECIPE_ASSIGNMENTS
+      )) {
         if (recipeList.includes(slug)) {
           author = userMap.get(username);
           break;
         }
       }
-      
-      // Fallback to random user if not assigned
       if (!author) {
         author = faker.helpers.arrayElement(users);
-        console.log(`  ⚠️  No specific author assigned, using random: ${author.username}`);
+        console.log(
+          `  ⚠️  No specific author assigned, using random: ${author.username}`
+        );
       } else {
         console.log(`  Author: ${author.username}`);
       }
-
-      // Find or create cuisine
       let cuisineId: string | null = null;
       if (data.cuisine) {
         const cuisine = await prisma.cuisine.upsert({
@@ -371,8 +335,6 @@ async function importRecipes(users: User[]) {
         });
         cuisineId = cuisine.id;
       }
-
-      // Handle image upload if there's a local image file
       let media: Media | null = null;
       const imagePath = path.join(folderPath, "image.jpg");
       if (fs.existsSync(imagePath)) {
@@ -384,8 +346,6 @@ async function importRecipes(users: User[]) {
           false
         );
       }
-
-      // Create recipe with nested writes
       const recipe = await prisma.recipe.create({
         data: {
           authorId: author.id,
@@ -431,8 +391,6 @@ async function importRecipes(users: User[]) {
           },
         },
       });
-
-      // Link media to recipe if uploaded
       if (media) {
         await prisma.media.update({
           where: { id: media.id },
@@ -442,8 +400,6 @@ async function importRecipes(users: User[]) {
           },
         });
       }
-
-      // Connect tags using connectOrCreate
       if (data.tags?.length) {
         for (const tagName of data.tags) {
           const tag = await prisma.tag.upsert({
@@ -456,8 +412,6 @@ async function importRecipes(users: User[]) {
           });
         }
       }
-
-      // Connect categories
       if (data.categories?.length) {
         for (const categoryName of data.categories) {
           const category = await prisma.category.findUnique({
@@ -470,8 +424,6 @@ async function importRecipes(users: User[]) {
           }
         }
       }
-
-      // Connect allergens
       if (data.allergens?.length) {
         for (const allergenName of data.allergens) {
           const allergen = await prisma.allergen.findUnique({
@@ -484,8 +436,6 @@ async function importRecipes(users: User[]) {
           }
         }
       }
-
-      // Generate random reviews
       const reviewsCount = faker.number.int({ min: 1, max: 3 });
       for (let r = 0; r < reviewsCount; r++) {
         const reviewer = faker.helpers.arrayElement(users);
@@ -498,7 +448,6 @@ async function importRecipes(users: User[]) {
           },
         });
       }
-
       console.log(`  ✓ Successfully imported: ${data.title}`);
     } catch (err) {
       console.error(`  ✗ Failed to import recipe ${data.title}:`, err);
@@ -508,19 +457,10 @@ async function importRecipes(users: User[]) {
 
 async function main() {
   console.log("Seeding database started...\n");
-
-  // Step 1: Clear existing data
   await clearExistingData();
-
-  // Step 2: Seed static reference data
   await seedStaticData();
-
-  // Step 3: Create users
   const users = await createUsers();
-
-  // Step 4: Import recipes from seed-data
   await importRecipes(users);
-
   console.log("\n✅ Seeding finished successfully!");
 }
 

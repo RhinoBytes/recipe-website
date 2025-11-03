@@ -339,7 +339,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                     </div>
                   </AccordionSection>
 
-                  {(recipe.averageRating && recipe.averageRating > 0) || recipe.reviewCount > 0 ? (
+                 {(recipe.averageRating && parseFloat(recipe.averageRating.toString()) > 0) || recipe.reviewCount > 0 ? (
                     <AccordionSection title="Rating" defaultOpen={false}>
                       <div className="text-center space-y-3">
                         <div className="flex gap-1 justify-center">
