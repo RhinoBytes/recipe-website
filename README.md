@@ -49,19 +49,22 @@ npm install
 
 ### 3. Configure Environment Variables
 
-The project includes a `.env` file with the Supabase URL already configured. You need to add your Supabase API keys:
+The project includes a `.env` file with the Supabase URL already configured for this project. You need to add your Supabase API keys:
+
+**Note**: The Supabase URL `https://zhbvoocgkifbrmqpcjpo.supabase.co` is the project-specific URL. If you're using a different Supabase project, replace it with your own project URL.
 
 1. Go to your [Supabase Dashboard](https://app.supabase.com)
 2. Select your project (or create a new one)
 3. Navigate to **Project Settings** → **API**
 4. Copy your API keys:
-   - **Project URL**: Already set in `.env` as `https://zhbvoocgkifbrmqpcjpo.supabase.co`
+   - **Project URL**: Use `https://zhbvoocgkifbrmqpcjpo.supabase.co` or replace with your project URL
    - **anon public key**: Copy and paste into `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - **service_role key**: Copy and paste into `SUPABASE_SERVICE_KEY` (keep this secret!)
 
 5. Update the `.env` file with your keys:
 
 ```env
+# Use the project-specific URL or replace with your own
 NEXT_PUBLIC_SUPABASE_URL=https://zhbvoocgkifbrmqpcjpo.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 SUPABASE_SERVICE_KEY=your-service-role-key-here

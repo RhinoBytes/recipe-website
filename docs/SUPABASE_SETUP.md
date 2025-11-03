@@ -72,6 +72,8 @@ TO public
 USING (bucket_id = 'recipe-builder');
 ```
 
+**Note**: This policy allows public read access to ALL files in the bucket. For production use, consider adding additional restrictions based on your security requirements (e.g., limiting access to specific folders or file types).
+
 ### Allow Authenticated Users to Upload
 
 This allows logged-in users to upload files:
@@ -235,9 +237,11 @@ This error occurs when the Supabase API keys are not properly configured. This i
 Example of a properly configured `.env`:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...[your-actual-anon-key]
+SUPABASE_SERVICE_KEY=eyJhbGc...[your-actual-service-key]
 ```
+
+**Note**: The keys shown are truncated examples. Your actual keys will be much longer JWT tokens.
 
 ### Error: "NEXT_PUBLIC_SUPABASE_URL is not configured"
 
