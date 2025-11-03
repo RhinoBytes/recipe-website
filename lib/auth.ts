@@ -6,7 +6,6 @@ import {
   AUTH_COOKIE_MAX_AGE,
   JWT_EXPIRES_IN,
 } from "@/config/constants";
-import { log } from "@/lib/logger";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this";
 const SALT_ROUNDS = 10;

@@ -1,4 +1,5 @@
 "use client";
+import { log } from "@/lib/logger";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -108,7 +109,7 @@ export default function NewRecipePage() {
           setAvailableTags(tagsData);
         }
       } catch (err) {
-        console.error("Failed to fetch form data:", err);
+        log.error({ error: err instanceof Error ? { message: err.message } : String(err) }, "Failed to fetch form data");
       }
     }
     
@@ -194,7 +195,7 @@ export default function NewRecipePage() {
       carbsG: formatted.carbsG || undefined,
     });
   };
-  console.log("formData:", formData);
+  log.info({ formDataKeys: Object.keys(formData) }, "Recipe form data");
   
   const handleMediaUploaded = (media: Media) => {
     setUploadedMedia((prev) => [...prev, media]);
@@ -205,7 +206,7 @@ export default function NewRecipePage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isPrimary: true }),
-      }).catch(console.error);
+      }).catch((error: Error) => log.error({ error: { message: error.message } }, "Error in recipe creation"));
     }
   };
 

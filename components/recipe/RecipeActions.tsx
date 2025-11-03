@@ -1,4 +1,5 @@
 "use client";
+import { log } from "@/lib/logger";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -36,7 +37,7 @@ export default function RecipeActions({ slug, isAuthor }: RecipeActionsProps) {
 
       router.push("/");
     } catch (error) {
-      console.error("Delete error:", error);
+      log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Delete error");
       alert("Failed to delete recipe. Please try again.");
       setDeleting(false);
     }

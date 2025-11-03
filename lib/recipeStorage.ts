@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import type { RecipeData } from "@/types/recipe";
 
+import { log } from "@/lib/logger";
 /**
  * Save recipe data to JSON file in development mode
  * Creates a folder structure: /prisma/data/recipes/{slug}/recipe.json
@@ -37,9 +38,9 @@ export async function saveRecipeToFile(
       "utf-8"
     );
 
-    console.log(`Recipe saved to: ${jsonFilePath}`);
+    log.info({ jsonFilePath }, "Recipe saved to file");
   } catch (error) {
-    console.error("Error saving recipe to file:", error);
+    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Error saving recipe to file");
     // Don't throw - we don't want to fail recipe creation if file save fails
   }
 }
@@ -60,7 +61,7 @@ export async function saveRecipeImage(
   try {
     // Check if imageUrl is a local upload path
     if (!imageUrl || imageUrl.startsWith("http")) {
-      console.log(`Skipping image save - not a local upload: ${imageUrl}`);
+      log.info({ imageUrl }, "Skipping image save - not a local upload");
       return;
     }
 
@@ -68,7 +69,7 @@ export async function saveRecipeImage(
     const sourceImagePath = path.join(process.cwd(), "public", imageUrl);
 
     if (!fs.existsSync(sourceImagePath)) {
-      console.log(`Source image not found: ${sourceImagePath}`);
+      log.warn({ sourceImagePath }, "Source image not found");
       return;
     }
 
@@ -92,9 +93,9 @@ export async function saveRecipeImage(
     // Copy the image file
     fs.copyFileSync(sourceImagePath, targetImagePath);
 
-    console.log(`Recipe image copied to: ${targetImagePath}`);
+    log.info({ targetImagePath }, "Recipe image copied");
   } catch (error) {
-    console.error("Error saving recipe image:", error);
+    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Error saving recipe image");
   }
 }
 
@@ -142,12 +143,12 @@ export function readRecipeFolders(): Array<{
             folderPath,
           });
         } catch (error) {
-          console.error(`Error reading recipe JSON for ${folder}:`, error);
+          log.error({ folder, error: error instanceof Error ? { message: error.message } : String(error) }, "Error reading recipe JSON");
         }
       }
     }
   } catch (error) {
-    console.error("Error reading recipe folders:", error);
+    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Error reading recipe folders");
   }
 
   return recipes;

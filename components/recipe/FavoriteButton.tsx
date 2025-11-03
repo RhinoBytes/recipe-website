@@ -1,4 +1,5 @@
 "use client";
+import { log } from "@/lib/logger";
 
 import { useState, useEffect } from "react";
 import { Heart, Loader2 } from "lucide-react";
@@ -27,7 +28,7 @@ export default function FavoriteButton({ recipeId }: FavoriteButtonProps) {
             setIsFavorited(favorited);
           }
         } catch (error) {
-          console.error("Failed to check favorite status:", error);
+          log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Failed to check favorite status");
         }
       }
       setInitialLoading(false);
@@ -67,7 +68,7 @@ export default function FavoriteButton({ recipeId }: FavoriteButtonProps) {
         }
       }
     } catch (error) {
-      console.error("Failed to toggle favorite:", error);
+      log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Failed to toggle favorite");
     } finally {
       setLoading(false);
     }

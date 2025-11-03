@@ -2,6 +2,7 @@ import fs from "fs";
 import { supabaseAdmin } from "./supabase/server.js";
 import { PrismaClient, Media } from "@prisma/client";
 
+import { log } from "@/lib/logger";
 const prisma = new PrismaClient();
 
 /**
@@ -21,11 +22,11 @@ export async function uploadImageToSupabase(
   try {
     // Check if file exists
     if (!fs.existsSync(filePath)) {
-      console.error(`  ❌ File not found: ${filePath}`);
+      log.error({ filePath }, "File not found");
       return null;
     }
 
-    console.log(`  ☁️  Uploading to Supabase: ${filePath}`);
+    log.info({ filePath }, "Uploading to Supabase");
 
     // Read file
     const fileBuffer = fs.readFileSync(filePath);
@@ -46,11 +47,11 @@ export async function uploadImageToSupabase(
       });
 
     if (uploadError) {
-      console.error(`  ❌ Supabase upload failed: ${uploadError.message}`);
+      log.error({ error: uploadError.message }, "Supabase upload failed");
       return null;
     }
 
-    console.log(`  ✅ Uploaded to Supabase: ${uploadData.path}`);
+    log.info({ path: uploadData.path }, "Uploaded to Supabase");
 
     // Get public URL
     const { data: urlData } = supabaseAdmin.storage
@@ -79,10 +80,10 @@ export async function uploadImageToSupabase(
       },
     });
 
-    console.log(`  ✅ Created Media record: ${media.id}`);
+    log.info({ mediaId: media.id }, "Created Media record");
     return media;
   } catch (error) {
-    console.error(`  ❌ Failed to upload image:`, error);
+    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Failed to upload image");
     return null;
   }
 }

@@ -1,4 +1,5 @@
 'use client';
+import { log } from "@/lib/logger";
 
 import React, { Component, ReactNode } from 'react';
 
@@ -28,7 +29,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    log.error({ error: { message: error.message, stack: error.stack }, componentStack: errorInfo.componentStack }, 'Error caught by boundary');
   }
 
   render() {

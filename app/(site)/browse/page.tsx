@@ -1,4 +1,5 @@
 "use client";
+import { log } from "@/lib/logger";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -150,7 +151,7 @@ function BrowsePageContent() {
           setAllergens(data);
         }
       } catch (error) {
-        console.error("Failed to fetch filter options:", error);
+        log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Failed to fetch filter options");
       }
     }
     fetchFilterOptions();
@@ -180,7 +181,7 @@ function BrowsePageContent() {
         setPagination(data.pagination);
       }
     } catch (error) {
-      console.error("Failed to fetch recipes:", error);
+      log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Failed to fetch recipes");
     } finally {
       setLoading(false);
     }
