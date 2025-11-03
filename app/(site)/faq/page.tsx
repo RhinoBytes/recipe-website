@@ -97,7 +97,7 @@ export default function FAQPage() {
             Still have questions?
           </h2>
           <p className="text-text-secondary mb-6">
-            Can't find the answer you're looking for? Reach out to our support team.
+            Can&apos;t find the answer you&apos;re looking for? Reach out to our support team.
           </p>
           <Link
             href="/contact"

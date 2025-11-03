@@ -19,7 +19,7 @@ export default function ContactPage() {
             Contact Us
           </h1>
           <p className="text-lg text-text-secondary text-center max-w-2xl mx-auto">
-            Have a question, suggestion, or just want to say hello? We'd love to hear from you!
+            Have a question, suggestion, or just want to say hello? We&apos;d love to hear from you!
           </p>
         </div>
       </div>
@@ -36,7 +36,7 @@ export default function ContactPage() {
             </div>
             <h3 className="text-xl font-bold text-text mb-2">Email Us</h3>
             <p className="text-text-secondary mb-4">
-              Send us an email and we'll respond within 24-48 hours
+              Send us an email and we&apos;ll respond within 24-48 hours
             </p>
             <a
               href="mailto:support@cookbook.com"
