@@ -12,6 +12,7 @@
   "fatG": 16,
   "carbsG": 42,
   "status": "PUBLISHED",
+  "chefNotes": "Room temperature ingredients are crucial for even mixing. Don't overbake - test with a toothpick at the minimum time. The buttercream can be made ahead and rewhipped before use.",
   "ingredients": [
     {
       "name": "all-purpose flour",
@@ -107,7 +108,7 @@
   "steps": [
     {
       "stepNumber": 1,
-      "instruction": "Preheat oven to 350°F (175°C). Line a 12-cup muffin tin with cupcake liners.",
+      "instruction": "Preheat oven to 350\u00b0F (175\u00b0C). Line a 12-cup muffin tin with cupcake liners.",
       "isOptional": false
     },
     {

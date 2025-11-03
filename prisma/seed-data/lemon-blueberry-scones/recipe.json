@@ -12,6 +12,7 @@
   "fatG": 14,
   "carbsG": 37,
   "status": "PUBLISHED",
+  "chefNotes": "Cold butter creates flaky layers! Don't overwork the dough. Fresh blueberries work best, but frozen work too - just don't thaw them first.",
   "ingredients": [
     {
       "name": "all-purpose flour",
@@ -112,7 +113,7 @@
   "steps": [
     {
       "stepNumber": 1,
-      "instruction": "Preheat oven to 400°F (200°C). Line a baking sheet with parchment paper.",
+      "instruction": "Preheat oven to 400\u00b0F (200\u00b0C). Line a baking sheet with parchment paper.",
       "isOptional": false
     },
     {

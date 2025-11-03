@@ -12,6 +12,7 @@
   "fatG": 20,
   "carbsG": 58,
   "status": "PUBLISHED",
+  "chefNotes": "For the flakiest crust, keep your butter cold and don't overwork the dough. Granny Smith apples hold their shape best, but mix with Honeycrisp for extra sweetness.",
   "ingredients": [
     {
       "name": "all-purpose flour",
@@ -140,7 +141,7 @@
     },
     {
       "stepNumber": 4,
-      "instruction": "Preheat oven to 425°F (220°C).",
+      "instruction": "Preheat oven to 425\u00b0F (220\u00b0C).",
       "isOptional": false
     },
     {
@@ -170,7 +171,7 @@
     },
     {
       "stepNumber": 10,
-      "instruction": "Bake at 425°F for 15 minutes, then reduce to 375°F and bake for 40-50 more minutes until golden brown and bubbling.",
+      "instruction": "Bake at 425\u00b0F for 15 minutes, then reduce to 375\u00b0F and bake for 40-50 more minutes until golden brown and bubbling.",
       "isOptional": false
     },
     {

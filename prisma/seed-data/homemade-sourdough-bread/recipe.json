@@ -12,6 +12,7 @@
   "fatG": 2,
   "carbsG": 45,
   "status": "PUBLISHED",
+  "chefNotes": "The key to great sourdough is patience and a healthy starter. Feed your starter regularly and give the dough plenty of time to develop flavor during the bulk fermentation.",
   "ingredients": [
     {
       "name": "sourdough starter",
@@ -88,7 +89,7 @@
     },
     {
       "stepNumber": 8,
-      "instruction": "Preheat oven to 450°F (230°C) with a Dutch oven inside for 30 minutes.",
+      "instruction": "Preheat oven to 450\u00b0F (230\u00b0C) with a Dutch oven inside for 30 minutes.",
       "isOptional": false
     },
     {

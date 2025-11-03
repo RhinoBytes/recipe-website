@@ -12,6 +12,7 @@
   "fatG": 7,
   "carbsG": 32,
   "status": "PUBLISHED",
+  "chefNotes": "Use room temperature ingredients for the best texture. Don't overmix the batter - a few lumps are okay! The key is tender, fluffy muffins with pockets of cinnamon-sugar goodness.",
   "ingredients": [
     {
       "name": "all-purpose flour",
@@ -96,7 +97,7 @@
   "steps": [
     {
       "stepNumber": 1,
-      "instruction": "Preheat oven to 375°F (190°C). Line a 12-cup muffin tin with paper liners.",
+      "instruction": "Preheat oven to 375\u00b0F (190\u00b0C). Line a 12-cup muffin tin with paper liners.",
       "isOptional": false
     },
     {

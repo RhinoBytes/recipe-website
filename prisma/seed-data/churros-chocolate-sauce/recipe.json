@@ -12,6 +12,7 @@
   "fatG": 16,
   "carbsG": 36,
   "status": "PUBLISHED",
+  "chefNotes": "The dough should be piped while still warm for the best shape. Don't overcrowd the pan when frying, and roll in cinnamon sugar immediately for maximum coating.",
   "ingredients": [
     {
       "name": "water",
@@ -113,7 +114,7 @@
     },
     {
       "stepNumber": 5,
-      "instruction": "Heat oil in a deep pot to 375°F (190°C).",
+      "instruction": "Heat oil in a deep pot to 375\u00b0F (190\u00b0C).",
       "isOptional": false
     },
     {

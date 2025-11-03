@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { uploadImageToCloudinary } from "../lib/uploadHelper.js";
+import { deleteCloudinaryAsset } from "../lib/cloudinary.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,13 @@ const prisma = new PrismaClient({
 type DifficultyType = keyof typeof Difficulty;
 type RecipeStatusType = keyof typeof RecipeStatus;
 
+/**
+ * RecipeData interface for seed file processing
+ * Note: This is similar to but distinct from types/recipe.ts RecipeData
+ * - Seed version: All fields optional (?) for flexible JSON parsing
+ * - Types version: Required fields with nullable (| null) for strict typing
+ * This separation is intentional to handle incomplete seed data gracefully.
+ */
 interface RecipeData {
   title: string;
   slug?: string;
@@ -26,6 +34,7 @@ interface RecipeData {
   difficulty?: string;
   sourceUrl?: string;
   sourceText?: string;
+  chefNotes?: string;
   cuisine?: string;
   status?: string;
   calories?: number;
@@ -138,6 +147,40 @@ function readRecipeFolders(): Array<{
  */
 async function clearExistingData() {
   console.log("Deleting all existing data...");
+
+  // First, fetch all media records to delete from Cloudinary
+  const allMedia = await prisma.media.findMany({
+    select: {
+      publicId: true,
+      resourceType: true,
+    },
+  });
+
+  console.log(`Found ${allMedia.length} media files to delete from Cloudinary...`);
+
+  // Delete media from Cloudinary
+  let deletedCount = 0;
+  let failedCount = 0;
+  for (const media of allMedia) {
+    try {
+      await deleteCloudinaryAsset(
+        media.publicId,
+        media.resourceType === "VIDEO" ? "video" : "image"
+      );
+      deletedCount++;
+      if (deletedCount % 10 === 0) {
+        console.log(`  Deleted ${deletedCount}/${allMedia.length} media files...`);
+      }
+    } catch (error) {
+      failedCount++;
+      console.warn(`  Failed to delete ${media.resourceType} ${media.publicId} from Cloudinary:`, error instanceof Error ? error.message : "Unknown error");
+      // Continue even if deletion fails - the image might not exist or credentials might be missing
+    }
+  }
+
+  if (allMedia.length > 0) {
+    console.log(`Cloudinary cleanup complete: ${deletedCount} deleted, ${failedCount} failed`);
+  }
 
   // Delete child tables first to avoid foreign key constraints
   await prisma.recipesAllergens.deleteMany({});
@@ -353,6 +396,7 @@ async function importRecipes(users: User[]) {
           difficulty: (data.difficulty as DifficultyType) || Difficulty.MEDIUM,
           sourceUrl: data.sourceUrl,
           sourceText: data.sourceText,
+          chefNotes: data.chefNotes,
           cuisineId,
           status: (data.status as RecipeStatusType) || RecipeStatus.PUBLISHED,
           calories: data.calories,

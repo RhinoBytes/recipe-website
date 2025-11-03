@@ -12,6 +12,7 @@
   "fatG": 22,
   "carbsG": 18,
   "status": "PUBLISHED",
+  "chefNotes": "Marinating the chicken for at least 2 hours makes it incredibly tender. The homemade dressing is surprisingly easy and tastes restaurant-quality!",
   "ingredients": [
     {
       "name": "chicken breast",
@@ -124,7 +125,7 @@
     },
     {
       "stepNumber": 2,
-      "instruction": "Grill chicken over medium-high heat for 6-7 minutes per side until internal temperature reaches 165°F (74°C).",
+      "instruction": "Grill chicken over medium-high heat for 6-7 minutes per side until internal temperature reaches 165\u00b0F (74\u00b0C).",
       "isOptional": false
     },
     {

@@ -1,7 +1,7 @@
 {
   "title": "Creamy Mac and Cheese",
   "slug": "mac-and-cheese",
-  "description": "Ultra-creamy, cheesy macaroni and cheese made from scratch with a blend of sharp cheddar and Gruyère. This comfort food classic beats any box version.",
+  "description": "Ultra-creamy, cheesy macaroni and cheese made from scratch with a blend of sharp cheddar and Gruy\u00e8re. This comfort food classic beats any box version.",
   "cuisine": "American",
   "difficulty": "EASY",
   "servings": 6,
@@ -12,6 +12,7 @@
   "fatG": 28,
   "carbsG": 42,
   "status": "PUBLISHED",
+  "chefNotes": "Use a mix of cheeses for depth of flavor - sharp cheddar for bite, gruyere for creaminess. The roux is key to preventing a grainy sauce.",
   "ingredients": [
     {
       "name": "elbow macaroni",
@@ -57,7 +58,7 @@
       "displayOrder": 5
     },
     {
-      "name": "Gruyère cheese",
+      "name": "Gruy\u00e8re cheese",
       "amount": "1",
       "unit": "cup",
       "preparation": "shredded",
