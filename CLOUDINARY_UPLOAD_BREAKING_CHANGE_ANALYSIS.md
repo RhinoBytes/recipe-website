@@ -1,10 +1,12 @@
 # Cloudinary Upload Breaking Change Analysis
 
+> **STATUS: FIXED** - The breaking code has been removed from `lib/cloudinary.ts`. The signature generation now correctly excludes `upload_preset` for signed uploads.
+
 ## Executive Summary
 
 **Breaking Commit Identified:** The breaking change was introduced in **PR #47** (merged as commit `9db420ee66ec67d765135046294be85cf8c8c3fb`), specifically in the file `lib/cloudinary.ts` in the `createUploadSignature` function.
 
-**Root Cause:** The `createUploadSignature` function incorrectly includes `upload_preset` in the signature generation parameters (lines 94-97), creating a **hybrid signed/unsigned upload approach** that invalidates the signature and causes Cloudinary to reject the upload with the error:
+**Root Cause:** The `createUploadSignature` function incorrectly included `upload_preset` in the signature generation parameters (lines 94-97), creating a **hybrid signed/unsigned upload approach** that invalidated the signature and caused Cloudinary to reject the upload with the error:
 
 ```
 {"error":{"message":"Upload preset must be specified when using unsigned upload"}}

@@ -86,15 +86,12 @@ export function createUploadSignature(
   }
 
   // Parameters to sign (excluding signature itself)
+  // For signed uploads, only timestamp and folder should be included in the signature
+  // upload_preset is only for unsigned uploads and should NOT be in the signature
   const paramsToSign: Record<string, string | number> = {
     timestamp: timestamp,
     folder: uploadFolder,
   };
-
-  // Add upload preset if configured
-  if (CLOUDINARY_UPLOAD_PRESET) {
-    paramsToSign.upload_preset = CLOUDINARY_UPLOAD_PRESET;
-  }
 
   // Generate signature
   const signature = generateSignature(paramsToSign);
