@@ -17,27 +17,27 @@ export default function ChefNotes({ notes }: ChefNotesProps) {
   // If there's only one note and it's long, don't split it into a list
   if (notesList.length === 1 && notesList[0].length > 100) {
     return (
-      <div className="bg-amber-50 rounded-lg shadow-md p-6 border border-amber-100">
-        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Lightbulb className="text-amber-600" size={24} />
+      <div className="bg-accent-light dark:bg-accent-light/10 rounded-lg shadow-md p-6 border border-accent/20 dark:border-accent/30">
+        <h3 className="text-xl font-bold text-text mb-4 flex items-center gap-2">
+          <Lightbulb className="text-accent" size={24} />
           Chef&apos;s Tips & Notes
         </h3>
-        <p className="text-gray-700">{notesList[0]}</p>
+        <p className="text-text">{notesList[0]}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-amber-50 rounded-lg shadow-md p-6 border border-amber-100">
-      <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <Lightbulb className="text-amber-600" size={24} />
+    <div className="bg-accent-light dark:bg-accent-light/10 rounded-lg shadow-md p-6 border border-accent/20 dark:border-accent/30">
+      <h3 className="text-xl font-bold text-text mb-4 flex items-center gap-2">
+        <Lightbulb className="text-accent" size={24} />
         Chef&apos;s Tips & Notes
       </h3>
       <ul className="space-y-3">
         {notesList.map((note, index) => (
           <li key={index} className="flex items-start gap-2">
-            <span className="text-amber-600 mt-1 flex-shrink-0">•</span>
-            <span className="text-gray-700">{note}</span>
+            <span className="text-accent mt-1 flex-shrink-0">•</span>
+            <span className="text-text">{note}</span>
           </li>
         ))}
       </ul>

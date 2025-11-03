@@ -46,7 +46,7 @@ export default function Button(props: ButtonProps) {
     primary:
       "bg-accent hover:bg-accent-hover text-bg border border-transparent shadow-md",
     secondary:
-      "bg-secondary text-text border border-border hover:bg-secondary-hover shadow-sm",
+      "bg-bg-secondary text-text border border-border hover:bg-bg-elevated shadow-sm",
     outline:
       "bg-transparent text-accent border-2 border-accent hover:bg-accent-light",
   } as const;

@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { randomUUID } from "crypto";
 import { log } from "@/lib/logger";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase client for server-side operations
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
  * Helper function to mark previous profile avatars as not primary
@@ -107,20 +111,33 @@ export async function POST(request: Request) {
       }
       const uniqueFilename = `avatar-${currentUser.userId}-${randomUUID()}.${fileExtension}`;
       
-      // Define upload path for avatars
-      const uploadDir = path.join(process.cwd(), "public", "uploads", "avatars");
-      const filePath = path.join(uploadDir, uniqueFilename);
-
-      // Ensure upload directory exists
-      await mkdir(uploadDir, { recursive: true });
-
-      // Convert file to buffer and write to disk
+      // Upload to Supabase Storage
+      const filePath = `avatars/${uniqueFilename}`;
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      await writeFile(filePath, buffer);
 
-      // Public URL path
-      const publicUrl = `/uploads/avatars/${uniqueFilename}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("recipe-builder")
+        .upload(filePath, buffer, {
+          contentType: file.type,
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        log.error({ error: uploadError }, "Supabase upload error");
+        return NextResponse.json(
+          { error: `Failed to upload to storage: ${uploadError.message}` },
+          { status: 500 }
+        );
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from("recipe-builder")
+        .getPublicUrl(uploadData.path);
+
+      const publicUrl = urlData.publicUrl;
 
       // Mark previous profile avatar as not primary
       await deactivatePreviousAvatars(currentUser.userId);
@@ -135,6 +152,7 @@ export async function POST(request: Request) {
           size: file.size,
           originalFilename: file.name,
           folder: "avatars",
+          storagePath: uploadData.path,
           userId: currentUser.userId,
           isProfileAvatar: true,
           resourceType: "IMAGE",

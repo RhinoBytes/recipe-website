@@ -35,8 +35,8 @@ export default function Footer() {
           <div>
             <h4 className="text-xl font-bold font-heading text-accent mb-4">Support</h4>
             <nav className="flex flex-col space-y-2">
-              <a href="#" className="text-text-secondary hover:text-accent transition-colors">Help Center</a>
-              <a href="#" className="text-text-secondary hover:text-accent transition-colors">Contact Us</a>
+              <Link href="/faq" className="text-text-secondary hover:text-accent transition-colors">FAQ</Link>
+              <Link href="/contact" className="text-text-secondary hover:text-accent transition-colors">Contact Us</Link>
             </nav>
           </div>
         </div>

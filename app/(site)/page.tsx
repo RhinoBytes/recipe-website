@@ -63,7 +63,7 @@ export default async function HomePage() {
   {/* Background image + gradient overlay */}
   <div className="absolute inset-0 w-full h-full bg-center bg-cover">
     <Image
-      src="/img/hero/Hero.jpeg"
+      src="/img/Hero/Hero.jpeg"
       alt="Hero Background"
       fill
       className="object-cover"

@@ -125,27 +125,27 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
 
   if (loading)
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-bg-secondary rounded-lg shadow-md p-6">
         <div className="flex justify-center py-8">
-          <Loader2 className="animate-spin text-amber-600" size={32} />
+          <Loader2 className="animate-spin text-accent" size={32} />
         </div>
       </div>
     );
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-bg-secondary rounded-lg shadow-md p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Reviews & Ratings</h2>
+          <h2 className="text-2xl font-bold text-text mb-2">Reviews & Ratings</h2>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               {renderStars(Math.round(averageRating))}
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-2xl font-bold text-text">
                 {averageRating.toFixed(1)}
               </span>
             </div>
-            <span className="text-gray-600">
+            <span className="text-text-secondary">
               ({totalReviews} {totalReviews === 1 ? "review" : "reviews"})
             </span>
           </div>
@@ -163,30 +163,30 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
 
       {/* Review Form */}
       {showReviewForm && isAuthenticated && !isAuthor && (
-        <form onSubmit={handleSubmitReview} className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Review</h3>
+        <form onSubmit={handleSubmitReview} className="mb-6 p-4 bg-bg rounded-lg border border-border">
+          <h3 className="text-lg font-semibold text-text mb-4">Your Review</h3>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg">
+            <div className="mb-4 p-3 bg-error/10 border border-error/20 text-error rounded-lg">
               {error}
             </div>
           )}
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
               Rating *
             </label>
             {renderStars(rating, true)}
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
               Comment (optional)
             </label>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-border rounded-lg bg-bg-secondary text-text focus:ring-2 focus:ring-accent focus:border-transparent"
               rows={4}
               placeholder="Share your thoughts about this recipe..."
             />
@@ -213,12 +213,12 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
       {/* Reviews List */}
       <div className="space-y-4">
         {reviews.length === 0 ? (
-          <p className="text-gray-600 text-center py-8">
+          <p className="text-text-secondary text-center py-8">
             No reviews yet. Be the first to review this recipe!
           </p>
         ) : (
           reviews.map((review) => (
-            <div key={review.id} className="border-t border-gray-200 pt-4">
+            <div key={review.id} className="border-t border-border pt-4">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 relative rounded-full overflow-hidden flex-shrink-0">
                   <Image
@@ -231,9 +231,9 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="font-semibold text-gray-900">{review.user.username}</span>
+                    <span className="font-semibold text-text">{review.user.username}</span>
                     {renderStars(review.rating)}
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-text-muted">
                       {new Date(review.createdAt).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -241,7 +241,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
                       })}
                     </span>
                   </div>
-                  {review.comment && <p className="text-gray-700">{review.comment}</p>}
+                  {review.comment && <p className="text-text">{review.comment}</p>}
                 </div>
               </div>
             </div>

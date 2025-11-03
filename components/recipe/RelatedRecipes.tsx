@@ -13,8 +13,8 @@ export default function RelatedRecipes({ recipes }: RelatedRecipesProps) {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-        <Heart className="text-red-500" size={28} />
+      <h2 className="text-2xl font-bold text-text mb-6 flex items-center gap-2">
+        <Heart className="text-error" size={28} />
         You Might Also Like
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -31,7 +31,7 @@ export default function RelatedRecipes({ recipes }: RelatedRecipesProps) {
             <Link
               key={recipe.id}
               href={`/recipes/${recipe.author.username}/${recipe.slug}`}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-bg-secondary rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
             >
               <div className="relative w-full h-40">
                 <Image
@@ -43,10 +43,10 @@ export default function RelatedRecipes({ recipes }: RelatedRecipesProps) {
                 />
               </div>
               <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                <h3 className="font-semibold text-text mb-2 line-clamp-2">
                   {recipe.title}
                 </h3>
-                <div className="flex items-center justify-between text-sm text-gray-600">
+                <div className="flex items-center justify-between text-sm text-text-secondary">
                   {totalTime > 0 && (
                     <div className="flex items-center gap-1">
                       <Clock size={14} />
@@ -58,7 +58,7 @@ export default function RelatedRecipes({ recipes }: RelatedRecipesProps) {
                   )}
                   {roundedRating > 0 && (
                     <div className="flex items-center gap-1">
-                      <Star size={14} className="fill-amber-400 text-amber-400" />
+                      <Star size={14} className="fill-highlight text-highlight" />
                       <span>{recipe.averageRating.toFixed(1)}</span>
                     </div>
                   )}

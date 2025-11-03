@@ -11,6 +11,15 @@
   --accent-hover: #b85c42; /* Dark terracotta */
   --accent-light: #fef9f7; /* Soft accent background */
 
+  /* Secondary colors */
+  --secondary: #8b7355; /* Warm brown */
+  --secondary-hover: #6d5a43; /* Darker brown */
+  --secondary-light: #f5f0eb; /* Light beige */
+
+  /* Highlight color */
+  --highlight: #e8a87c; /* Warm peach */
+  --highlight-hover: #d99566; /* Darker peach */
+
   /* Background and text */
   --bg: #f8f9fa; /* Page background */
   --bg-secondary: #ffffff;
@@ -51,9 +60,18 @@
 /* Dark Terracotta Theme */
 :root[data-theme="dark-terracotta"] {
   /* Primary colors - warmer, softer terracotta tones for dark mode */
-  --accent: #d4735a; /* Keep terracotta as accent */
-  --accent-hover: #e68970; /* Lighter hover for dark background */
+  --accent: #e8a87c; /* Lighter terracotta for visibility */
+  --accent-hover: #f0b890; /* Lighter hover for dark background */
   --accent-light: #3a2a25; /* Dark accent background */
+
+  /* Secondary colors */
+  --secondary: #a89886; /* Light warm gray */
+  --secondary-hover: #b8a896; /* Lighter gray */
+  --secondary-light: #2a1f1a; /* Dark warm background */
+
+  /* Highlight color */
+  --highlight: #f0c080; /* Warm gold */
+  --highlight-hover: #f5d090; /* Lighter gold */
 
   /* Background and text */
   --bg: #1a1410; /* Deep brown-black background */
@@ -81,13 +99,13 @@
   /* State colors - adjusted for dark mode */
   --success: #4caf50;
   --warning: #ff9800;
-  --error: #f44336;
+  --error: #ff5252;
   --info: #9e9e9e;
 
   /* Card gradient */
   --card-gradient: linear-gradient(
     to bottom right,
-    rgba(212, 115, 90, 0.75),
+    rgba(232, 168, 124, 0.75),
     rgba(58, 42, 37, 0.9)
   );
 }

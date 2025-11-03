@@ -341,10 +341,10 @@ export default function NewRecipePage() {
         onRecipeFormatted={handleAIFormattedRecipe}
       />
 
-      <div className="min-h-screen bg-gray-50 py-4 md:py-8 px-4">
+      <div className="min-h-screen bg-bg py-4 md:py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Create New Recipe</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-text">Create New Recipe</h1>
             <Button
               variant="secondary"
               onClick={() => setShowAIModal(true)}
@@ -356,7 +356,7 @@ export default function NewRecipePage() {
           </div>
           
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
+            <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-6">
               {error}
             </div>
           )}
@@ -365,29 +365,29 @@ export default function NewRecipePage() {
               <CollapsibleSection title="Basic Information" defaultOpen={true}>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Recipe Title <span className="text-red-500">*</span>
-                      <span className="ml-2 text-xs text-gray-500">Required</span>
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
+                      Recipe Title <span className="text-error">*</span>
+                      <span className="ml-2 text-xs text-text-muted">Required</span>
                     </label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="e.g., Honey Garlic Glazed Salmon"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Description
-                      <span className="ml-2 text-xs text-gray-500">Optional - A brief overview of your recipe</span>
+                      <span className="ml-2 text-xs text-text-muted">Optional - A brief overview of your recipe</span>
                     </label>
                     <textarea
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       rows={3}
                       placeholder="Brief description of your recipe..."
                     />
@@ -395,43 +395,43 @@ export default function NewRecipePage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text-secondary mb-1">
                         Servings
-                        <span className="ml-2 text-xs text-gray-500">How many people?</span>
+                        <span className="ml-2 text-xs text-text-muted">How many people?</span>
                       </label>
                       <input
                         type="number"
                         value={formData.servings}
                         onChange={(e) => setFormData({ ...formData, servings: parseInt(e.target.value) || 1 })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                         min="1"
                         max="100"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text-secondary mb-1">
                         Prep Time (min)
-                        <span className="ml-2 text-xs text-gray-500">Setup time</span>
+                        <span className="ml-2 text-xs text-text-muted">Setup time</span>
                       </label>
                       <input
                         type="number"
                         value={formData.prepTimeMinutes}
                         onChange={(e) => setFormData({ ...formData, prepTimeMinutes: parseInt(e.target.value) || 0 })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                         min="0"
                         max="1440"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text-secondary mb-1">
                         Cook Time (min)
-                        <span className="ml-2 text-xs text-gray-500">Active cooking</span>
+                        <span className="ml-2 text-xs text-text-muted">Active cooking</span>
                       </label>
                       <input
                         type="number"
                         value={formData.cookTimeMinutes}
                         onChange={(e) => setFormData({ ...formData, cookTimeMinutes: parseInt(e.target.value) || 0 })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                         min="0"
                         max="1440"
                       />
@@ -439,14 +439,14 @@ export default function NewRecipePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Difficulty
-                      <span className="ml-2 text-xs text-gray-500">How complex is this recipe?</span>
+                      <span className="ml-2 text-xs text-text-muted">How complex is this recipe?</span>
                     </label>
                     <select
                       value={formData.difficulty}
                       onChange={(e) => setFormData({ ...formData, difficulty: e.target.value as Difficulty })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                     >
                       <option value={Difficulty.EASY}>Easy - Quick and simple</option>
                       <option value={Difficulty.MEDIUM}>Medium - Some experience helpful</option>
@@ -455,9 +455,9 @@ export default function NewRecipePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       Recipe Images
-                      <span className="ml-2 text-xs text-gray-500">Upload photos to make your recipe more appealing</span>
+                      <span className="ml-2 text-xs text-text-muted">Upload photos to make your recipe more appealing</span>
                     </label>
                     <MediaUploader
                       onMediaUploaded={handleMediaUploaded}
@@ -469,42 +469,42 @@ export default function NewRecipePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Cuisine
-                      <span className="ml-2 text-xs text-gray-500">Optional - e.g., Italian, Mexican, Thai</span>
+                      <span className="ml-2 text-xs text-text-muted">Optional - e.g., Italian, Mexican, Thai</span>
                     </label>
                     <input
                       type="text"
                       value={formData.cuisineName}
                       onChange={(e) => setFormData({ ...formData, cuisineName: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="e.g., Italian, Mexican, Thai"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Source
-                      <span className="ml-2 text-xs text-gray-500">Optional - URL or text (e.g., &ldquo;From Grandma&apos;s cookbook&rdquo;)</span>
+                      <span className="ml-2 text-xs text-text-muted">Optional - URL or text (e.g., &ldquo;From Grandma&apos;s cookbook&rdquo;)</span>
                     </label>
                     <input
                       type="text"
                       value={formData.source}
                       onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="https://... or text like 'From Grandma's cookbook'"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Chef&apos;s Notes
-                      <span className="ml-2 text-xs text-gray-500">Optional - Tips, substitutions, or personal notes</span>
+                      <span className="ml-2 text-xs text-text-muted">Optional - Tips, substitutions, or personal notes</span>
                     </label>
                     <textarea
                       value={formData.chefNotes}
                       onChange={(e) => setFormData({ ...formData, chefNotes: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       rows={3}
                       placeholder="Add any helpful tips, substitutions, or personal notes about this recipe..."
                     />
@@ -517,14 +517,14 @@ export default function NewRecipePage() {
                 title="Nutrition Information" 
                 defaultOpen={false}
               >
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-text-secondary mb-4">
                   Optional - Add nutritional information per serving. These values will be displayed on the recipe page.
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Calories
-                      <span className="ml-2 text-xs text-gray-500">Per serving</span>
+                      <span className="ml-2 text-xs text-text-muted">Per serving</span>
                     </label>
                     <input
                       type="number"
@@ -533,15 +533,15 @@ export default function NewRecipePage() {
                         ...formData, 
                         calories: e.target.value ? parseInt(e.target.value) : undefined 
                       })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="0"
                       min="0"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Protein (g)
-                      <span className="ml-2 text-xs text-gray-500">Grams</span>
+                      <span className="ml-2 text-xs text-text-muted">Grams</span>
                     </label>
                     <input
                       type="number"
@@ -550,15 +550,15 @@ export default function NewRecipePage() {
                         ...formData, 
                         proteinG: e.target.value ? parseInt(e.target.value) : undefined 
                       })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="0"
                       min="0"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Fat (g)
-                      <span className="ml-2 text-xs text-gray-500">Grams</span>
+                      <span className="ml-2 text-xs text-text-muted">Grams</span>
                     </label>
                     <input
                       type="number"
@@ -567,15 +567,15 @@ export default function NewRecipePage() {
                         ...formData, 
                         fatG: e.target.value ? parseInt(e.target.value) : undefined 
                       })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="0"
                       min="0"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Carbs (g)
-                      <span className="ml-2 text-xs text-gray-500">Grams</span>
+                      <span className="ml-2 text-xs text-text-muted">Grams</span>
                     </label>
                     <input
                       type="number"
@@ -584,7 +584,7 @@ export default function NewRecipePage() {
                         ...formData, 
                         carbsG: e.target.value ? parseInt(e.target.value) : undefined 
                       })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="0"
                       min="0"
                     />
@@ -597,17 +597,17 @@ export default function NewRecipePage() {
                 title="Ingredients" 
                 defaultOpen={true}
               >
-                <p className="text-sm text-gray-600 mb-4">
-                  <span className="font-medium">Enter one ingredient per line.</span> Format: <code className="bg-gray-100 px-1 rounded">amount unit name (notes) optional</code>
+                <p className="text-sm text-text-secondary mb-4">
+                  <span className="font-medium">Enter one ingredient per line.</span> Format: <code className="bg-bg-elevated px-1 rounded text-text">amount unit name (notes) optional</code>
                   <br />
-                  <span className="text-xs">Examples: <code className="bg-gray-100 px-1 rounded">2 cups flour</code>, <code className="bg-gray-100 px-1 rounded">1/2 cup sugar (or brown sugar) optional</code></span>
+                  <span className="text-xs">Examples: <code className="bg-bg-elevated px-1 rounded text-text">2 cups flour</code>, <code className="bg-bg-elevated px-1 rounded text-text">1/2 cup sugar (or brown sugar) optional</code></span>
                   <br />
-                  <span className="text-xs">Group ingredients: <code className="bg-gray-100 px-1 rounded">For the sauce:</code></span>
+                  <span className="text-xs">Group ingredients: <code className="bg-bg-elevated px-1 rounded text-text">For the sauce:</code></span>
                 </p>
                 <textarea
                   value={ingredientsText}
                   onChange={(e) => setIngredientsText(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent font-mono text-sm"
+                  className="w-full px-4 py-3 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent font-mono text-sm"
                   rows={10}
                   placeholder={`2 cups all-purpose flour\n1/2 cup sugar\n1 tsp baking powder\n\nFor the sauce:\n3 tbsp olive oil\n2 cloves garlic, minced (optional)`}
                   required
@@ -619,17 +619,17 @@ export default function NewRecipePage() {
                 title="Instructions" 
                 defaultOpen={true}
               >
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-text-secondary mb-4">
                   <span className="font-medium">Enter one step per line.</span> Steps will be numbered automatically.
                   <br />
-                  <span className="text-xs">Group steps: <code className="bg-gray-100 px-1 rounded">For the cake:</code></span>
+                  <span className="text-xs">Group steps: <code className="bg-bg-elevated px-1 rounded text-text">For the cake:</code></span>
                   <br />
-                  <span className="text-xs">Mark optional: Add <code className="bg-gray-100 px-1 rounded">(optional)</code> at the end</span>
+                  <span className="text-xs">Mark optional: Add <code className="bg-bg-elevated px-1 rounded text-text">(optional)</code> at the end</span>
                 </p>
                 <textarea
                   value={stepsText}
                   onChange={(e) => setStepsText(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                  className="w-full px-4 py-3 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
                   rows={12}
                   placeholder={`Preheat oven to 350°F\nMix flour and sugar in a large bowl\n\nFor the sauce:\nHeat oil in a pan\nAdd garlic and cook until fragrant (optional)`}
                   required
@@ -642,14 +642,14 @@ export default function NewRecipePage() {
                 badge={formData.tags.length || undefined}
                 defaultOpen={false}
               >
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-text-secondary mb-4">
                   Select from existing tags or add custom tags to help users find your recipe.
                 </p>
 
                 {/* Existing Tags */}
                 {availableTags.length > 0 && (
                   <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Popular Tags</h4>
+                    <h4 className="text-sm font-medium text-text-secondary mb-2">Popular Tags</h4>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {availableTags.slice(0, showAllTags ? undefined : 8).map((tag) => (
                        <button
@@ -658,8 +658,8 @@ export default function NewRecipePage() {
   onClick={() => toggleTag(tag.name)}
   className={`px-4 py-2 rounded-lg border-2 transition-colors ${
     formData.tags.includes(tag.name)
-      ? "border-amber-600 bg-amber-50 text-amber-800 font-medium"
-      : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+      ? "border-accent bg-accent/10 text-accent font-medium"
+      : "border-border bg-bg-secondary text-text hover:border-accent/50"
   }`}
 >
   {tag.name}
@@ -673,7 +673,7 @@ export default function NewRecipePage() {
                       <button
                         type="button"
                         onClick={() => setShowAllTags(!showAllTags)}
-                        className="text-amber-600 hover:text-amber-700 text-sm font-medium mb-4"
+                        className="text-accent hover:text-accent-hover text-sm font-medium mb-4"
                       >
                         {showAllTags ? 'Show Less' : `Show ${availableTags.length - 8} More Tags`}
                       </button>
@@ -683,20 +683,20 @@ export default function NewRecipePage() {
 
                 {/* Custom Tag Input */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Add Custom Tag</h4>
+                  <h4 className="text-sm font-medium text-text-secondary mb-2">Add Custom Tag</h4>
                   <div className="flex gap-2 mb-4">
                     <input
                       type="text"
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="flex-1 px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="Add a custom tag (e.g., Weeknight Dinner)"
                     />
                     <button
                       type="button"
                       onClick={addTag}
-                      className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors whitespace-nowrap"
+                      className="px-4 py-2 bg-accent text-bg rounded-lg hover:bg-accent-hover transition-colors whitespace-nowrap"
                     >
                       Add
                     </button>
@@ -706,18 +706,18 @@ export default function NewRecipePage() {
                 {/* Selected Tags */}
                 {formData.tags.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Selected Tags</h4>
+                    <h4 className="text-sm font-medium text-text-secondary mb-2">Selected Tags</h4>
                     <div className="flex flex-wrap gap-2">
                       {formData.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm"
+                          className="inline-flex items-center gap-2 px-3 py-1 bg-accent/20 text-accent rounded-full text-sm"
                         >
                           {tag}
                           <button
                             type="button"
                             onClick={() => removeTag(tag)}
-                            className="hover:text-amber-900 font-bold"
+                            className="hover:text-accent-hover font-bold"
                             title="Remove tag"
                           >
                             ×
@@ -736,7 +736,7 @@ export default function NewRecipePage() {
                   badge={formData.categories.length || undefined}
                   defaultOpen={false}
                 >
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm text-text-secondary mb-4">
                     Select one or more categories that best describe your recipe.
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -747,8 +747,8 @@ export default function NewRecipePage() {
                         onClick={() => toggleCategory(category.name)}
                         className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                           formData.categories.includes(category.name)
-                            ? "border-amber-600 bg-amber-50 text-amber-800 font-medium"
-                            : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                            ? "border-accent bg-accent/10 text-accent font-medium"
+                            : "border-border bg-bg-secondary text-text hover:border-accent/50"
                         }`}
                       >
                         {category.name}
@@ -765,7 +765,7 @@ export default function NewRecipePage() {
                   badge={formData.allergens.length || undefined}
                   defaultOpen={false}
                 >
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm text-text-secondary mb-4">
                     <span className="font-medium">Important:</span> Select all allergens present in your recipe to help keep users safe.
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -776,8 +776,8 @@ export default function NewRecipePage() {
                         onClick={() => toggleAllergen(allergen.name)}
                         className={`px-4 py-2 rounded-lg border-2 transition-colors ${
                           formData.allergens.includes(allergen.name)
-                            ? "border-red-600 bg-red-50 text-red-800 font-medium"
-                            : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                            ? "border-error bg-error/10 text-error font-medium"
+                            : "border-border bg-bg-secondary text-text hover:border-error/50"
                         }`}
                       >
                         {allergen.name}
@@ -792,17 +792,17 @@ export default function NewRecipePage() {
                 title="Publish" 
                 defaultOpen={true}
               >
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-text-secondary mb-4">
                   Choose to save as a draft or publish your recipe immediately.
                 </p>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     Status
                   </label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as RecipeStatus })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                   >
                     <option value={RecipeStatus.DRAFT}>Save as Draft - Not visible to others</option>
                     <option value={RecipeStatus.PUBLISHED}>Publish Recipe - Visible to everyone</option>
