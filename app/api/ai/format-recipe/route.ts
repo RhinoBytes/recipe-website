@@ -230,7 +230,16 @@ Each ingredient should have:
 For counted items (eggs, apples): include amount and unit (e.g., amount: "2", unit: "eggs")
 For measured items: include amount and unit in their ORIGINAL measurement system
 
-Extract ALL steps from the recipe. Always estimate nutrition for the recipe per serving (calories, proteinG, fatG, carbsG). NO tags/categories/allergens.
+NUTRITION (REQUIRED):
+You MUST estimate nutritional values per serving. Calculate approximate values based on the ingredients:
+- calories: total calories per serving (required - estimate if not explicitly stated)
+- proteinG: grams of protein per serving (required - estimate if not explicitly stated)
+- fatG: grams of fat per serving (required - estimate if not explicitly stated)
+- carbsG: grams of carbohydrates per serving (required - estimate if not explicitly stated)
+
+Use your knowledge of common ingredient nutritional values to provide reasonable estimates.
+
+Extract ALL steps from the recipe. NO tags/categories/allergens.
 
 Recipe:
 ${text}`;
@@ -241,7 +250,7 @@ ${text}`;
       {
         role: "system",
         content:
-          "Expert recipe parser. Extract all information from recipes. Keep measurements in their original system (no conversion needed). NO tags/categories/allergens. Return valid JSON only.",
+          "Expert recipe parser and nutritionist. Extract all information from recipes and provide accurate nutritional estimates. Keep measurements in their original system (no conversion needed). NO tags/categories/allergens. ALWAYS include estimated nutrition values (calories, proteinG, fatG, carbsG) based on ingredients. Return valid JSON only.",
       },
       { role: "user", content: prompt },
     ],

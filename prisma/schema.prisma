@@ -61,6 +61,7 @@ model Recipe {
   status          RecipeStatus @default(DRAFT)
   sourceUrl       String?
   sourceText      String?
+  chefNotes       String?
   cuisineId       String?
   averageRating   Decimal?     @db.Decimal(3, 2)
   reviewCount     Int          @default(0)

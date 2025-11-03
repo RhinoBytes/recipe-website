@@ -80,7 +80,7 @@ export default function RecipeSidebar({
       )}
 
       {/* Nutrition Info - Enhanced Styling */}
-      {hasNutrition && (
+      {hasNutrition ? (
         <div className="bg-gradient-to-br from-accent-light to-secondary-light rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-text mb-4 text-center">
             Nutrition Per Serving
@@ -111,6 +111,18 @@ export default function RecipeSidebar({
               </div>
             )}
           </div>
+        </div>
+      ) : (
+        <div className="bg-bg-secondary rounded-lg shadow-md p-6 text-center border-2 border-border/50">
+          <h3 className="text-lg font-semibold text-text mb-2">
+            Nutrition Information
+          </h3>
+          <p className="text-sm text-text-secondary">
+            Not Available
+          </p>
+          <p className="text-xs text-text-muted mt-2">
+            Nutritional data has not been provided for this recipe
+          </p>
         </div>
       )}
     </div>
