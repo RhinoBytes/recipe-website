@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-bg pt-20">
+    <div className="min-h-screen bg-bg ">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-accent-light to-secondary-light py-12">
         <div className="container mx-auto px-4 max-w-4xl">

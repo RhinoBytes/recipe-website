@@ -50,7 +50,8 @@ export default function RecipeSidebar({
   const hasNutrition = calories || proteinG || fatG || carbsG;
 
   return (
-    <div className="space-y-6">
+
+    <div className="space-y-6  pt-20">
       {/* Recipe Actions - 2x2 Grid */}
       <div className="bg-bg-secondary rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold text-text mb-4">Quick Actions</h3>
