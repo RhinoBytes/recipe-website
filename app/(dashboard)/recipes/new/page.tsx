@@ -341,10 +341,10 @@ export default function NewRecipePage() {
         onRecipeFormatted={handleAIFormattedRecipe}
       />
 
-      <div className="min-h-screen bg-gray-50 py-4 md:py-8 px-4">
+      <div className="min-h-screen bg-bg py-4 md:py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 md:mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Create New Recipe</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-text">Create New Recipe</h1>
             <Button
               variant="secondary"
               onClick={() => setShowAIModal(true)}
@@ -356,7 +356,7 @@ export default function NewRecipePage() {
           </div>
           
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
+            <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-6">
               {error}
             </div>
           )}
@@ -365,29 +365,29 @@ export default function NewRecipePage() {
               <CollapsibleSection title="Basic Information" defaultOpen={true}>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Recipe Title <span className="text-red-500">*</span>
-                      <span className="ml-2 text-xs text-gray-500">Required</span>
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
+                      Recipe Title <span className="text-error">*</span>
+                      <span className="ml-2 text-xs text-text-muted">Required</span>
                     </label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="e.g., Honey Garlic Glazed Salmon"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Description
-                      <span className="ml-2 text-xs text-gray-500">Optional - A brief overview of your recipe</span>
+                      <span className="ml-2 text-xs text-text-muted">Optional - A brief overview of your recipe</span>
                     </label>
                     <textarea
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       rows={3}
                       placeholder="Brief description of your recipe..."
                     />
@@ -395,43 +395,43 @@ export default function NewRecipePage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text-secondary mb-1">
                         Servings
-                        <span className="ml-2 text-xs text-gray-500">How many people?</span>
+                        <span className="ml-2 text-xs text-text-muted">How many people?</span>
                       </label>
                       <input
                         type="number"
                         value={formData.servings}
                         onChange={(e) => setFormData({ ...formData, servings: parseInt(e.target.value) || 1 })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                         min="1"
                         max="100"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text-secondary mb-1">
                         Prep Time (min)
-                        <span className="ml-2 text-xs text-gray-500">Setup time</span>
+                        <span className="ml-2 text-xs text-text-muted">Setup time</span>
                       </label>
                       <input
                         type="number"
                         value={formData.prepTimeMinutes}
                         onChange={(e) => setFormData({ ...formData, prepTimeMinutes: parseInt(e.target.value) || 0 })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                         min="0"
                         max="1440"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-text-secondary mb-1">
                         Cook Time (min)
-                        <span className="ml-2 text-xs text-gray-500">Active cooking</span>
+                        <span className="ml-2 text-xs text-text-muted">Active cooking</span>
                       </label>
                       <input
                         type="number"
                         value={formData.cookTimeMinutes}
                         onChange={(e) => setFormData({ ...formData, cookTimeMinutes: parseInt(e.target.value) || 0 })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                         min="0"
                         max="1440"
                       />
@@ -439,14 +439,14 @@ export default function NewRecipePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Difficulty
-                      <span className="ml-2 text-xs text-gray-500">How complex is this recipe?</span>
+                      <span className="ml-2 text-xs text-text-muted">How complex is this recipe?</span>
                     </label>
                     <select
                       value={formData.difficulty}
                       onChange={(e) => setFormData({ ...formData, difficulty: e.target.value as Difficulty })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                     >
                       <option value={Difficulty.EASY}>Easy - Quick and simple</option>
                       <option value={Difficulty.MEDIUM}>Medium - Some experience helpful</option>
@@ -455,9 +455,9 @@ export default function NewRecipePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-text-secondary mb-2">
                       Recipe Images
-                      <span className="ml-2 text-xs text-gray-500">Upload photos to make your recipe more appealing</span>
+                      <span className="ml-2 text-xs text-text-muted">Upload photos to make your recipe more appealing</span>
                     </label>
                     <MediaUploader
                       onMediaUploaded={handleMediaUploaded}
@@ -469,42 +469,42 @@ export default function NewRecipePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Cuisine
-                      <span className="ml-2 text-xs text-gray-500">Optional - e.g., Italian, Mexican, Thai</span>
+                      <span className="ml-2 text-xs text-text-muted">Optional - e.g., Italian, Mexican, Thai</span>
                     </label>
                     <input
                       type="text"
                       value={formData.cuisineName}
                       onChange={(e) => setFormData({ ...formData, cuisineName: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="e.g., Italian, Mexican, Thai"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Source
-                      <span className="ml-2 text-xs text-gray-500">Optional - URL or text (e.g., &ldquo;From Grandma&apos;s cookbook&rdquo;)</span>
+                      <span className="ml-2 text-xs text-text-muted">Optional - URL or text (e.g., &ldquo;From Grandma&apos;s cookbook&rdquo;)</span>
                     </label>
                     <input
                       type="text"
                       value={formData.source}
                       onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       placeholder="https://... or text like 'From Grandma's cookbook'"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-text-secondary mb-1">
                       Chef&apos;s Notes
-                      <span className="ml-2 text-xs text-gray-500">Optional - Tips, substitutions, or personal notes</span>
+                      <span className="ml-2 text-xs text-text-muted">Optional - Tips, substitutions, or personal notes</span>
                     </label>
                     <textarea
                       value={formData.chefNotes}
                       onChange={(e) => setFormData({ ...formData, chefNotes: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
                       rows={3}
                       placeholder="Add any helpful tips, substitutions, or personal notes about this recipe..."
                     />

@@ -176,6 +176,7 @@ export default function MediaUploader({
         <label htmlFor="media-upload-input">
           <Button
             as="button"
+            type="button"
             disabled={uploading || media.length >= maxFiles}
             className="cursor-pointer"
           >

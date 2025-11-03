@@ -11,7 +11,7 @@ export default async function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-12">
       <div className="w-full lg:w-3/5">
       <AuthForm />
       </div>

@@ -298,16 +298,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
             {/* Allergens */}
             {recipe.allergens.length > 0 && (
-              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+              <div className="bg-error/10 dark:bg-error/20 border-2 border-error/30 dark:border-error/40 rounded-lg p-4">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="text-red-600 mt-0.5 flex-shrink-0" size={24} />
+                  <AlertCircle className="text-error mt-0.5 flex-shrink-0" size={24} />
                   <div>
-                    <h3 className="font-semibold text-red-900 mb-2">Allergen Warning</h3>
+                    <h3 className="font-semibold text-error dark:text-error mb-2">Allergen Warning</h3>
                     <div className="flex flex-wrap gap-2">
                       {recipe.allergens.map(({ allergen }) => (
                         <span
                           key={allergen.id}
-                          className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium"
+                          className="px-3 py-1 bg-error/20 dark:bg-error/30 text-error dark:text-error rounded-full text-sm font-medium"
                         >
                           {allergen.name}
                         </span>

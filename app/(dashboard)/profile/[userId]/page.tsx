@@ -223,7 +223,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-bg dark:bg-gray-900">
+    <div className="min-h-screen bg-bg dark:bg-gray-900 pt-20">
       {/* Profile Header */}
       <div className="bg-gradient-to-br from-accent-light to-secondary-light dark:from-accent/20 dark:to-secondary/20 py-12">
         <div className="max-w-6xl mx-auto px-4">
