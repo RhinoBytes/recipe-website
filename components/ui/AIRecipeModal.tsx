@@ -12,6 +12,14 @@ interface AIRecipeModalProps {
   onRecipeFormatted: (formattedData: FormattedRecipeResponse) => void;
 }
 
+const MAX_CHARACTERS = 2000;
+
+// Error types for better error handling
+enum ErrorType {
+  LENGTH_ERROR = 'LENGTH_ERROR',
+  SUBMISSION_ERROR = 'SUBMISSION_ERROR',
+}
+
 export default function AIRecipeModal({
   isOpen,
   onClose,
@@ -20,15 +28,43 @@ export default function AIRecipeModal({
   const [pasteText, setPasteText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<ErrorType | null>(null);
+
+  const characterCount = pasteText.length;
+  const isOverLimit = characterCount > MAX_CHARACTERS;
+  const isDisabled = loading || !pasteText.trim() || isOverLimit;
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newText = e.target.value;
+    
+    // Enforce hard limit at MAX_CHARACTERS
+    if (newText.length <= MAX_CHARACTERS) {
+      setPasteText(newText);
+    }
+    
+    // Clear error when user starts typing if it was a length error
+    if (errorType === ErrorType.LENGTH_ERROR) {
+      setError(null);
+      setErrorType(null);
+    }
+  };
 
   const handleFormatWithAI = async () => {
     if (!pasteText.trim()) {
       setError("Please paste a recipe first");
+      setErrorType(ErrorType.SUBMISSION_ERROR);
+      return;
+    }
+
+    if (isOverLimit) {
+      setError(`Recipe text is too long. Please reduce it to ${MAX_CHARACTERS} characters or less.`);
+      setErrorType(ErrorType.LENGTH_ERROR);
       return;
     }
 
     setLoading(true);
     setError(null);
+    setErrorType(null);
 
     try {
       const response = await fetch("/api/ai/format-recipe", {
@@ -53,6 +89,7 @@ export default function AIRecipeModal({
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to format recipe");
+      setErrorType(ErrorType.SUBMISSION_ERROR);
     } finally {
       setLoading(false);
     }
@@ -62,6 +99,7 @@ export default function AIRecipeModal({
     if (!loading) {
       setPasteText("");
       setError(null);
+      setErrorType(null);
       onClose();
     }
   };
@@ -86,7 +124,8 @@ export default function AIRecipeModal({
           </label>
           <textarea
             value={pasteText}
-            onChange={(e) => setPasteText(e.target.value)}
+            onChange={handleTextChange}
+            maxLength={MAX_CHARACTERS}
             className="w-full h-64 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#d4735a] focus:border-transparent resize-none"
             placeholder="Example:
 
@@ -111,6 +150,16 @@ Instructions:
 Serves 24 cookies"
             disabled={loading}
           />
+          
+          {/* Character counter */}
+          <div className={`mt-2 text-sm ${isOverLimit ? 'text-red-600 font-semibold' : 'text-gray-600'}`}>
+            {characterCount} / {MAX_CHARACTERS} characters
+            {isOverLimit && (
+              <span className="ml-2">
+                ({characterCount - MAX_CHARACTERS} over limit)
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex gap-3 justify-end">
@@ -124,7 +173,8 @@ Serves 24 cookies"
           <Button
             variant="primary"
             onClick={handleFormatWithAI}
-            disabled={loading || !pasteText.trim()}
+            disabled={isDisabled}
+            title={isOverLimit ? "Recipe text exceeds character limit" : undefined}
           >
             {loading ? (
               <>
