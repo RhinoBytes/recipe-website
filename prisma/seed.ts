@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { uploadImageToCloudinary } from "../lib/uploadHelper.js";
+import { deleteCloudinaryAsset } from "../lib/cloudinary.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -139,6 +140,40 @@ function readRecipeFolders(): Array<{
  */
 async function clearExistingData() {
   console.log("Deleting all existing data...");
+
+  // First, fetch all media records to delete from Cloudinary
+  const allMedia = await prisma.media.findMany({
+    select: {
+      publicId: true,
+      resourceType: true,
+    },
+  });
+
+  console.log(`Found ${allMedia.length} media files to delete from Cloudinary...`);
+
+  // Delete media from Cloudinary
+  let deletedCount = 0;
+  let failedCount = 0;
+  for (const media of allMedia) {
+    try {
+      await deleteCloudinaryAsset(
+        media.publicId,
+        media.resourceType === "VIDEO" ? "video" : "image"
+      );
+      deletedCount++;
+      if (deletedCount % 10 === 0) {
+        console.log(`  Deleted ${deletedCount}/${allMedia.length} media files...`);
+      }
+    } catch (error) {
+      failedCount++;
+      console.warn(`  Failed to delete ${media.publicId} from Cloudinary:`, error instanceof Error ? error.message : "Unknown error");
+      // Continue even if deletion fails - the image might not exist or credentials might be missing
+    }
+  }
+
+  if (allMedia.length > 0) {
+    console.log(`Cloudinary cleanup complete: ${deletedCount} deleted, ${failedCount} failed`);
+  }
 
   // Delete child tables first to avoid foreign key constraints
   await prisma.recipesAllergens.deleteMany({});
