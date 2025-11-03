@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
+import { log } from "@/lib/logger";
 
 /**
  * GET /api/recipes/[slug]/reviews
@@ -76,7 +77,10 @@ export async function GET(
       totalReviews: reviews.length,
     });
   } catch (error) {
-    console.error("Error fetching reviews:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Error fetching reviews"
+    );
     return NextResponse.json(
       { error: "Failed to fetch reviews" },
       { status: 500 }
@@ -96,6 +100,7 @@ export async function POST(
     const currentUser = await getCurrentUser();
     
     if (!currentUser) {
+      log.warn({}, "Unauthorized review creation attempt");
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -119,6 +124,7 @@ export async function POST(
 
     // Don't allow users to review their own recipes
     if (recipe.authorId === currentUser.userId) {
+      log.warn({ userId: currentUser.userId, recipeId: recipe.id }, "User attempted to review own recipe");
       return NextResponse.json(
         { error: "You cannot review your own recipe" },
         { status: 403 }
@@ -220,6 +226,11 @@ export async function POST(
     const avatarMedia = review.user.media[0];
     const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
 
+    log.info(
+      { userId: currentUser.userId, recipeId: recipe.id, reviewId: review.id, isUpdate: !!existingReview },
+      existingReview ? "Review updated successfully" : "Review created successfully"
+    );
+
     return NextResponse.json(
       {
         id: review.id,
@@ -235,7 +246,10 @@ export async function POST(
       { status: existingReview ? 200 : 201 }
     );
   } catch (error) {
-    console.error("Error creating review:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Error creating review"
+    );
     return NextResponse.json(
       { error: "Failed to create review" },
       { status: 500 }

@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     });
 
     log.info({ 
-      total: result.total, 
+      totalCount: result.pagination.totalCount, 
       page, 
       perPage, 
       hasQuery: !!query,

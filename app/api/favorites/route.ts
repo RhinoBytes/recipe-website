@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { DEFAULT_RECIPE_IMAGE, DEFAULT_USER_AVATAR } from "@/lib/constants";
+import { log } from "@/lib/logger";
 
 /**
  * GET /api/favorites
@@ -113,7 +114,10 @@ export async function GET() {
       favorites: formattedFavorites,
     });
   } catch (error) {
-    console.error("Error fetching favorites:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Error fetching favorites"
+    );
     return NextResponse.json(
       { error: "Failed to fetch favorites" },
       { status: 500 }
@@ -130,6 +134,7 @@ export async function POST(request: Request) {
     const currentUser = await getCurrentUser();
     
     if (!currentUser) {
+      log.warn({}, "Unauthorized favorite add attempt");
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -183,9 +188,14 @@ export async function POST(request: Request) {
       },
     });
 
+    log.info({ userId: currentUser.userId, recipeId }, "Recipe added to favorites");
+
     return NextResponse.json(favorite, { status: 201 });
   } catch (error) {
-    console.error("Error adding favorite:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Error adding favorite"
+    );
     return NextResponse.json(
       { error: "Failed to add favorite" },
       { status: 500 }
@@ -202,6 +212,7 @@ export async function DELETE(request: Request) {
     const currentUser = await getCurrentUser();
     
     if (!currentUser) {
+      log.warn({}, "Unauthorized favorite delete attempt");
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -245,11 +256,16 @@ export async function DELETE(request: Request) {
       },
     });
 
+    log.info({ userId: currentUser.userId, recipeId }, "Recipe removed from favorites");
+
     return NextResponse.json({
       message: "Favorite removed successfully",
     });
   } catch (error) {
-    console.error("Error removing favorite:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Error removing favorite"
+    );
     return NextResponse.json(
       { error: "Failed to remove favorite" },
       { status: 500 }

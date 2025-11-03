@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import { log } from "@/lib/logger";
 
 export const config = {
   api: {
@@ -78,7 +79,10 @@ export async function POST(request: Request) {
       filename: uniqueFilename,
     });
   } catch (error) {
-    console.error("Image upload error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Image upload error"
+    );
     return NextResponse.json(
       {
         error: "Failed to upload image",

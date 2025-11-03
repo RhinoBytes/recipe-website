@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
+import { log } from "@/lib/logger";
 
 export async function PATCH(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();
 
     if (!currentUser) {
+      log.warn({}, "Unauthorized username update attempt");
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -67,6 +69,8 @@ export async function PATCH(request: NextRequest) {
     const avatarMedia = updatedUser.media[0];
     const avatarUrl = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
 
+    log.info({ userId: currentUser.userId, username }, "Username updated successfully");
+
     return NextResponse.json({
       message: "Username updated successfully",
       user: {
@@ -75,7 +79,10 @@ export async function PATCH(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Update username error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Update username error"
+    );
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
