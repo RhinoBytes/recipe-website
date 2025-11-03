@@ -49,7 +49,21 @@ export default async function RootLayout({
 }>) {
   const user = await getUserFromSession();
   return (
-    <html lang="en" data-theme="terracotta" className={`${playfair.variable} ${lora.variable} ${dancing.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${playfair.variable} ${lora.variable} ${dancing.variable}`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('app-theme') || 'terracotta';
+                  document.documentElement.setAttribute('data-theme', theme);
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="antialiased">
         <AuthProvider initialUser={user}>
           <Navbar /> 

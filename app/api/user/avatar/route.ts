@@ -152,7 +152,6 @@ export async function POST(request: Request) {
           size: file.size,
           originalFilename: file.name,
           folder: "avatars",
-          storagePath: uploadData.path,
           userId: currentUser.userId,
           isProfileAvatar: true,
           resourceType: "IMAGE",

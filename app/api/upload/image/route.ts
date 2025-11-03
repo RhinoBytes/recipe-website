@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { randomUUID } from "crypto";
 import { log } from "@/lib/logger";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase client for server-side operations
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export const config = {
   api: {
@@ -13,7 +17,7 @@ export const config = {
 
 /**
  * POST /api/upload/image
- * Upload a recipe image
+ * Upload a recipe image to Supabase Storage
  */
 export async function POST(request: Request) {
   try {
@@ -55,23 +59,53 @@ export async function POST(request: Request) {
     }
 
     // Generate unique filename
-    const fileExtension = file.name.split(".").pop();
-    const uniqueFilename = `${randomUUID()}.${fileExtension}`;
-    
-    // Define upload path
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "recipes");
-    const filePath = path.join(uploadDir, uniqueFilename);
+    let fileExtension = file.name.includes(".") ? file.name.split(".").pop() : undefined;
+    // If no extension, infer from MIME type
+    if (!fileExtension || fileExtension === file.name) {
+      const mimeToExt: Record<string, string> = {
+        "image/jpeg": "jpg",
+        "image/jpg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp",
+        "image/gif": "gif",
+      };
+      fileExtension = mimeToExt[file.type];
+      if (!fileExtension) {
+        return NextResponse.json(
+          { error: "Could not determine file extension from MIME type" },
+          { status: 400 }
+        );
+      }
+    }
+    const uniqueFilename = `recipe-${currentUser.userId}-${randomUUID()}.${fileExtension}`;
 
-    // Ensure upload directory exists
-    await mkdir(uploadDir, { recursive: true });
-
-    // Convert file to buffer and write to disk
+    // Upload to Supabase Storage
+    const filePath = `recipes/${uniqueFilename}`;
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
 
-    // Return the public URL path
-    const publicUrl = `/uploads/recipes/${uniqueFilename}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("recipe-builder")
+      .upload(filePath, buffer, {
+        contentType: file.type,
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      log.error({ error: uploadError }, "Supabase upload error");
+      return NextResponse.json(
+        { error: `Failed to upload to storage: ${uploadError.message}` },
+        { status: 500 }
+      );
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from("recipe-builder")
+      .getPublicUrl(uploadData.path);
+
+    const publicUrl = urlData.publicUrl;
 
     return NextResponse.json({
       success: true,
