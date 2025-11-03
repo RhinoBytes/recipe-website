@@ -10,6 +10,8 @@ const pinoOptions = {
   },
 };
 
+// Use pino-pretty only in development (next dev)
+// Production builds (including Vercel) will use JSON format for optimal log collection
 const logger = pino(
   process.env.NODE_ENV === 'development'
     ? {
