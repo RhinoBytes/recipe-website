@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCuisines } from "@/lib/queries/metadata";
+import { log } from "@/lib/logger";
 
 /**
  * GET /api/cuisines
@@ -15,9 +16,14 @@ export async function GET() {
       count: cuisine._count.recipes,
     }));
 
+    log.info({ count: formattedCuisines.length }, "Fetched cuisines successfully");
+
     return NextResponse.json(formattedCuisines);
   } catch (error) {
-    console.error("Get cuisines error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Get cuisines error"
+    );
     return NextResponse.json(
       { error: "Failed to fetch cuisines" },
       { status: 500 }

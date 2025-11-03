@@ -1,4 +1,5 @@
 "use client";
+import { log } from "@/lib/logger";
 
 import { useState, useRef } from "react";
 import Image from "next/image";
@@ -54,7 +55,7 @@ export default function MediaUploader({
 
       setUploadProgress("");
     } catch (err) {
-      console.error("Upload error:", err);
+      log.error({ error: err instanceof Error ? { message: err.message, stack: err.stack } : String(err) }, "Upload error");
       setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
@@ -147,7 +148,7 @@ export default function MediaUploader({
         onMediaDeleted(mediaId);
       }
     } catch (err) {
-      console.error("Delete error:", err);
+      log.error({ error: err instanceof Error ? { message: err.message, stack: err.stack } : String(err) }, "Delete error");
       setError(err instanceof Error ? err.message : "Delete failed");
     }
   };

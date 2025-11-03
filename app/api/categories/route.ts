@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCategories } from "@/lib/queries/metadata";
+import { log } from "@/lib/logger";
 
 export async function GET(request: Request) {
   try {
@@ -36,9 +37,14 @@ export async function GET(request: Request) {
       };
     });
 
+    log.info({ count: formattedCategories.length, limit }, "Fetched categories successfully");
+
     return NextResponse.json(formattedCategories);
   } catch (error) {
-    console.error("Failed to fetch categories:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Failed to fetch categories"
+    );
     return NextResponse.json(
       { error: "Failed to fetch categories" },
       { status: 500 }

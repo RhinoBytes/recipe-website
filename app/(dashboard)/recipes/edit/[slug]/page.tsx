@@ -1,4 +1,5 @@
 "use client";
+import { log } from "@/lib/logger";
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -120,7 +121,7 @@ export default function EditRecipePage() {
               setUploadedMedia(mediaData.media || []);
             }
           } catch (mediaErr) {
-            console.error("Failed to fetch media:", mediaErr);
+            log.error({ error: mediaErr instanceof Error ? { message: mediaErr.message } : String(mediaErr) }, "Failed to fetch media");
           }
         }
         
@@ -215,7 +216,7 @@ export default function EditRecipePage() {
           setAvailableTags(Array.isArray(tagsData) ? tagsData : []);
         }
       } catch (err) {
-        console.error("Failed to load recipe:", err);
+        log.error({ error: err instanceof Error ? { message: err.message } : String(err) }, "Failed to load recipe");
         setError(err instanceof Error ? err.message : "Failed to load recipe");
       } finally {
         setInitialLoading(false);
@@ -233,7 +234,7 @@ export default function EditRecipePage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isPrimary: true }),
-      }).catch(console.error);
+      }).catch((error: Error) => log.error({ error: { message: error.message } }, "Error in recipe edit"));
     }
   };
 

@@ -1,4 +1,5 @@
 "use client";
+import { log } from "@/lib/logger";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -57,7 +58,7 @@ export default function RecipeReviews({ recipeSlug, isAuthor }: RecipeReviewsPro
           }
         }
       } catch (err) {
-        console.error("Failed to fetch reviews:", err);
+        log.error({ error: err instanceof Error ? { message: err.message } : String(err) }, "Failed to fetch reviews");
       } finally {
         setLoading(false);
       }

@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import OpenAI from "openai";
 import { z } from "zod";
 import { Difficulty } from "@prisma/client";
+import { log } from "@/lib/logger";
 
 /** Zod Schemas with preprocessing to handle AI quirks */
 const RecipeIngredientSchema = z.object({
@@ -192,7 +193,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ recipe: formattedRecipe, source: "ai" });
   } catch (error) {
-    console.error("Recipe formatting error:", error);
+    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Recipe formatting error");
     return NextResponse.json(
       {
         error: "Failed to format recipe",
@@ -269,7 +270,7 @@ ${text}`;
   if (!result) throw new Error("Empty response from OpenAI");
 
   const parsed = parseJSONSafe(result);
-  console.log("Parsed recipe from AI:", parsed);
+  log.info({ hasRecipe: !!parsed }, "Parsed recipe from AI");
   return RecipeSchema.parse(parsed);
 }
 

@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { log } from "@/lib/logger";
 
 // Define the correct context type based on the error message
 type RouteContext = {
@@ -69,7 +70,7 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
         throw storageError;
       }
     } catch (storageError) {
-      console.error("Supabase Storage deletion failed:", storageError);
+      log.error({ error: storageError }, "Supabase Storage deletion failed");
       return NextResponse.json(
         {
           error: "Failed to delete media from storage",
@@ -89,7 +90,7 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
       });
     } catch (dbError) {
       // Log error for manual cleanup - Storage asset is already deleted
-      console.error("Database deletion failed after storage deletion:", {
+      log.error({
         mediaId,
         storagePath: media.publicId,
         error: dbError,
@@ -109,7 +110,7 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
       message: "Media deleted successfully",
     });
   } catch (error) {
-    console.error("Media deletion error:", error);
+    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Media deletion error");
     return NextResponse.json(
       {
         error: "Failed to delete media",
@@ -213,7 +214,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       media: updatedMedia,
     });
   } catch (error) {
-    console.error("Media update error:", error);
+    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Media update error");
     return NextResponse.json(
       {
         error: "Failed to update media",

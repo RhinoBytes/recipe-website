@@ -1,4 +1,5 @@
 "use client";
+import { log } from "@/lib/logger";
 
 import { Share2, Facebook, Twitter, Link as LinkIcon, Check } from "lucide-react";
 import { useState, useMemo } from "react";
@@ -28,7 +29,7 @@ export default function SocialShare({ title, description, url }: SocialShareProp
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error("Failed to copy link:", error);
+      log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Failed to copy link");
     }
   };
 
@@ -51,7 +52,7 @@ export default function SocialShare({ title, description, url }: SocialShareProp
           url: shareUrl,
         });
       } catch (error) {
-        console.error("Error sharing:", error);
+        log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Error sharing");
       }
     }
   };

@@ -1,6 +1,7 @@
 // app/profile/[userId]/page.tsx
 "use client";
 
+import { log } from "@/lib/logger";
 import { useState, useEffect, use, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext"; 
 import { useRouter } from "next/navigation";
@@ -65,8 +66,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const [sortOption, setSortOption] = useState<"newest" | "oldest" | "popular">("newest");
 
   const isOwnProfile = currentUser?.id === resolvedParams.userId;
-  console.log("currentUser?.userId:", currentUser?.id);
-  console.log("isOwnProfile:", isOwnProfile);
+  log.info({ userId: currentUser?.id }, "Profile page - current user ID");
+  log.info({ isOwnProfile }, "Profile page - is own profile");
 
   // Fetch profile user data
   useEffect(() => {
@@ -91,7 +92,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           setError("User not found");
         }
       } catch (err) {
-        console.error("Failed to fetch user:", err);
+        log.error({ error: err instanceof Error ? { message: err.message } : String(err) }, "Failed to fetch user");
         setError("Failed to load user profile");
       } finally {
         setLoading(false);
@@ -110,7 +111,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         setRecipes(data.recipes);
       }
     } catch (error) {
-      console.error("Failed to fetch recipes:", error);
+      log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Failed to fetch recipes");
     } finally {
       setLoading(false);
     }
@@ -127,7 +128,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         setFavorites(data.favorites);
       }
     } catch (error) {
-      console.error("Failed to fetch favorites:", error);
+      log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Failed to fetch favorites");
     } finally {
       setLoading(false);
     }
@@ -179,7 +180,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         setUsernameError(data.error || "Failed to update username");
       }
     } catch (error) {
-      console.error("Failed to update username:", error);
+      log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, "Failed to update username");
       setUsernameError("Failed to update username");
     } finally {
       setUsernameLoading(false);

@@ -1,4 +1,5 @@
 'use client';
+import { log } from "@/lib/logger";
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
@@ -42,7 +43,7 @@ export default function AvatarPicker({ currentAvatar, onSuccess, className = '' 
       setSelectedAvatar(data.avatarUrl);
       onSuccess(data.avatarUrl);
     } catch (error) {
-      console.error('Avatar selection error:', error);
+      log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, 'Avatar selection error');
       setUploadError(error instanceof Error ? error.message : 'Failed to set avatar');
     } finally {
       setUploading(false);
@@ -92,7 +93,7 @@ export default function AvatarPicker({ currentAvatar, onSuccess, className = '' 
       setSelectedAvatar(data.avatarUrl);
       onSuccess(data.avatarUrl);
     } catch (error) {
-      console.error('Upload error:', error);
+      log.error({ error: error instanceof Error ? { message: error.message } : String(error) }, 'Upload error');
       setUploadError(error instanceof Error ? error.message : 'Failed to upload image');
     } finally {
       setUploading(false);

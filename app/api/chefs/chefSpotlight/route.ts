@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { RecipeStatus } from "@prisma/client";
 import { DEFAULT_CHEF_AVATAR } from "@/lib/constants";
+import { log } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -110,9 +111,14 @@ export async function GET() {
       };
     }
 
+    log.info({ chefId: spotlightChef?.id || null }, "Fetched spotlight chef successfully");
+
     return NextResponse.json({ chef: spotlightChef });
   } catch (error) {
-    console.error("Failed to fetch spotlight chef:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Failed to fetch spotlight chef"
+    );
     return NextResponse.json(
       { error: "Failed to fetch spotlight chef" },
       { status: 500 }

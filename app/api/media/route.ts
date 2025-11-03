@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { log } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { MediaResourceType } from "@prisma/client";
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
       media,
     });
   } catch (error) {
-    console.error("Media creation error:", error);
+    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Media creation error");
     return NextResponse.json(
       {
         error: "Failed to create media record",
@@ -147,7 +148,7 @@ export async function GET(request: Request) {
       media,
     });
   } catch (error) {
-    console.error("Media fetch error:", error);
+    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Media fetch error");
     return NextResponse.json(
       {
         error: "Failed to fetch media",

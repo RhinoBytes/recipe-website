@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sanitizeInput } from "@/utils/validation";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
+import { log } from "@/lib/logger";
 
 /**
  * PATCH /api/user/profile
@@ -100,7 +101,10 @@ export async function PATCH(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Profile update error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Profile update error"
+    );
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

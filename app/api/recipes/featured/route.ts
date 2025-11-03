@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_RECIPE_IMAGE } from "@/lib/constants";
+import { log } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -90,9 +91,14 @@ export async function GET() {
       };
     }
 
+    log.info({ recipeId: featuredRecipe?.id || null }, "Fetched featured recipe successfully");
+
     return NextResponse.json({ recipe: featuredRecipe });
   } catch (error) {
-    console.error("Failed to fetch featured recipe:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Failed to fetch featured recipe"
+    );
     return NextResponse.json(
       { error: "Failed to fetch featured recipe" },
       { status: 500 }

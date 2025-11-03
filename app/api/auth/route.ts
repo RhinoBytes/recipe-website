@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
+import { log } from "@/lib/logger";
 
 /**
  * GET /api/auth
@@ -46,6 +47,7 @@ export async function GET() {
 
     if (!user) {
       // User not in database despite having valid token
+      log.warn({ userId: currentUser.userId }, "Valid token but user not found in database");
       return NextResponse.json({ authenticated: false });
     }
 
@@ -62,7 +64,10 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Get current user error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Get current user error"
+    );
     // For auth checks, better to return authenticated: false than an error
     return NextResponse.json({ authenticated: false });
   }

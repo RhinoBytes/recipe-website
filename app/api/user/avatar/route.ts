@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import { log } from "@/lib/logger";
 
 /**
  * Helper function to mark previous profile avatars as not primary
@@ -152,6 +153,7 @@ export async function POST(request: Request) {
     const { avatarUrl } = body;
 
     if (!avatarUrl) {
+      log.warn({ userId: currentUser.userId }, "Avatar update attempt without avatarUrl");
       return NextResponse.json(
         { error: "avatarUrl is required" },
         { status: 400 }
@@ -184,7 +186,10 @@ export async function POST(request: Request) {
       mediaId: media.id,
     });
   } catch (error) {
-    console.error("Avatar upload error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Avatar upload error"
+    );
     return NextResponse.json(
       {
         error: "Failed to set avatar",

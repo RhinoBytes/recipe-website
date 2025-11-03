@@ -3,6 +3,7 @@ import { hashPassword, createToken, setAuthCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sanitizeInput, isValidEmail } from "@/utils/validation";
 import { DEFAULT_USER_AVATAR } from "@/lib/constants";
+import { log } from "@/lib/logger";
 
 /**
  * POST /api/auth/register
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
+      log.warn({ email }, "Registration attempt with existing email");
       return NextResponse.json(
         { error: "User with this email already exists" },
         { status: 409 }
@@ -107,6 +109,8 @@ export async function POST(request: NextRequest) {
     // Set cookie
     await setAuthCookie(token);
 
+    log.info({ userId: user.id, email: user.email, username: user.username }, "User registered successfully");
+
     return NextResponse.json(
       {
         message: "User created successfully",
@@ -118,7 +122,10 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Registration error:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Registration error"
+    );
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

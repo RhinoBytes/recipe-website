@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { log } from "@/lib/logger";
 import Button from "@/components/ui/Button";
 import { User, Utensils } from "lucide-react";
 import type { Chef } from "@/types";
@@ -16,7 +17,7 @@ export default function ChefSpotlight({ chef }: ChefSpotlightProps) {
     );
   }
 
-  console.log(`Chef ID: ${chef.id}`);
+  log.info({ chefId: chef.id }, "Chef spotlight rendered");
 
   return (
     <section className="py-16 bg-bg min-h-[300px]">

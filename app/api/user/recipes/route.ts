@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { DEFAULT_RECIPE_IMAGE } from "@/lib/constants";
+import { log } from "@/lib/logger";
 
 /**
  * GET /api/user/recipes
@@ -101,7 +102,10 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Error fetching user recipes:", error);
+    log.error(
+      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      "Error fetching user recipes"
+    );
     return NextResponse.json(
       { error: "Failed to fetch recipes" },
       { status: 500 }
