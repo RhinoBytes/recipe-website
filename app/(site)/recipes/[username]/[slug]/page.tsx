@@ -405,44 +405,6 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 </div>
               );
             })()}
-              <AccordionSection title="Nutrition Per Serving" defaultOpen={false}>
-                {(recipe.calories || recipe.proteinG || recipe.fatG || recipe.carbsG) ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {recipe.calories && (
-                      <div className="bg-bg rounded-lg p-4 text-center border-2 border-accent/20">
-                        <div className="text-3xl font-bold text-accent">{recipe.calories}</div>
-                        <div className="text-xs text-text-secondary mt-1 font-medium">Calories</div>
-                      </div>
-                    )}
-                    {recipe.proteinG && (
-                      <div className="bg-bg rounded-lg p-4 text-center border-2 border-secondary/20">
-                        <div className="text-3xl font-bold text-secondary">{recipe.proteinG}g</div>
-                        <div className="text-xs text-text-secondary mt-1 font-medium">Protein</div>
-                      </div>
-                    )}
-                    {recipe.fatG && (
-                      <div className="bg-bg rounded-lg p-4 text-center border-2 border-muted/20">
-                        <div className="text-3xl font-bold text-muted">{recipe.fatG}g</div>
-                        <div className="text-xs text-text-secondary mt-1 font-medium">Fat</div>
-                      </div>
-                    )}
-                    {recipe.carbsG && (
-                      <div className="bg-bg rounded-lg p-4 text-center border-2 border-highlight/20">
-                        <div className="text-3xl font-bold text-highlight">{recipe.carbsG}g</div>
-                        <div className="text-xs text-text-secondary mt-1 font-medium">Carbs</div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <p className="text-sm text-text-secondary">Not Available</p>
-                    <p className="text-xs text-text-muted mt-1">
-                      Nutritional data has not been provided for this recipe
-                    </p>
-                  </div>
-                )}
-              </AccordionSection>
-            </div>
 
             {/* Ingredients with Interactive List */}
             <IngredientsList ingredients={recipe.ingredients} />

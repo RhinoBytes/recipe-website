@@ -11,6 +11,7 @@ import { Difficulty, RecipeStatus } from "@prisma/client";
 import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
 import { RecipeFormData } from "@/types/recipe";
 import type { Media } from "@/types/index";
+import { detectAndNormalizeUrl } from "@/utils/urlDetection";
 
 interface RecipeStep {
   stepNumber: number;
@@ -261,29 +262,8 @@ export default function EditRecipePage() {
         throw new Error("Please add at least one instruction step");
       }
 
-      // Detect if source is a URL using a more robust check
-      const isUrl = formData.source.trim() && (() => {
-        try {
-          const url = new URL(formData.source.trim());
-          return url.protocol === 'http:' || url.protocol === 'https:';
-        } catch {
-          // If it starts with www., prepend https://
-          if (formData.source.trim().startsWith('www.')) {
-            try {
-              new URL(`https://${formData.source.trim()}`);
-              return true;
-            } catch {
-              return false;
-            }
-          }
-          return false;
-        }
-      })();
-
-      // For www. URLs, prepend https://
-      const normalizedUrl = isUrl && formData.source.trim().startsWith('www.')
-        ? `https://${formData.source.trim()}`
-        : formData.source.trim();
+      // Detect if source is a URL using shared utility function
+      const { isUrl, normalizedUrl } = detectAndNormalizeUrl(formData.source);
 
       // Parsed ingredients already have dual measurements from parseIngredients()
       const submissionData = {
