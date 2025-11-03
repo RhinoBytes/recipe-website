@@ -26,6 +26,7 @@ interface RecipeData {
   difficulty?: string;
   sourceUrl?: string;
   sourceText?: string;
+  chefNotes?: string;
   cuisine?: string;
   status?: string;
   calories?: number;
@@ -353,6 +354,7 @@ async function importRecipes(users: User[]) {
           difficulty: (data.difficulty as DifficultyType) || Difficulty.MEDIUM,
           sourceUrl: data.sourceUrl,
           sourceText: data.sourceText,
+          chefNotes: data.chefNotes,
           cuisineId,
           status: (data.status as RecipeStatusType) || RecipeStatus.PUBLISHED,
           calories: data.calories,

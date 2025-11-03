@@ -12,6 +12,7 @@
   "fatG": 9,
   "carbsG": 24,
   "status": "PUBLISHED",
+  "chefNotes": "For extra chewy cookies, chill the dough for 30 minutes before baking. The brown butter adds a nutty depth that makes these cookies irresistible!",
   "ingredients": [
     {
       "name": "all-purpose flour",
@@ -82,7 +83,7 @@
   "steps": [
     {
       "stepNumber": 1,
-      "instruction": "Preheat oven to 375°F (190°C). Line baking sheets with parchment paper.",
+      "instruction": "Preheat oven to 375\u00b0F (190\u00b0C). Line baking sheets with parchment paper.",
       "isOptional": false
     },
     {
@@ -126,8 +127,15 @@
       "isOptional": false
     }
   ],
-  "tags": ["Easy", "Kid-Friendly", "Comfort Food"],
-  "categories": ["Dessert", "Snack"],
+  "tags": [
+    "Easy",
+    "Kid-Friendly",
+    "Comfort Food"
+  ],
+  "categories": [
+    "Dessert",
+    "Snack"
+  ],
   "allergens": [],
   "imageUrl": "image.jpg"
 }

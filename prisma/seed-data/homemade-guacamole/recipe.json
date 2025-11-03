@@ -1,7 +1,7 @@
 {
   "title": "Homemade Guacamole",
   "slug": "homemade-guacamole",
-  "description": "Fresh, chunky guacamole made with ripe avocados, lime juice, cilantro, and a touch of jalapeño. Perfect as a dip, topping, or side dish for any Mexican meal.",
+  "description": "Fresh, chunky guacamole made with ripe avocados, lime juice, cilantro, and a touch of jalape\u00f1o. Perfect as a dip, topping, or side dish for any Mexican meal.",
   "cuisine": "Mexican",
   "difficulty": "EASY",
   "servings": 6,
@@ -12,6 +12,7 @@
   "fatG": 11,
   "carbsG": 8,
   "status": "PUBLISHED",
+  "chefNotes": "The key is perfectly ripe avocados - they should yield to gentle pressure. Mash to your preferred texture and add lime juice immediately to prevent browning.",
   "ingredients": [
     {
       "name": "ripe avocados",
@@ -37,7 +38,7 @@
       "displayOrder": 2
     },
     {
-      "name": "jalapeño pepper",
+      "name": "jalape\u00f1o pepper",
       "amount": "1",
       "unit": "whole",
       "preparation": "seeded and minced",
@@ -101,7 +102,7 @@
     },
     {
       "stepNumber": 4,
-      "instruction": "Fold in onion, jalapeño, cilantro, tomato, and garlic.",
+      "instruction": "Fold in onion, jalape\u00f1o, cilantro, tomato, and garlic.",
       "isOptional": false
     },
     {

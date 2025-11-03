@@ -344,6 +344,7 @@ export async function POST(request: Request) {
         difficulty: fullRecipe.difficulty,
         sourceUrl: fullRecipe.sourceUrl,
         sourceText: fullRecipe.sourceText,
+        chefNotes: fullRecipe.chefNotes,
         status: fullRecipe.status,
         calories: fullRecipe.calories,
         proteinG: fullRecipe.proteinG,

@@ -12,6 +12,7 @@
   "fatG": 48,
   "carbsG": 22,
   "status": "PUBLISHED",
+  "chefNotes": "Low and slow is the way to go! The 3-2-1 method (3 hours smoke, 2 hours wrapped, 1 hour sauced) creates fall-off-the-bone tender ribs with a beautiful bark.",
   "ingredients": [
     {
       "name": "baby back ribs",
@@ -110,7 +111,7 @@
     },
     {
       "stepNumber": 4,
-      "instruction": "Preheat oven to 275°F (135°C).",
+      "instruction": "Preheat oven to 275\u00b0F (135\u00b0C).",
       "isOptional": false
     },
     {

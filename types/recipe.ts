@@ -78,6 +78,7 @@ export interface RecipeData {
   difficulty: string | null;
   sourceUrl: string | null;
   sourceText: string | null;
+  chefNotes: string | null;
   status: string | null;
   calories: number | null;
   proteinG: number | null;

@@ -12,6 +12,7 @@
   "fatG": 22,
   "carbsG": 32,
   "status": "PUBLISHED",
+  "chefNotes": "Use rotisserie chicken for a quick shortcut. The homemade salsa verde is worth the effort - it's fresh, tangy, and so much better than store-bought!",
   "ingredients": [
     {
       "name": "chicken breast",
@@ -37,7 +38,7 @@
       "displayOrder": 2
     },
     {
-      "name": "jalapeño peppers",
+      "name": "jalape\u00f1o peppers",
       "amount": "2",
       "unit": "whole",
       "isOptional": false,
@@ -106,12 +107,12 @@
   "steps": [
     {
       "stepNumber": 1,
-      "instruction": "Preheat oven to 375°F (190°C). Lightly grease a 9x13 inch baking dish.",
+      "instruction": "Preheat oven to 375\u00b0F (190\u00b0C). Lightly grease a 9x13 inch baking dish.",
       "isOptional": false
     },
     {
       "stepNumber": 2,
-      "instruction": "Roast tomatillos, jalapeños, onion, and garlic under broiler for 8-10 minutes until charred.",
+      "instruction": "Roast tomatillos, jalape\u00f1os, onion, and garlic under broiler for 8-10 minutes until charred.",
       "isOptional": false
     },
     {
