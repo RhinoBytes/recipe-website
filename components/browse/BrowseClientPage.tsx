@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import BrowseRecipeCard from "@/components/browse/BrowseRecipeCard";
 import BrowseSidebarFiltersNew from "@/components/browse/BrowseSidebarFiltersNew";
-import BrowseMobileFilters from "@/components/browse/BrowseMobileFilters";
-import BrowseActiveFilters from "@/components/browse/BrowseActiveFilters";
 import BrowseEmptyState from "@/components/browse/BrowseEmptyState";
 
 interface CategoryNode {
@@ -83,7 +81,6 @@ export default function BrowseClientPage({
   const router = useRouter();
   
   const [searchInput, setSearchInput] = useState(initialFilters.query);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [favoritedRecipes, setFavoritedRecipes] = useState<Set<string>>(new Set());
 
   // Build URL with current filters
@@ -277,7 +274,7 @@ export default function BrowseClientPage({
             </button>
             <button
               type="button"
-              onClick={() => setShowMobileFilters(true)}
+              onClick={() => alert("Mobile filters - To be implemented")}
               className="lg:hidden px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition flex items-center gap-2"
             >
               <Filter size={20} />
