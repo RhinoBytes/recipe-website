@@ -14,6 +14,7 @@ import { Difficulty, RecipeStatus } from "@prisma/client";
 import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
 import type { Media } from "@/types/index";
 import { detectAndNormalizeUrl } from "@/utils/urlDetection";
+import { RecipeSchema } from "@/lib/schemas/recipe";
 
 interface RecipeStep {
   stepNumber: number;
@@ -53,6 +54,9 @@ export default function NewRecipePage() {
   // State for textarea inputs
   const [ingredientsText, setIngredientsText] = useState("");
   const [stepsText, setStepsText] = useState("");
+  
+  // Validation error state
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
   const [formData, setFormData] = useState<RecipeFormData>({
     title: "",
@@ -117,6 +121,9 @@ export default function NewRecipePage() {
   }, []);
 
   const handleAIFormattedRecipe = (formatted: FormattedRecipeResponse) => {
+    // Clear any previous validation errors
+    setValidationErrors({});
+    
     // Prefer steps array from AI if available, otherwise fall back to instructions string
     let finalSteps: RecipeStep[];
     if (formatted.steps && formatted.steps.length > 0) {
@@ -172,7 +179,7 @@ export default function NewRecipePage() {
     setIngredientsText(ingredientsToText(finalIngredients));
     setStepsText(stepsToText(finalSteps));
 
-    // Update form with AI-formatted data
+    // Update form with AI-formatted data (no validation yet - user will review)
     setFormData({
       title: formatted.title || "",
       description: formatted.description || "",
@@ -219,24 +226,17 @@ export default function NewRecipePage() {
     
     setLoading(true);
     setError(null);
+    setValidationErrors({});
     
     try {
       // Parse textareas into structured data
       const parsedIngredients = parseIngredients(ingredientsText);
       const parsedSteps = parseSteps(stepsText);
 
-      // Validate at least one ingredient and step
-      if (parsedIngredients.length === 0) {
-        throw new Error("Please add at least one ingredient");
-      }
-      if (parsedSteps.length === 0) {
-        throw new Error("Please add at least one instruction step");
-      }
-
       // Detect if source is a URL using shared utility function
       const { isUrl, normalizedUrl } = detectAndNormalizeUrl(formData.source);
 
-      // Parsed ingredients already have dual measurements from parseIngredients()
+      // Prepare submission data
       const submissionData = {
         ...formData,
         ingredients: parsedIngredients,
@@ -246,7 +246,23 @@ export default function NewRecipePage() {
       };
 
       // Remove the 'source' field as it's been split into sourceUrl/sourceText
-      const { source: _, ...dataToSubmit } = submissionData;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { source: _unused, ...dataToSubmit } = submissionData;
+
+      // Validate with Zod before submitting
+      const validation = RecipeSchema.safeParse(dataToSubmit);
+      if (!validation.success) {
+        // Convert Zod errors to user-friendly format
+        const fieldErrors: Record<string, string> = {};
+        validation.error.issues.forEach((issue) => {
+          const path = issue.path.join(".");
+          fieldErrors[path] = issue.message;
+        });
+        setValidationErrors(fieldErrors);
+        setError("Please fix the validation errors below");
+        setLoading(false);
+        return;
+      }
 
       const response = await fetch("/api/recipes", {
         method: "POST",
@@ -256,14 +272,25 @@ export default function NewRecipePage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create recipe");
+        // Handle backend validation errors
+        if (errorData.details && Array.isArray(errorData.details)) {
+          const fieldErrors: Record<string, string> = {};
+          errorData.details.forEach((detail: { path: string; message: string }) => {
+            fieldErrors[detail.path] = detail.message;
+          });
+          setValidationErrors(fieldErrors);
+          setError("Server validation failed. Please fix the errors below.");
+        } else {
+          throw new Error(errorData.error || "Failed to create recipe");
+        }
+        setLoading(false);
+        return;
       }
 
       const recipe = await response.json();
       router.push(`/recipes/${recipe.username}/${recipe.slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create recipe");
-    } finally {
       setLoading(false);
     }
   };
@@ -358,6 +385,21 @@ export default function NewRecipePage() {
           {error && (
             <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-6">
               {error}
+              {Object.keys(validationErrors).length > 0 && (
+                <div className="mt-2 text-sm">
+                  <p className="font-medium mb-1">Validation errors:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {Object.entries(validationErrors).slice(0, 5).map(([field, message]) => (
+                      <li key={field}>
+                        <span className="font-medium">{field}:</span> {message}
+                      </li>
+                    ))}
+                    {Object.keys(validationErrors).length > 5 && (
+                      <li>... and {Object.keys(validationErrors).length - 5} more errors</li>
+                    )}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
@@ -373,10 +415,13 @@ export default function NewRecipePage() {
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
+                      className={`w-full px-4 py-2 border ${validationErrors.title ? 'border-error' : 'border-border'} rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent`}
                       placeholder="e.g., Honey Garlic Glazed Salmon"
                       required
                     />
+                    {validationErrors.title && (
+                      <p className="mt-1 text-sm text-error">{validationErrors.title}</p>
+                    )}
                   </div>
 
                   <div>
@@ -607,11 +652,14 @@ export default function NewRecipePage() {
                 <textarea
                   value={ingredientsText}
                   onChange={(e) => setIngredientsText(e.target.value)}
-                  className="w-full px-4 py-3 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent font-mono text-sm"
+                  className={`w-full px-4 py-3 border ${validationErrors.ingredients ? 'border-error' : 'border-border'} rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent font-mono text-sm`}
                   rows={10}
                   placeholder={`2 cups all-purpose flour\n1/2 cup sugar\n1 tsp baking powder\n\nFor the sauce:\n3 tbsp olive oil\n2 cloves garlic, minced (optional)`}
                   required
                 />
+                {validationErrors.ingredients && (
+                  <p className="mt-1 text-sm text-error">{validationErrors.ingredients}</p>
+                )}
               </CollapsibleSection>
 
               {/* Instructions/Steps */}
@@ -629,11 +677,14 @@ export default function NewRecipePage() {
                 <textarea
                   value={stepsText}
                   onChange={(e) => setStepsText(e.target.value)}
-                  className="w-full px-4 py-3 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm"
+                  className={`w-full px-4 py-3 border ${validationErrors.steps ? 'border-error' : 'border-border'} rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent text-sm`}
                   rows={12}
                   placeholder={`Preheat oven to 350°F\nMix flour and sugar in a large bowl\n\nFor the sauce:\nHeat oil in a pan\nAdd garlic and cook until fragrant (optional)`}
                   required
                 />
+                {validationErrors.steps && (
+                  <p className="mt-1 text-sm text-error">{validationErrors.steps}</p>
+                )}
               </CollapsibleSection>
 
               {/* Tags */}

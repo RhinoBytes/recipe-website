@@ -2,132 +2,12 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import OpenAI from "openai";
 import { z } from "zod";
-import { Difficulty } from "@prisma/client";
 import { log } from "@/lib/logger";
 
-/** Zod Schemas with preprocessing to handle AI quirks */
-const RecipeIngredientSchema = z.object({
-  name: z.string().min(1).max(200),
-  amount: z
-    .preprocess(
-      (val) => (val == null ? null : String(val)),
-      z.string().nullable()
-    )
-    .optional(),
-  unit: z
-    .preprocess(
-      (val) => (val == null ? null : String(val).toLowerCase()),
-      z.string().nullable()
-    )
-    .optional(),
-  size: z
-    .preprocess(
-      (val) => (val == null ? null : String(val)),
-      z.string().nullable()
-    )
-    .optional(),
-  preparation: z
-    .preprocess(
-      (val) => (val == null ? null : String(val)),
-      z.string().nullable()
-    )
-    .optional(),
-  notes: z.string().nullable().optional(),
-  groupName: z.string().nullable().optional(),
-  isOptional: z.boolean().optional(),
-  displayOrder: z.preprocess(
-    (val) => (val == null ? 0 : Number(val)),
-    z.number().int().min(0)
-  ),
-});
+/** Type for AI-parsed recipe (raw output without validation) */
+type AIRecipeOutput = Record<string, unknown>;
 
-const RecipeStepSchema = z.object({
-  stepNumber: z.preprocess((val) => Number(val ?? 1), z.number().int().min(1)),
-  instruction: z.string().min(1),
-  groupName: z.string().nullable().optional(),
-  isOptional: z.boolean().optional(),
-});
-
-const RecipeSchema = z.object({
-  title: z.preprocess(
-    (val) => String(val ?? "Untitled Recipe"),
-    z.string().min(1).max(200)
-  ),
-  description: z.preprocess(
-    (val) => String(val ?? "No description"),
-    z.string().max(2000)
-  ),
-  instructions: z
-    .preprocess(
-      (val) => (Array.isArray(val) ? val.join("\n") : String(val ?? "")),
-      z.string().min(1)
-    )
-    .optional(),
-  steps: z.array(RecipeStepSchema).optional(),
-  servings: z.preprocess(
-    (val) => Number(val ?? 1),
-    z.number().int().min(1).max(100)
-  ),
-  prepTimeMinutes: z.preprocess(
-    (val) => Number(val ?? 0),
-    z.number().int().min(0).max(1440)
-  ),
-  cookTimeMinutes: z.preprocess(
-    (val) => Number(val ?? 0),
-    z.number().int().min(0).max(1440)
-  ),
-  difficulty: z.preprocess((val) => {
-    if (val == null) return Difficulty.MEDIUM;
-    const diffStr = String(val).toUpperCase();
-    if (Object.values(Difficulty).includes(diffStr as Difficulty)) {
-      return diffStr as Difficulty;
-    }
-    return Difficulty.MEDIUM;
-  }, z.nativeEnum(Difficulty)),
-  calories: z.preprocess(
-    (val) => (val == null ? 0 : Number(val)),
-    z.number().int().min(0)
-  ),
-  proteinG: z.preprocess(
-    (val) => (val == null ? 0 : Number(val)),
-    z.number().min(0)
-  ),
-  fatG: z.preprocess(
-    (val) => (val == null ? 0 : Number(val)),
-    z.number().min(0)
-  ),
-  carbsG: z.preprocess(
-    (val) => (val == null ? 0 : Number(val)),
-    z.number().min(0)
-  ),
-  ingredients: z.array(RecipeIngredientSchema).min(1),
-  tags: z
-    .preprocess(
-      (val) => (Array.isArray(val) ? val.map(String) : []),
-      z.array(z.string().max(50))
-    )
-    .optional()
-    .default([]),
-  categories: z
-    .preprocess(
-      (val) => (Array.isArray(val) ? val.map(String) : []),
-      z.array(z.string().max(50))
-    )
-    .optional()
-    .default([]),
-  allergens: z
-    .preprocess(
-      (val) => (Array.isArray(val) ? val.map(String) : []),
-      z.array(z.string().max(50))
-    )
-    .optional()
-    .default([]),
-  cuisineName: z.string().optional(),
-  sourceUrl: z.string().url().optional(),
-  sourceText: z.string().optional(),
-  imageUrl: z.string().url().optional(),
-});
-
+/** Request validation schema - only validates the request structure */
 const RequestBodySchema = z
   .object({
     text: z.string().max(10000).optional(),
@@ -137,16 +17,18 @@ const RequestBodySchema = z
     message: "Either 'text' or 'data' must be provided",
   });
 
-type FormattedRecipe = z.infer<typeof RecipeSchema>;
-
 const openai = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 
 /**
  * POST /api/ai/format-recipe
+ * Returns raw AI-formatted recipe data without validation
+ * Validation is performed on the frontend for UX and backend for security
  */
 export async function POST(request: Request) {
+  const startTime = Date.now();
+  
   try {
     // Authentication
     const currentUser = await getCurrentUser();
@@ -157,7 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate request
+    // Validate request structure only
     const body = await request.json();
     const validation = RequestBodySchema.safeParse(body);
     if (!validation.success) {
@@ -176,24 +58,29 @@ export async function POST(request: Request) {
       );
     }
 
-    let formattedRecipe: FormattedRecipe;
+    let formattedRecipe: AIRecipeOutput;
 
     if (text) {
       formattedRecipe = await parseRecipeWithOpenAI(text);
     } else if (data) {
       formattedRecipe = await completeRecipeWithAI(data);
     } else {
-      // This else block makes it clear to TypeScript that all paths are handled.
-      // Even though zod's .refine should prevent this, it satisfies the compiler.
       return NextResponse.json(
         { error: "Invalid request: 'text' or 'data' must be provided." },
         { status: 400 }
       );
     }
 
+    const duration = Date.now() - startTime;
+    log.info({ duration, hasRecipe: !!formattedRecipe }, "AI parsing completed");
+
     return NextResponse.json({ recipe: formattedRecipe, source: "ai" });
   } catch (error) {
-    log.error({ error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) }, "Recipe formatting error");
+    const duration = Date.now() - startTime;
+    log.error({ 
+      duration,
+      error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) 
+    }, "Recipe formatting error");
     return NextResponse.json(
       {
         error: "Failed to format recipe",
@@ -213,8 +100,8 @@ function parseJSONSafe(text: string) {
   return JSON.parse(cleaned);
 }
 
-/** Parse raw text into structured recipe */
-async function parseRecipeWithOpenAI(text: string): Promise<FormattedRecipe> {
+/** Parse raw text into structured recipe - returns raw AI output */
+async function parseRecipeWithOpenAI(text: string): Promise<AIRecipeOutput> {
   if (!openai) throw new Error("OpenAI client not initialized");
 
   const prompt = `Parse this recipe into JSON with these fields:
@@ -223,17 +110,22 @@ STRUCTURE:
 - title, description, servings, prepTimeMinutes, cookTimeMinutes
 - calories, proteinG, fatG, carbsG, cuisineName
 - difficulty: EASY, MEDIUM, or HARD
-- steps: array with stepNumber, instruction, groupName (if grouped), isOptional
-- ingredients: array with name, amount, unit, size, preparation, notes, groupName, displayOrder
+- steps: array with stepNumber (number), instruction (string), groupName (string or null), isOptional (boolean)
+- ingredients: array with name (string), amount (string or null), unit (string or null), size (string or null), preparation (string or null), notes (string or null), groupName (string or null), displayOrder (number)
+
+IMPORTANT - TYPE REQUIREMENTS:
+- Use actual numbers (not strings) for: servings, prepTimeMinutes, cookTimeMinutes, calories, proteinG, fatG, carbsG, stepNumber, displayOrder
+- Use actual booleans (not strings) for: isOptional
+- Use strings or null for: amount, unit, size, preparation, notes, groupName
 
 INGREDIENT FORMAT:
 Each ingredient should have:
 - name: ingredient name (e.g., "flour", "eggs")
-- amount: numeric quantity as string (e.g., "1", "1/2", "2.5") - optional if not applicable
-- unit: measurement unit (e.g., "cup", "tbsp", "g", "oz", "pieces") - optional if not applicable
-- size: descriptor (large, medium, small) - optional
-- preparation: physical state (diced, melted, sifted) - optional
-- notes: substitutions/alternatives - optional
+- amount: numeric quantity as string (e.g., "1", "1/2", "2.5") or null if not applicable
+- unit: measurement unit (e.g., "cup", "tbsp", "g", "oz", "pieces") or null if not applicable
+- size: descriptor (large, medium, small) or null
+- preparation: physical state (diced, melted, sifted) or null
+- notes: substitutions/alternatives or null
 
 For counted items (eggs, apples): include amount and unit (e.g., amount: "2", unit: "eggs")
 For measured items: include amount and unit in their ORIGINAL measurement system
@@ -253,12 +145,12 @@ Recipe:
 ${text}`;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
         content:
-          "Expert recipe parser and nutritionist. Extract all information from recipes and provide accurate nutritional estimates. Keep measurements in their original system (no conversion needed). NO tags/categories/allergens. ALWAYS include estimated nutrition values (calories, proteinG, fatG, carbsG) based on ingredients. Return valid JSON only.",
+          "Expert recipe parser and nutritionist. Extract all information from recipes and provide accurate nutritional estimates. Keep measurements in their original system (no conversion needed). NO tags/categories/allergens. ALWAYS include estimated nutrition values (calories, proteinG, fatG, carbsG) based on ingredients. Return valid JSON only with proper types (numbers as numbers, booleans as booleans, not strings).",
       },
       { role: "user", content: prompt },
     ],
@@ -271,13 +163,11 @@ ${text}`;
 
   const parsed = parseJSONSafe(result);
   log.info({ hasRecipe: !!parsed }, "Parsed recipe from AI");
-  return RecipeSchema.parse(parsed);
+  return parsed;
 }
 
-/** Complete partial recipe data */
-async function completeRecipeWithAI(
-  data: Partial<FormattedRecipe>
-): Promise<FormattedRecipe> {
+/** Complete partial recipe data - returns raw AI output */
+async function completeRecipeWithAI(data: Record<string, unknown>): Promise<AIRecipeOutput> {
   if (!openai) throw new Error("OpenAI client not initialized");
 
   const prompt = `Complete this recipe with missing fields:
@@ -285,20 +175,25 @@ ${JSON.stringify(data, null, 2)}
 
 Requirements:
 - difficulty: EASY, MEDIUM, or HARD
-- steps: array with stepNumber, instruction, groupName, isOptional
+- steps: array with stepNumber (number), instruction (string), groupName (string or null), isOptional (boolean)
 - ingredients with amount and unit (keep original measurement system)
 - Estimate missing cuisineName, nutrition, times
 - NO tags/categories/allergens
 
-Return complete JSON.`;
+IMPORTANT - TYPE REQUIREMENTS:
+- Use actual numbers (not strings) for: servings, prepTimeMinutes, cookTimeMinutes, calories, proteinG, fatG, carbsG, stepNumber, displayOrder
+- Use actual booleans (not strings) for: isOptional
+- Use strings or null for: amount, unit, size, preparation, notes, groupName
+
+Return complete JSON with proper types (numbers as numbers, booleans as booleans, not strings).`;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
         content:
-          "Recipe validator. Generate missing fields, keep measurements in original system (no conversion). NO tags/categories/allergens. Valid JSON only.",
+          "Recipe validator. Generate missing fields, keep measurements in original system (no conversion). NO tags/categories/allergens. Valid JSON only with proper types (numbers as numbers, booleans as booleans, not strings).",
       },
       { role: "user", content: prompt },
     ],
@@ -310,5 +205,5 @@ Return complete JSON.`;
   if (!result) throw new Error("Empty response from OpenAI");
 
   const parsed = parseJSONSafe(result);
-  return RecipeSchema.parse(parsed);
+  return parsed;
 }
