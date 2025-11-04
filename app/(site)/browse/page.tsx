@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getDescendantCategoryIds, buildCategoryTree } from "@/lib/category-utils";
+import { getDescendantCategoryIdsForMultiple, buildCategoryTree } from "@/lib/category-utils";
 import { searchRecipes } from "@/lib/queries/recipes";
 import BrowseClientPage from "@/components/browse/BrowseClientPage";
 
@@ -21,23 +21,23 @@ export default async function BrowsePage({
 }) {
   // Parse search parameters
   const query = searchParams.q || "";
-  const categoryFilterId = searchParams.category;
+  const categoryFilterIds = searchParams.category?.split(",").filter(Boolean) || [];
   const tags = searchParams.tags?.split(",").filter(Boolean) || [];
-  const cuisines = searchParams.cuisines?.split(",").filter(Boolean) || [];
+  const cuisineFilterIds = searchParams.cuisines?.split(",").filter(Boolean) || [];
   const allergens = searchParams.allergens?.split(",").filter(Boolean) || [];
   const difficulty = searchParams.difficulty || "";
   const sort = searchParams.sort || "newest";
   const page = parseInt(searchParams.page || "1");
   const perPage = 12;
 
-  // Handle hierarchical category filtering
+  // Handle hierarchical category filtering (supports multiple categories)
   let categoryIdsToFilter: string[] = [];
   let selectedCategoryNames: string[] = [];
 
-  if (categoryFilterId) {
-    // Get all descendant category IDs (including the parent)
-    categoryIdsToFilter = await getDescendantCategoryIds(
-      categoryFilterId,
+  if (categoryFilterIds.length > 0) {
+    // Get all descendant category IDs for all selected categories
+    categoryIdsToFilter = await getDescendantCategoryIdsForMultiple(
+      categoryFilterIds,
       prisma
     );
 
@@ -49,12 +49,22 @@ export default async function BrowsePage({
     selectedCategoryNames = categoriesData.map((c) => c.name);
   }
 
+  // Convert cuisine IDs to names for searchRecipes
+  let cuisineNames: string[] = [];
+  if (cuisineFilterIds.length > 0) {
+    const cuisinesData = await prisma.cuisine.findMany({
+      where: { id: { in: cuisineFilterIds } },
+      select: { name: true },
+    });
+    cuisineNames = cuisinesData.map((c) => c.name);
+  }
+
   // Fetch recipes with hierarchical filtering
   const result = await searchRecipes({
     query,
     categories: selectedCategoryNames,
     tags,
-    cuisines,
+    cuisines: cuisineNames,
     allergens,
     difficulty,
     sort,
@@ -122,9 +132,9 @@ export default async function BrowsePage({
       allergens={allAllergens}
       initialFilters={{
         query,
-        categoryId: categoryFilterId || "",
+        categoryIds: categoryFilterIds,
         tags,
-        cuisines,
+        cuisineIds: cuisineFilterIds,
         allergens,
         difficulty,
         sort,
