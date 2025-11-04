@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown, ChevronUp, ChevronRight, X } from "lucide-react";
-import { getDescendantIdsFromTree, getDescendantCount } from "@/lib/category-utils";
+import { getDescendantIdsFromTree } from "@/lib/category-utils";
 
 interface CategoryNode {
   id: string;
