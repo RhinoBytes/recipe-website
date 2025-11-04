@@ -6,7 +6,7 @@ import { getDescendantCategoryIdsForMultiple } from "@/lib/category-utils";
 // Using Node.js runtime for Prisma compatibility
 export const runtime = "nodejs";
 
-// Cache filter metadata for 5 minutes
+// Cache filter metadata for 5 minutes (300 seconds)
 export const revalidate = 300;
 
 /**

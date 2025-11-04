@@ -142,16 +142,19 @@ export default function BrowseClientPage({
       setRecipes(data.recipes);
       setPagination(data.pagination);
 
-      // Log performance metrics
+      // Log performance metrics (TODO: Replace with proper logging service in production)
       const duration = performance.now() - startTime;
-      console.log(`[Browse Performance] Fetch completed in ${duration.toFixed(0)}ms`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[Browse Performance] Fetch completed in ${duration.toFixed(0)}ms`);
+      }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log('[Browse] Request cancelled');
+        // Request was cancelled - this is normal, no need to log
         return;
       }
       console.error("Error fetching recipes:", error);
-      // Keep showing current recipes on error
+      // TODO: Show user-friendly error toast/message in future enhancement
+      // Keep showing current recipes on error for better UX
     } finally {
       setIsLoading(false);
       setIsFetching(false);
@@ -241,7 +244,9 @@ export default function BrowseClientPage({
     await applyFilters(newFilters, 1);
   };
 
-  // Debounced search input handler (optional: auto-search as you type)
+  // Debounced search input handler
+  // NOTE: Auto-search feature is available but disabled by default
+  // To enable: uncomment the setTimeout code below (300ms debounce recommended for UX)
   const handleSearchInputChange = (value: string) => {
     setSearchInput(value);
     
@@ -250,14 +255,13 @@ export default function BrowseClientPage({
       clearTimeout(searchTimeoutRef.current);
     }
     
-    // Debounce: wait 500ms after user stops typing
-    // Note: Currently disabled auto-search, user must press Enter or click Search
-    // To enable auto-search, uncomment the lines below:
+    // Optional: Enable auto-search by uncommenting below
+    // User must currently press Enter or click Search button
     /*
     searchTimeoutRef.current = setTimeout(() => {
       const newFilters = { ...currentFilters, query: value };
       applyFilters(newFilters, 1);
-    }, 500);
+    }, 300);
     */
   };
 
