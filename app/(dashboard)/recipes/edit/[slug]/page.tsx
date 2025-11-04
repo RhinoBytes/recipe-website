@@ -287,7 +287,6 @@ export default function EditRecipePage() {
         });
         setValidationErrors(fieldErrors);
         setError("Please fix the validation errors below");
-        setLoading(false);
         return;
       }
 
@@ -310,7 +309,6 @@ export default function EditRecipePage() {
         } else {
           throw new Error(errorData.error || "Failed to update recipe");
         }
-        setLoading(false);
         return;
       }
 
@@ -318,6 +316,7 @@ export default function EditRecipePage() {
       router.push(`/recipes/${recipe.username}/${recipe.slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update recipe");
+    } finally {
       setLoading(false);
     }
   };

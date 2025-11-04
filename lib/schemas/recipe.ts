@@ -21,7 +21,7 @@ export const RecipeIngredientSchema = z.object({
     .string()
     .nullable()
     .optional()
-    .transform((val) => (val === "" ? null : val?.toLowerCase())),
+    .transform((val) => (val === "" ? null : val?.toLowerCase() ?? null)),
   size: z
     .string()
     .nullable()

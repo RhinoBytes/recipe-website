@@ -260,7 +260,6 @@ export default function NewRecipePage() {
         });
         setValidationErrors(fieldErrors);
         setError("Please fix the validation errors below");
-        setLoading(false);
         return;
       }
 
@@ -283,7 +282,6 @@ export default function NewRecipePage() {
         } else {
           throw new Error(errorData.error || "Failed to create recipe");
         }
-        setLoading(false);
         return;
       }
 
@@ -291,6 +289,7 @@ export default function NewRecipePage() {
       router.push(`/recipes/${recipe.username}/${recipe.slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create recipe");
+    } finally {
       setLoading(false);
     }
   };
