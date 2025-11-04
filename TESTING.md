@@ -229,16 +229,122 @@ ORDER BY r.title;
 
 ## Known Limitations
 
-1. **Mobile Filters**: The mobile filter modal is not yet implemented (placeholder alert shown)
+1. ~~**Mobile Filters**: The mobile filter modal is not yet implemented (placeholder alert shown)~~ **IMPLEMENTED** - Mobile filters now fully functional
 2. **Active Filters Display**: Simplified version showing only "Clear all" button
 3. **Category Count**: Recipe counts per category are not yet displayed
 4. **Deep Linking**: Direct access with category ID works, but category name would be more user-friendly
 
+## Multi-Select Filter Updates (Latest)
+
+### New Features
+1. **Multi-Select Categories**: Users can now select multiple categories simultaneously using checkboxes
+2. **Multi-Select Cuisines**: Cuisines now use checkbox-based multi-select (like categories)
+3. **Indeterminate State**: Parent category checkboxes show indeterminate state when some (but not all) children are selected
+4. **Filter Order**: Filters now appear in order: Categories → Cuisines → Tags → Difficulty → Allergens
+5. **Client-Side Navigation**: Filter toggles use `router.replace` to avoid polluting browser history
+6. **Mobile Parity**: Mobile filter modal has identical behavior to desktop sidebar
+7. **Clear Buttons**: Each filter section has its own "Clear" button
+
+### URL Format
+- **Categories**: `?category=id1,id2,id3` (comma-separated category IDs)
+- **Cuisines**: `?cuisines=id1,id2` (comma-separated cuisine IDs)
+- **Tags**: `?tags=tag1,tag2` (comma-separated tag names)
+- **Allergens**: `?allergens=allergen1,allergen2` (comma-separated allergen names)
+- **Difficulty**: `?difficulty=EASY` (single value)
+- **Sort**: `?sort=newest` (single value)
+- **Page**: `?page=2` (resets to 1 when filters change)
+
+### Testing Multi-Select Categories
+
+**Test Case 1: Select Multiple Categories**
+1. Navigate to `/browse`
+2. Expand a parent category (e.g., "Desserts")
+3. Click checkbox for "Cookies & Bars"
+4. Click checkbox for "Pies & Tarts"
+5. Verify URL contains: `?category=<cookies-id>,<pies-id>`
+6. Verify results show recipes from both categories
+
+**Test Case 2: Indeterminate State**
+1. Navigate to `/browse`
+2. Expand "Desserts" category
+3. Select only "Cookies & Bars" child
+4. Verify parent "Desserts" checkbox shows indeterminate state (dash/mixed)
+5. Click parent "Desserts" checkbox
+6. Verify all dessert categories are selected (parent + all children)
+7. Verify URL includes all descendant category IDs
+
+**Test Case 3: Deselect Parent Removes Children**
+1. Select parent category with children
+2. Verify all descendants appear in results
+3. Deselect the parent category
+4. Verify only that parent and its descendants are removed
+5. Other selected categories remain selected
+
+**Test Case 4: Multi-Select Cuisines**
+1. Navigate to `/browse`
+2. Select "Italian" cuisine checkbox
+3. Select "Mexican" cuisine checkbox
+4. Verify URL contains: `?cuisines=<italian-id>,<mexican-id>`
+5. Verify results show recipes from both cuisines
+
+**Test Case 5: Filter Combination**
+1. Select multiple categories (e.g., "Breakfast & Brunch", "Main Course")
+2. Select multiple cuisines (e.g., "Italian", "Mexican")
+3. Select multiple tags (e.g., "Quick & Easy", "Vegetarian")
+4. Verify URL contains all selected filters
+5. Verify results match ALL selected criteria (AND logic within category, OR between filter types)
+6. Click "Clear all" and verify all filters are removed
+
+**Test Case 6: Mobile Filter Modal**
+1. Resize browser to mobile width (< 1024px) or use mobile device
+2. Click "Filters" button
+3. Modal opens showing identical filter UI
+4. Select multiple categories using checkboxes
+5. Select cuisines (should appear above tags)
+6. Click "Apply Filters"
+7. Modal closes and URL updates with selected filters
+8. Verify results match selected filters
+
+**Test Case 7: Client-Side Navigation**
+1. Navigate to `/browse`
+2. Select a category
+3. Verify URL changes without full page reload (no flicker)
+4. Use browser back button
+5. Verify you can navigate back through filter changes
+6. Toggle multiple filters rapidly
+7. Verify history doesn't get cluttered (using router.replace)
+
+**Test Case 8: Section Clear Buttons**
+1. Select multiple categories
+2. Select multiple cuisines
+3. Select multiple tags
+4. Click "Clear" button in Categories section
+5. Verify only categories are cleared
+6. Cuisines and tags remain selected
+7. Repeat for other sections
+
+**Test Case 9: Keyboard Accessibility**
+1. Navigate to `/browse`
+2. Tab through filter controls
+3. Verify checkboxes can be toggled with Space key
+4. Verify expand/collapse controls can be activated with Enter/Space
+5. Verify visual focus indicators are clear
+
+**Test Case 10: Direct URL Access**
+1. Navigate directly to `/browse?category=<id1>,<id2>&cuisines=<id3>`
+2. Verify page loads with correct filters applied
+3. Verify checkboxes show correct selected state
+4. Verify parent categories show indeterminate state if appropriate
+5. Verify results match the URL filters
+
 ## Future Enhancements
 
 1. Add recipe count badges to each category
-2. Implement mobile filter modal with hierarchical tree
+2. ~~Implement mobile filter modal with hierarchical tree~~ **COMPLETED**
 3. Add "breadcrumb" display showing current category path
-4. Add keyboard navigation for category tree
+4. Add keyboard navigation for category tree (partially implemented)
 5. Add search within categories
 6. Optimize with category hierarchy caching
+7. Add "Select All" / "Deselect All" for each filter section
+8. Add filter presets (e.g., "Quick Weeknight Dinners", "Healthy Breakfast")
+9. Persist filter preferences in local storage or user profile
