@@ -49,7 +49,11 @@ export async function GET(
             { createdAt: "asc" },
           ],
         },
-        cuisine: true,
+        cuisines: {
+          include: {
+            cuisine: true,
+          },
+        },
         ingredients: {
           orderBy: {
             displayOrder: 'asc',
@@ -91,6 +95,7 @@ export async function GET(
       ...recipe,
       tags: recipe.tags.map(rt => rt.tag),
       categories: recipe.categories.map(rc => rc.category),
+      cuisines: recipe.cuisines.map(rc => rc.cuisine),
       allergens: recipe.allergens.map(ra => ra.allergen),
     };
 
@@ -182,6 +187,7 @@ export async function PATCH(
       sourceText,
       chefNotes,
       cuisineName,
+      cuisines,
       calories,
       proteinG,
       fatG,
@@ -219,27 +225,7 @@ export async function PATCH(
 
     // Update recipe with all relations in a transaction
     const updatedRecipe = await prisma.$transaction(async (tx) => {
-      // Handle cuisine
-      let cuisineId = existingRecipe.cuisineId;
-      if (cuisineName !== undefined) {
-        if (cuisineName && cuisineName.trim()) {
-          let cuisine = await tx.cuisine.findUnique({
-            where: { name: cuisineName.trim() },
-          });
-
-          if (!cuisine) {
-            cuisine = await tx.cuisine.create({
-              data: { name: cuisineName.trim() },
-            });
-          }
-
-          cuisineId = cuisine.id;
-        } else {
-          cuisineId = null;
-        }
-      }
-
-      // Update the recipe
+      // Update the recipe (without cuisineId)
       const recipe = await tx.recipe.update({
         where: { id: existingRecipe.id },
         data: {
@@ -253,7 +239,6 @@ export async function PATCH(
           sourceUrl,
           sourceText,
           chefNotes,
-          cuisineId,
           status: status ?? existingRecipe.status,
           calories,
           proteinG,
@@ -261,6 +246,36 @@ export async function PATCH(
           carbsG,
         },
       });
+
+      // Update cuisines if provided (many-to-many)
+      const cuisineNames = cuisines && cuisines.length > 0 
+        ? cuisines 
+        : (cuisineName !== undefined && cuisineName && cuisineName.trim() ? [cuisineName.trim()] : undefined);
+      
+      if (cuisineNames !== undefined) {
+        // Delete existing cuisine relations
+        await tx.recipesCuisines.deleteMany({
+          where: { recipeId: recipe.id },
+        });
+
+        // Create new cuisine relations
+        if (cuisineNames.length > 0) {
+          for (const cuisName of cuisineNames) {
+            const cuisine = await tx.cuisine.findUnique({
+              where: { name: cuisName },
+            });
+
+            if (cuisine) {
+              await tx.recipesCuisines.create({
+                data: {
+                  recipeId: recipe.id,
+                  cuisineId: cuisine.id,
+                },
+              });
+            }
+          }
+        }
+      }
 
       // Update steps if provided
       if (steps !== undefined && Array.isArray(steps)) {

@@ -34,7 +34,8 @@ export interface RecipeFormData {
   difficulty: Difficulty;
   source: string;
   chefNotes: string;
-  cuisineName: string;
+  cuisineName: string; // Keep for backward compatibility
+  cuisines?: string[]; // New array of cuisine names
   ingredients: RecipeIngredient[];
   tags: string[];
   categories: string[];

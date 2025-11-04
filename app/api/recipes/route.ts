@@ -121,6 +121,7 @@ export async function POST(request: Request) {
       sourceText,
       chefNotes,
       cuisineName,
+      cuisines,
       calories,
       proteinG,
       fatG,
@@ -188,23 +189,7 @@ export async function POST(request: Request) {
 
     // Create recipe with all relations in a transaction
     const recipe = await prisma.$transaction(async (tx) => {
-      // Handle cuisine
-      let cuisineId = null;
-      if (cuisineName && cuisineName.trim()) {
-        let cuisine = await tx.cuisine.findUnique({
-          where: { name: cuisineName.trim() },
-        });
-
-        if (!cuisine) {
-          cuisine = await tx.cuisine.create({
-            data: { name: cuisineName.trim() },
-          });
-        }
-
-        cuisineId = cuisine.id;
-      }
-
-      // Create the recipe
+      // Create the recipe (without cuisineId - it's now many-to-many)
       const newRecipe = await tx.recipe.create({
         data: {
           authorId: currentUser.userId,
@@ -218,7 +203,6 @@ export async function POST(request: Request) {
           sourceUrl: sourceUrl || null,
           sourceText: sourceText || null,
           chefNotes: chefNotes || null,
-          cuisineId,
           status: status || RecipeStatus.PUBLISHED,
           calories,
           proteinG,
@@ -256,6 +240,29 @@ export async function POST(request: Request) {
             displayOrder: ing.displayOrder ?? idx,
           })),
         });
+      }
+
+      // Handle cuisines (many-to-many)
+      const cuisineNames = cuisines && cuisines.length > 0 
+        ? cuisines 
+        : (cuisineName && cuisineName.trim() ? [cuisineName.trim()] : []);
+      
+      if (cuisineNames.length > 0) {
+        for (const cuisName of cuisineNames) {
+          // Find cuisine
+          const cuisine = await tx.cuisine.findUnique({
+            where: { name: cuisName },
+          });
+
+          if (cuisine) {
+            await tx.recipesCuisines.create({
+              data: {
+                recipeId: newRecipe.id,
+                cuisineId: cuisine.id,
+              },
+            });
+          }
+        }
       }
 
       // Handle tags
@@ -386,10 +393,12 @@ export async function POST(request: Request) {
         categories: {
           include: { category: true },
         },
+        cuisines: {
+          include: { cuisine: true },
+        },
         allergens: {
           include: { allergen: true },
         },
-        cuisine: true,
       },
     });
 
@@ -411,7 +420,7 @@ export async function POST(request: Request) {
         proteinG: fullRecipe.proteinG,
         fatG: fullRecipe.fatG,
         carbsG: fullRecipe.carbsG,
-        cuisine: fullRecipe.cuisine?.name || null,
+        cuisines: fullRecipe.cuisines?.map((rc) => rc.cuisine.name) || [],
         ingredients: fullRecipe.ingredients.map((ing) => ({
           name: ing.name,
           amount: ing.amount,

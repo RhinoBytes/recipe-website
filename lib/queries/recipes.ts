@@ -460,8 +460,12 @@ export async function searchRecipes({
   }
 
   if (cuisines.length > 0) {
-    where.cuisine = {
-      name: { in: cuisines, mode: "insensitive" },
+    where.cuisines = {
+      some: {
+        cuisine: {
+          name: { in: cuisines, mode: "insensitive" },
+        },
+      },
     };
   }
 
@@ -546,7 +550,11 @@ export async function searchRecipes({
           category: true,
         },
       },
-      cuisine: true,
+      cuisines: {
+        include: {
+          cuisine: true,
+        },
+      },
       allergens: {
         include: {
           allergen: true,
@@ -580,7 +588,8 @@ export async function searchRecipes({
     },
     tags: recipe.tags.map((rt) => rt.tag.name),
     categories: recipe.categories.map((rc) => rc.category.name),
-    cuisine: recipe.cuisine?.name || null,
+    cuisine: recipe.cuisines.length > 0 ? recipe.cuisines[0].cuisine.name : null, // Keep for backward compatibility
+    cuisines: recipe.cuisines.map((rc) => rc.cuisine.name),
     allergens: recipe.allergens.map((ra) => ra.allergen.name),
     createdAt: recipe.createdAt,
   }));

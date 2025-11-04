@@ -61,7 +61,6 @@ model Recipe {
   sourceUrl       String?
   sourceText      String?
   chefNotes       String?
-  cuisineId       String?
   averageRating   Decimal?     @db.Decimal(3, 2)
   reviewCount     Int          @default(0)
   calories        Int?
@@ -72,10 +71,10 @@ model Recipe {
   updatedAt       DateTime     @updatedAt
 
   author      User                @relation(fields: [authorId], references: [id])
-  cuisine     Cuisine?            @relation(fields: [cuisineId], references: [id])
   ingredients RecipeIngredient[]
   steps       RecipeStep[]
   categories  RecipesCategories[]
+  cuisines    RecipesCuisines[]
   tags        RecipesTags[]
   reviews     Review[]
   favorites   FavoriteRecipe[]
@@ -111,9 +110,12 @@ model RecipeStep {
 }
 
 model Cuisine {
-  id      String   @id @default(uuid())
-  name    String   @unique
-  recipes Recipe[]
+  id       String            @id @default(uuid())
+  name     String            @unique
+  parentId String?
+  parent   Cuisine?          @relation("CuisineHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Cuisine[]         @relation("CuisineHierarchy")
+  recipes  RecipesCuisines[]
 }
 
 model Category {
@@ -133,6 +135,16 @@ model RecipesCategories {
   category Category @relation(fields: [categoryId], references: [id])
 
   @@id([recipeId, categoryId])
+}
+
+model RecipesCuisines {
+  recipeId  String
+  cuisineId String
+
+  recipe  Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  cuisine Cuisine @relation(fields: [cuisineId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, cuisineId])
 }
 
 model Tag {
