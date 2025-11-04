@@ -119,11 +119,15 @@ export const RecipeSchema = z.object({
     .array(z.string().max(50, "Category name is too long"))
     .optional()
     .default([]),
+  cuisines: z
+    .array(z.string().max(100, "Cuisine name is too long"))
+    .optional()
+    .default([]),
   allergens: z
     .array(z.string().max(50, "Allergen name is too long"))
     .optional()
     .default([]),
-  cuisineName: z.string().optional(),
+  cuisineName: z.string().optional(), // Keep for backward compatibility
   sourceUrl: z
     .union([z.literal(""), z.string().url("Invalid URL format")])
     .optional(),
