@@ -155,8 +155,10 @@
     "Quick"
   ],
   "categories": [
-    "Dinner",
-    "Lunch"
+    "Main Course",
+    "Meat (Beef, Pork, Lamb)",
+    "Weeknight Dinners",
+    "Grilling & BBQ"
   ],
   "allergens": [],
   "imageUrl": "image.jpg"
