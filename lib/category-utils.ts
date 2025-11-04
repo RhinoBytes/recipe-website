@@ -107,10 +107,6 @@ export async function getDescendantCategoryIdsForMultiple(
   // Build category tree in memory
   const categoryTree = buildCategoryTree(allCategories);
 
-  // Build a map for quick lookups
-  const categoryMap = new Map<string, { id: string; name: string; parentId: string | null }>();
-  allCategories.forEach(cat => categoryMap.set(cat.id, cat));
-
   const allDescendantIds = new Set<string>();
 
   // Get descendants for each parent category using in-memory tree

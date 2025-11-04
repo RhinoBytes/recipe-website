@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import BrowseRecipeCard from "@/components/browse/BrowseRecipeCard";
@@ -95,8 +95,8 @@ export default function BrowseClientPage({
 
   // Track in-flight requests to prevent duplicate fetches
   const [isFetching, setIsFetching] = useState(false);
-  const abortControllerRef = useState<{ current: AbortController | null }>({ current: null })[0];
-  const searchTimeoutRef = useState<{ current: NodeJS.Timeout | null }>({ current: null })[0];
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch recipes from API with current filters
   const fetchRecipes = useCallback(async (filters: typeof initialFilters, page: number) => {
@@ -157,7 +157,7 @@ export default function BrowseClientPage({
       setIsFetching(false);
       abortControllerRef.current = null;
     }
-  }, [isFetching, abortControllerRef]);
+  }, [isFetching]);
 
   // Update URL without page reload
   const updateURL = useCallback((filters: typeof initialFilters, page: number) => {

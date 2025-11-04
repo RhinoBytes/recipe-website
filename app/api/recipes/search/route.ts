@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { searchRecipes } from "@/lib/queries/recipes";
 import { getDescendantCategoryIdsForMultiple } from "@/lib/category-utils";
 
-// Enable Edge runtime for faster cold starts
+// Using Node.js runtime for Prisma compatibility
 export const runtime = "nodejs";
 
 // Cache filter metadata for 5 minutes
