@@ -37,6 +37,7 @@ interface BrowseMobileFiltersProps {
   onDifficultyChange: (difficulty: string) => void;
   onSortChange: (sort: string) => void;
   onClearAll: () => void;
+  isLoading?: boolean;
 }
 
 export default function BrowseMobileFilters({
@@ -59,6 +60,7 @@ export default function BrowseMobileFilters({
   onDifficultyChange,
   onSortChange,
   onClearAll,
+  isLoading = false,
 }: BrowseMobileFiltersProps) {
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -87,11 +89,12 @@ export default function BrowseMobileFilters({
         {/* Header */}
         <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-5 py-4 flex items-center justify-between z-10">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Filters
+            Filters {isLoading && <span className="text-sm font-normal text-gray-500 ml-2">(Applying...)</span>}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition"
+            disabled={isLoading}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Close filters"
           >
             <X size={24} />
@@ -125,9 +128,10 @@ export default function BrowseMobileFilters({
         <div className="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-5">
           <button
             onClick={onClose}
-            className="w-full px-6 py-3 bg-accent text-bg rounded-lg hover:bg-accent-hover transition font-semibold"
+            disabled={isLoading}
+            className="w-full px-6 py-3 bg-accent text-bg rounded-lg hover:bg-accent-hover transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Apply Filters
+            {isLoading ? "Applying..." : "Apply Filters"}
           </button>
         </div>
       </div>
