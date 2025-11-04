@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronDown, ChevronUp, ChevronRight, X } from "lucide-react";
-import Link from "next/link";
+import { getDescendantIdsFromTree } from "@/lib/category-utils";
 
 interface CategoryNode {
   id: string;
@@ -22,21 +22,22 @@ interface BrowseSidebarFiltersProps {
   tags: FilterOption[];
   cuisines: FilterOption[];
   allergens: FilterOption[];
-  selectedCategoryId: string;
+  selectedCategoryIds: string[];
   selectedTags: string[];
-  selectedCuisines: string[];
+  selectedCuisineIds: string[];
   selectedAllergens: string[];
   selectedDifficulty: string;
   sortOption: string;
-  onTagToggle: (tag: string) => void;
-  onCuisineToggle: (cuisine: string) => void;
-  onAllergenToggle: (allergen: string) => void;
+  onCategoryToggle: (categoryId: string) => void;
+  onTagToggle: (tagId: string) => void;
+  onCuisineToggle: (cuisineId: string) => void;
+  onAllergenToggle: (allergenId: string) => void;
   onDifficultyChange: (difficulty: string) => void;
   onSortChange: (sort: string) => void;
   onClearAll: () => void;
 }
 
-type SectionKey = "categories" | "tags" | "cuisines" | "difficulty" | "allergens";
+type SectionKey = "categories" | "cuisines" | "tags" | "difficulty" | "allergens";
 
 interface CollapsibleSectionProps {
   title: string;
@@ -44,20 +45,40 @@ interface CollapsibleSectionProps {
   children: React.ReactNode;
   openSection: SectionKey | null;
   onToggle: (key: SectionKey) => void;
+  onClear?: () => void;
+  hasActiveFilters?: boolean;
 }
 
-function CollapsibleSection({ title, sectionKey, children, openSection, onToggle }: CollapsibleSectionProps) {
+function CollapsibleSection({ 
+  title, 
+  sectionKey, 
+  children, 
+  openSection, 
+  onToggle,
+  onClear,
+  hasActiveFilters = false 
+}: CollapsibleSectionProps) {
   const isOpen = openSection === sectionKey;
 
   return (
     <div className="border-b border-border pb-4 mb-4">
-      <button
-        onClick={() => onToggle(sectionKey)}
-        className="flex items-center justify-between w-full text-left font-semibold font-heading text-text mb-2"
-      >
-        <span>{title}</span>
-        {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-      </button>
+      <div className="flex items-center justify-between mb-2">
+        <button
+          onClick={() => onToggle(sectionKey)}
+          className="flex items-center gap-2 text-left font-semibold font-heading text-text"
+        >
+          <span>{title}</span>
+          {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+        {hasActiveFilters && onClear && (
+          <button
+            onClick={onClear}
+            className="text-xs text-accent hover:text-accent-hover font-medium"
+          >
+            Clear
+          </button>
+        )}
+      </div>
       {isOpen && <div className="mt-3">{children}</div>}
     </div>
   );
@@ -65,35 +86,61 @@ function CollapsibleSection({ title, sectionKey, children, openSection, onToggle
 
 interface CategoryItemProps {
   category: CategoryNode;
-  selectedCategoryId: string;
+  selectedCategoryIds: string[];
+  categoryTree: CategoryNode[];
   level: number;
   expandedCategories: Set<string>;
   onToggleExpanded: (id: string) => void;
+  onCategoryToggle: (categoryId: string) => void;
 }
 
 function CategoryItem({
   category,
-  selectedCategoryId,
+  selectedCategoryIds,
+  categoryTree,
   level,
   expandedCategories,
   onToggleExpanded,
+  onCategoryToggle,
 }: CategoryItemProps) {
+  const checkboxRef = useRef<HTMLInputElement>(null);
   const hasChildren = category.children && category.children.length > 0;
   const isExpanded = expandedCategories.has(category.id);
-  const isSelected = selectedCategoryId === category.id;
+  
+  // Get all descendant IDs for this category
+  const descendantIds = getDescendantIdsFromTree(category.id, categoryTree);
+  const descendantIdsWithoutSelf = descendantIds.filter(id => id !== category.id);
+  
+  // Check if this category is selected
+  const isSelected = selectedCategoryIds.includes(category.id);
+  
+  // Count how many descendants are selected
+  const selectedDescendantCount = descendantIdsWithoutSelf.filter(
+    id => selectedCategoryIds.includes(id)
+  ).length;
+  
+  // Determine checkbox state
+  const isChecked = isSelected && selectedDescendantCount === descendantIdsWithoutSelf.length;
+  const isIndeterminate = !isChecked && (isSelected || selectedDescendantCount > 0);
+  
+  // Set indeterminate state on the checkbox element
+  useEffect(() => {
+    if (checkboxRef.current) {
+      checkboxRef.current.indeterminate = isIndeterminate;
+    }
+  }, [isIndeterminate]);
 
   return (
     <div>
       <div
-        className={`flex items-center gap-2 p-2 rounded-lg transition ${
-          isSelected ? "bg-accent-light/50" : "hover:bg-accent-light/30"
-        }`}
+        className="flex items-center gap-2 p-2 rounded-lg transition hover:bg-accent-light/30"
         style={{ paddingLeft: `${level * 12 + 8}px` }}
       >
         {hasChildren ? (
           <button
             onClick={() => onToggleExpanded(category.id)}
             className="flex-shrink-0"
+            aria-label={isExpanded ? "Collapse" : "Expand"}
           >
             <ChevronRight
               size={16}
@@ -105,14 +152,19 @@ function CategoryItem({
         ) : (
           <span className="w-4" />
         )}
-        <Link
-          href={`/browse?category=${category.id}`}
-          className={`text-sm flex-1 ${
-            isSelected ? "font-semibold text-accent" : "text-text"
-          }`}
-        >
-          {category.name}
-        </Link>
+        <label className="flex items-center gap-2 cursor-pointer flex-1">
+          <input
+            ref={checkboxRef}
+            type="checkbox"
+            checked={isChecked || isIndeterminate}
+            onChange={() => onCategoryToggle(category.id)}
+            className="w-4 h-4 text-accent bg-bg border-border rounded focus:ring-accent focus:ring-2"
+            aria-checked={isIndeterminate ? "mixed" : isChecked}
+          />
+          <span className="text-sm text-text flex-1">
+            {category.name}
+          </span>
+        </label>
       </div>
       {hasChildren && isExpanded && (
         <div>
@@ -120,10 +172,12 @@ function CategoryItem({
             <CategoryItem
               key={child.id}
               category={child}
-              selectedCategoryId={selectedCategoryId}
+              selectedCategoryIds={selectedCategoryIds}
+              categoryTree={categoryTree}
               level={level + 1}
               expandedCategories={expandedCategories}
               onToggleExpanded={onToggleExpanded}
+              onCategoryToggle={onCategoryToggle}
             />
           ))}
         </div>
@@ -137,12 +191,13 @@ export default function BrowseSidebarFilters({
   tags,
   cuisines,
   allergens,
-  selectedCategoryId,
+  selectedCategoryIds,
   selectedTags,
-  selectedCuisines,
+  selectedCuisineIds,
   selectedAllergens,
   selectedDifficulty,
   sortOption,
+  onCategoryToggle,
   onTagToggle,
   onCuisineToggle,
   onAllergenToggle,
@@ -154,9 +209,9 @@ export default function BrowseSidebarFilters({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
   const hasActiveFilters = 
-    selectedCategoryId !== "" ||
+    selectedCategoryIds.length > 0 ||
     selectedTags.length > 0 ||
-    selectedCuisines.length > 0 ||
+    selectedCuisineIds.length > 0 ||
     selectedAllergens.length > 0 ||
     selectedDifficulty !== "";
 
@@ -174,6 +229,22 @@ export default function BrowseSidebarFilters({
       }
       return next;
     });
+  };
+
+  const clearCategories = () => {
+    selectedCategoryIds.forEach(id => onCategoryToggle(id));
+  };
+
+  const clearTags = () => {
+    selectedTags.forEach(tag => onTagToggle(tag));
+  };
+
+  const clearCuisines = () => {
+    selectedCuisineIds.forEach(cuisine => onCuisineToggle(cuisine));
+  };
+
+  const clearAllergens = () => {
+    selectedAllergens.forEach(allergen => onAllergenToggle(allergen));
   };
 
   return (
@@ -214,17 +285,50 @@ export default function BrowseSidebarFilters({
         sectionKey="categories"
         openSection={openSection}
         onToggle={handleSectionToggle}
+        onClear={clearCategories}
+        hasActiveFilters={selectedCategoryIds.length > 0}
       >
         <div className="space-y-1 max-h-80 overflow-y-auto">
           {categoryTree.map((category) => (
             <CategoryItem
               key={category.id}
               category={category}
-              selectedCategoryId={selectedCategoryId}
+              selectedCategoryIds={selectedCategoryIds}
+              categoryTree={categoryTree}
               level={0}
               expandedCategories={expandedCategories}
               onToggleExpanded={handleToggleExpanded}
+              onCategoryToggle={onCategoryToggle}
             />
+          ))}
+        </div>
+      </CollapsibleSection>
+
+      {/* Cuisines - Now appears before Tags */}
+      <CollapsibleSection 
+        title="Cuisines" 
+        sectionKey="cuisines"
+        openSection={openSection}
+        onToggle={handleSectionToggle}
+        onClear={clearCuisines}
+        hasActiveFilters={selectedCuisineIds.length > 0}
+      >
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {cuisines.map((cuisine) => (
+            <label
+              key={cuisine.id}
+              className="flex items-center gap-2 cursor-pointer hover:bg-accent-light/30 p-2 rounded-lg transition"
+            >
+              <input
+                type="checkbox"
+                checked={selectedCuisineIds.includes(cuisine.id)}
+                onChange={() => onCuisineToggle(cuisine.id)}
+                className="w-4 h-4 text-accent bg-bg border-border rounded focus:ring-accent focus:ring-2"
+              />
+              <span className="text-sm text-text flex-1">
+                {cuisine.name}
+              </span>
+            </label>
           ))}
         </div>
       </CollapsibleSection>
@@ -235,6 +339,8 @@ export default function BrowseSidebarFilters({
         sectionKey="tags"
         openSection={openSection}
         onToggle={handleSectionToggle}
+        onClear={clearTags}
+        hasActiveFilters={selectedTags.length > 0}
       >
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {tags.slice(0, 15).map((tag) => (
@@ -244,39 +350,12 @@ export default function BrowseSidebarFilters({
             >
               <input
                 type="checkbox"
-                checked={selectedTags.includes(tag.name)}
-                onChange={() => onTagToggle(tag.name)}
+                checked={selectedTags.includes(tag.id)}
+                onChange={() => onTagToggle(tag.id)}
                 className="w-4 h-4 text-accent bg-bg border-border rounded focus:ring-accent focus:ring-2"
               />
               <span className="text-sm text-text flex-1">
                 {tag.name}
-              </span>
-            </label>
-          ))}
-        </div>
-      </CollapsibleSection>
-
-      {/* Cuisines */}
-      <CollapsibleSection 
-        title="Cuisines" 
-        sectionKey="cuisines"
-        openSection={openSection}
-        onToggle={handleSectionToggle}
-      >
-        <div className="space-y-2 max-h-48 overflow-y-auto">
-          {cuisines.map((cuisine) => (
-            <label
-              key={cuisine.id}
-              className="flex items-center gap-2 cursor-pointer hover:bg-accent-light/30 p-2 rounded-lg transition"
-            >
-              <input
-                type="checkbox"
-                checked={selectedCuisines.includes(cuisine.name)}
-                onChange={() => onCuisineToggle(cuisine.name)}
-                className="w-4 h-4 text-accent bg-bg border-border rounded focus:ring-accent focus:ring-2"
-              />
-              <span className="text-sm text-text flex-1">
-                {cuisine.name}
               </span>
             </label>
           ))}
@@ -318,6 +397,8 @@ export default function BrowseSidebarFilters({
           sectionKey="allergens"
           openSection={openSection}
           onToggle={handleSectionToggle}
+          onClear={clearAllergens}
+          hasActiveFilters={selectedAllergens.length > 0}
         >
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {allergens.map((allergen) => (
@@ -327,8 +408,8 @@ export default function BrowseSidebarFilters({
               >
                 <input
                   type="checkbox"
-                  checked={selectedAllergens.includes(allergen.name)}
-                  onChange={() => onAllergenToggle(allergen.name)}
+                  checked={selectedAllergens.includes(allergen.id)}
+                  onChange={() => onAllergenToggle(allergen.id)}
                   className="w-4 h-4 text-accent bg-bg border-border rounded focus:ring-accent focus:ring-2"
                 />
                 <span className="text-sm text-text">

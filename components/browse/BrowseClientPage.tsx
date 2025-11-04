@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import BrowseRecipeCard from "@/components/browse/BrowseRecipeCard";
 import BrowseSidebarFiltersNew from "@/components/browse/BrowseSidebarFiltersNew";
 import BrowseEmptyState from "@/components/browse/BrowseEmptyState";
+import BrowseMobileFilters from "@/components/browse/BrowseMobileFilters";
 
 interface CategoryNode {
   id: string;
@@ -60,9 +61,9 @@ interface BrowseClientPageProps {
   allergens: FilterOption[];
   initialFilters: {
     query: string;
-    categoryId: string;
+    categoryIds: string[];
     tags: string[];
-    cuisines: string[];
+    cuisineIds: string[];
     allergens: string[];
     difficulty: string;
     sort: string;
@@ -79,9 +80,11 @@ export default function BrowseClientPage({
   initialFilters,
 }: BrowseClientPageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const [searchInput, setSearchInput] = useState(initialFilters.query);
   const [favoritedRecipes, setFavoritedRecipes] = useState<Set<string>>(new Set());
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Build URL with current filters
   const buildURL = (params: Record<string, string | string[]>) => {
@@ -100,13 +103,39 @@ export default function BrowseClientPage({
     return `/browse${urlParams.toString() ? `?${urlParams.toString()}` : ""}`;
   };
 
+  // Generic toggle handler for filters
+  const handleToggleFilter = (filterKey: string, id: string) => {
+    const currentParams = new URLSearchParams(Array.from(searchParams.entries()));
+    const existing = currentParams.get(filterKey) || '';
+    const values = existing ? existing.split(',').filter(Boolean) : [];
+    
+    const index = values.indexOf(id);
+    if (index === -1) {
+      values.push(id);
+    } else {
+      values.splice(index, 1);
+    }
+    
+    if (values.length === 0) {
+      currentParams.delete(filterKey);
+    } else {
+      currentParams.set(filterKey, values.join(','));
+    }
+    
+    // Reset to page 1 when filters change
+    currentParams.delete('page');
+    
+    // Use replace to avoid history pollution
+    router.replace(`/browse?${currentParams.toString()}`);
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const url = buildURL({
       q: searchInput,
-      category: initialFilters.categoryId,
+      category: initialFilters.categoryIds,
       tags: initialFilters.tags,
-      cuisines: initialFilters.cuisines,
+      cuisines: initialFilters.cuisineIds,
       allergens: initialFilters.allergens,
       difficulty: initialFilters.difficulty,
       sort: initialFilters.sort,
@@ -115,86 +144,48 @@ export default function BrowseClientPage({
     router.push(url);
   };
 
-  const handleTagToggle = (tag: string) => {
-    const newTags = initialFilters.tags.includes(tag)
-      ? initialFilters.tags.filter((t) => t !== tag)
-      : [...initialFilters.tags, tag];
-    
-    const url = buildURL({
-      q: initialFilters.query,
-      category: initialFilters.categoryId,
-      tags: newTags,
-      cuisines: initialFilters.cuisines,
-      allergens: initialFilters.allergens,
-      difficulty: initialFilters.difficulty,
-      sort: initialFilters.sort,
-      page: "1",
-    });
-    router.push(url);
+  const handleCategoryToggle = (categoryId: string) => {
+    handleToggleFilter('category', categoryId);
   };
 
-  const handleCuisineToggle = (cuisine: string) => {
-    const newCuisines = initialFilters.cuisines.includes(cuisine)
-      ? initialFilters.cuisines.filter((c) => c !== cuisine)
-      : [...initialFilters.cuisines, cuisine];
-    
-    const url = buildURL({
-      q: initialFilters.query,
-      category: initialFilters.categoryId,
-      tags: initialFilters.tags,
-      cuisines: newCuisines,
-      allergens: initialFilters.allergens,
-      difficulty: initialFilters.difficulty,
-      sort: initialFilters.sort,
-      page: "1",
-    });
-    router.push(url);
+  const handleTagToggle = (tagId: string) => {
+    handleToggleFilter('tags', tagId);
   };
 
-  const handleAllergenToggle = (allergen: string) => {
-    const newAllergens = initialFilters.allergens.includes(allergen)
-      ? initialFilters.allergens.filter((a) => a !== allergen)
-      : [...initialFilters.allergens, allergen];
-    
-    const url = buildURL({
-      q: initialFilters.query,
-      category: initialFilters.categoryId,
-      tags: initialFilters.tags,
-      cuisines: initialFilters.cuisines,
-      allergens: newAllergens,
-      difficulty: initialFilters.difficulty,
-      sort: initialFilters.sort,
-      page: "1",
-    });
-    router.push(url);
+  const handleCuisineToggle = (cuisineId: string) => {
+    handleToggleFilter('cuisines', cuisineId);
+  };
+
+  const handleAllergenToggle = (allergenId: string) => {
+    handleToggleFilter('allergens', allergenId);
   };
 
   const handleDifficultyChange = (difficulty: string) => {
     const url = buildURL({
       q: initialFilters.query,
-      category: initialFilters.categoryId,
+      category: initialFilters.categoryIds,
       tags: initialFilters.tags,
-      cuisines: initialFilters.cuisines,
+      cuisines: initialFilters.cuisineIds,
       allergens: initialFilters.allergens,
       difficulty,
       sort: initialFilters.sort,
       page: "1",
     });
-    router.push(url);
+    router.replace(url);
   };
 
   const handleSortChange = (sort: string) => {
     const url = buildURL({
       q: initialFilters.query,
-      category: initialFilters.categoryId,
+      category: initialFilters.categoryIds,
       tags: initialFilters.tags,
-      cuisines: initialFilters.cuisines,
+      cuisines: initialFilters.cuisineIds,
       allergens: initialFilters.allergens,
       difficulty: initialFilters.difficulty,
       sort,
       page: pagination.page.toString(),
     });
-    router.push(url);
+    router.replace(url);
   };
 
   const clearAllFilters = () => {
@@ -204,15 +195,15 @@ export default function BrowseClientPage({
   const handlePageChange = (newPage: number) => {
     const url = buildURL({
       q: initialFilters.query,
-      category: initialFilters.categoryId,
+      category: initialFilters.categoryIds,
       tags: initialFilters.tags,
-      cuisines: initialFilters.cuisines,
+      cuisines: initialFilters.cuisineIds,
       allergens: initialFilters.allergens,
       difficulty: initialFilters.difficulty,
       sort: initialFilters.sort,
       page: newPage.toString(),
     });
-    router.push(url);
+    router.replace(url);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -234,9 +225,9 @@ export default function BrowseClientPage({
 
   const hasActiveFilters =
     !!initialFilters.query ||
-    !!initialFilters.categoryId ||
+    initialFilters.categoryIds.length > 0 ||
     initialFilters.tags.length > 0 ||
-    initialFilters.cuisines.length > 0 ||
+    initialFilters.cuisineIds.length > 0 ||
     initialFilters.allergens.length > 0 ||
     !!initialFilters.difficulty;
 
@@ -272,10 +263,9 @@ export default function BrowseClientPage({
             >
               Search
             </button>
-            {/* TODO: Implement mobile filter modal - Issue #TBD */}
             <button
               type="button"
-              onClick={() => alert("Mobile filters coming soon")}
+              onClick={() => setIsMobileFilterOpen(true)}
               className="lg:hidden px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition flex items-center gap-2"
             >
               <Filter size={20} />
@@ -304,12 +294,13 @@ export default function BrowseClientPage({
               tags={tags}
               cuisines={cuisines}
               allergens={allergens}
-              selectedCategoryId={initialFilters.categoryId}
+              selectedCategoryIds={initialFilters.categoryIds}
               selectedTags={initialFilters.tags}
-              selectedCuisines={initialFilters.cuisines}
+              selectedCuisineIds={initialFilters.cuisineIds}
               selectedAllergens={initialFilters.allergens}
               selectedDifficulty={initialFilters.difficulty}
               sortOption={initialFilters.sort}
+              onCategoryToggle={handleCategoryToggle}
               onTagToggle={handleTagToggle}
               onCuisineToggle={handleCuisineToggle}
               onAllergenToggle={handleAllergenToggle}
@@ -318,6 +309,29 @@ export default function BrowseClientPage({
               onClearAll={clearAllFilters}
             />
           </aside>
+
+          {/* Mobile Filter Modal */}
+          <BrowseMobileFilters
+            isOpen={isMobileFilterOpen}
+            onClose={() => setIsMobileFilterOpen(false)}
+            categoryTree={categoryTree}
+            tags={tags}
+            cuisines={cuisines}
+            allergens={allergens}
+            selectedCategoryIds={initialFilters.categoryIds}
+            selectedTags={initialFilters.tags}
+            selectedCuisineIds={initialFilters.cuisineIds}
+            selectedAllergens={initialFilters.allergens}
+            selectedDifficulty={initialFilters.difficulty}
+            sortOption={initialFilters.sort}
+            onCategoryToggle={handleCategoryToggle}
+            onTagToggle={handleTagToggle}
+            onCuisineToggle={handleCuisineToggle}
+            onAllergenToggle={handleAllergenToggle}
+            onDifficultyChange={handleDifficultyChange}
+            onSortChange={handleSortChange}
+            onClearAll={clearAllFilters}
+          />
 
           {/* Main Content Area */}
           <main className="flex-1 min-w-0">

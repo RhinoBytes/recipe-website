@@ -83,3 +83,81 @@ export function buildCategoryTree(
 
   return rootCategories;
 }
+
+/**
+ * Get all descendant category IDs for multiple parent categories
+ * @param parentIds - Array of parent category IDs
+ * @param prisma - The Prisma client instance
+ * @returns Array of unique descendant category IDs (including parents)
+ */
+export async function getDescendantCategoryIdsForMultiple(
+  parentIds: string[],
+  prisma: PrismaClient
+): Promise<string[]> {
+  const allDescendantIds = new Set<string>();
+
+  // Get descendants for each parent category
+  for (const parentId of parentIds) {
+    const descendants = await getDescendantCategoryIds(parentId, prisma);
+    descendants.forEach(id => allDescendantIds.add(id));
+  }
+
+  return Array.from(allDescendantIds);
+}
+
+/**
+ * Get all descendant IDs for a given category (including the category itself)
+ * Uses the category tree structure to avoid multiple database queries
+ * @param categoryId - The category ID to get descendants for
+ * @param categoryTree - The full category tree
+ * @returns Array of descendant category IDs including the given category
+ */
+export function getDescendantIdsFromTree(
+  categoryId: string,
+  categoryTree: CategoryNode[]
+): string[] {
+  const descendants: string[] = [categoryId];
+  
+  // Find the node in the tree
+  function findAndCollectDescendants(nodes: CategoryNode[]): boolean {
+    for (const node of nodes) {
+      if (node.id === categoryId) {
+        // Found it! Now collect all descendants
+        collectAllDescendants(node);
+        return true;
+      }
+      if (node.children && node.children.length > 0) {
+        if (findAndCollectDescendants(node.children)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  function collectAllDescendants(node: CategoryNode) {
+    if (node.children && node.children.length > 0) {
+      for (const child of node.children) {
+        descendants.push(child.id);
+        collectAllDescendants(child);
+      }
+    }
+  }
+  
+  findAndCollectDescendants(categoryTree);
+  return descendants;
+}
+
+/**
+ * Get total count of descendants for a category (for indeterminate state calculation)
+ * @param categoryId - The category ID
+ * @param categoryTree - The full category tree
+ * @returns Total number of descendants (not including the category itself)
+ */
+export function getDescendantCount(
+  categoryId: string,
+  categoryTree: CategoryNode[]
+): number {
+  const descendants = getDescendantIdsFromTree(categoryId, categoryTree);
+  return descendants.length - 1; // Subtract 1 to exclude the category itself
+}

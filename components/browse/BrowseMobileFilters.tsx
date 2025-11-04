@@ -2,7 +2,14 @@
 
 import { X } from "lucide-react";
 import { useEffect } from "react";
-import BrowseSidebarFilters from "./BrowseSidebarFilters";
+import BrowseSidebarFiltersNew from "./BrowseSidebarFiltersNew";
+
+interface CategoryNode {
+  id: string;
+  name: string;
+  parentId: string | null;
+  children?: CategoryNode[];
+}
 
 interface FilterOption {
   id: string;
@@ -13,20 +20,20 @@ interface FilterOption {
 interface BrowseMobileFiltersProps {
   isOpen: boolean;
   onClose: () => void;
-  categories: FilterOption[];
+  categoryTree: CategoryNode[];
   tags: FilterOption[];
   cuisines: FilterOption[];
   allergens: FilterOption[];
-  selectedCategories: string[];
+  selectedCategoryIds: string[];
   selectedTags: string[];
-  selectedCuisines: string[];
+  selectedCuisineIds: string[];
   selectedAllergens: string[];
   selectedDifficulty: string;
   sortOption: string;
-  onCategoryToggle: (category: string) => void;
-  onTagToggle: (tag: string) => void;
-  onCuisineToggle: (cuisine: string) => void;
-  onAllergenToggle: (allergen: string) => void;
+  onCategoryToggle: (categoryId: string) => void;
+  onTagToggle: (tagId: string) => void;
+  onCuisineToggle: (cuisineId: string) => void;
+  onAllergenToggle: (allergenId: string) => void;
   onDifficultyChange: (difficulty: string) => void;
   onSortChange: (sort: string) => void;
   onClearAll: () => void;
@@ -35,7 +42,23 @@ interface BrowseMobileFiltersProps {
 export default function BrowseMobileFilters({
   isOpen,
   onClose,
-  ...filterProps
+  categoryTree,
+  tags,
+  cuisines,
+  allergens,
+  selectedCategoryIds,
+  selectedTags,
+  selectedCuisineIds,
+  selectedAllergens,
+  selectedDifficulty,
+  sortOption,
+  onCategoryToggle,
+  onTagToggle,
+  onCuisineToggle,
+  onAllergenToggle,
+  onDifficultyChange,
+  onSortChange,
+  onClearAll,
 }: BrowseMobileFiltersProps) {
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -77,9 +100,25 @@ export default function BrowseMobileFilters({
 
         {/* Content - Reuse sidebar filters without sticky positioning */}
         <div className="p-5">
-          <div className="space-y-4">
-            <BrowseSidebarFilters {...filterProps} />
-          </div>
+          <BrowseSidebarFiltersNew
+            categoryTree={categoryTree}
+            tags={tags}
+            cuisines={cuisines}
+            allergens={allergens}
+            selectedCategoryIds={selectedCategoryIds}
+            selectedTags={selectedTags}
+            selectedCuisineIds={selectedCuisineIds}
+            selectedAllergens={selectedAllergens}
+            selectedDifficulty={selectedDifficulty}
+            sortOption={sortOption}
+            onCategoryToggle={onCategoryToggle}
+            onTagToggle={onTagToggle}
+            onCuisineToggle={onCuisineToggle}
+            onAllergenToggle={onAllergenToggle}
+            onDifficultyChange={onDifficultyChange}
+            onSortChange={onSortChange}
+            onClearAll={onClearAll}
+          />
         </div>
 
         {/* Apply Button */}
