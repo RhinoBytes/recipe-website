@@ -93,9 +93,32 @@ export default function BrowseClientPage({
   // Current active filters from URL
   const [currentFilters, setCurrentFilters] = useState(initialFilters);
 
+  // Track in-flight requests to prevent duplicate fetches
+  const [isFetching, setIsFetching] = useState(false);
+  const abortControllerRef = useState<{ current: AbortController | null }>({ current: null })[0];
+  const searchTimeoutRef = useState<{ current: NodeJS.Timeout | null }>({ current: null })[0];
+
   // Fetch recipes from API with current filters
   const fetchRecipes = useCallback(async (filters: typeof initialFilters, page: number) => {
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Prevent duplicate requests
+    if (isFetching) {
+      return;
+    }
+
     setIsLoading(true);
+    setIsFetching(true);
+    
+    // Create new abort controller for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    // Track performance
+    const startTime = performance.now();
     
     try {
       const params = new URLSearchParams();
@@ -109,19 +132,32 @@ export default function BrowseClientPage({
       params.set("page", page.toString());
       params.set("perPage", "12");
 
-      const response = await fetch(`/api/recipes/search?${params.toString()}`);
+      const response = await fetch(`/api/recipes/search?${params.toString()}`, {
+        signal: controller.signal,
+      });
+      
       if (!response.ok) throw new Error("Failed to fetch recipes");
       
       const data = await response.json();
       setRecipes(data.recipes);
       setPagination(data.pagination);
+
+      // Log performance metrics
+      const duration = performance.now() - startTime;
+      console.log(`[Browse Performance] Fetch completed in ${duration.toFixed(0)}ms`);
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('[Browse] Request cancelled');
+        return;
+      }
       console.error("Error fetching recipes:", error);
       // Keep showing current recipes on error
     } finally {
       setIsLoading(false);
+      setIsFetching(false);
+      abortControllerRef.current = null;
     }
-  }, []);
+  }, [isFetching, abortControllerRef]);
 
   // Update URL without page reload
   const updateURL = useCallback((filters: typeof initialFilters, page: number) => {
@@ -177,8 +213,35 @@ export default function BrowseClientPage({
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Clear any pending debounced search
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = null;
+    }
+    
     const newFilters = { ...currentFilters, query: searchInput };
     await applyFilters(newFilters, 1);
+  };
+
+  // Debounced search input handler (optional: auto-search as you type)
+  const handleSearchInputChange = (value: string) => {
+    setSearchInput(value);
+    
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Debounce: wait 500ms after user stops typing
+    // Note: Currently disabled auto-search, user must press Enter or click Search
+    // To enable auto-search, uncomment the lines below:
+    /*
+    searchTimeoutRef.current = setTimeout(() => {
+      const newFilters = { ...currentFilters, query: value };
+      applyFilters(newFilters, 1);
+    }, 500);
+    */
   };
 
   const handleCategoryToggle = (categoryId: string) => {
@@ -271,7 +334,7 @@ export default function BrowseClientPage({
               <input
                 type="text"
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={(e) => handleSearchInputChange(e.target.value)}
                 placeholder="Search recipes by title, description, or ingredients..."
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-bg-secondary dark:bg-gray-700 text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
