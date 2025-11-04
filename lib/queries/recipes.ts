@@ -282,7 +282,11 @@ export async function getRecipeBySlug(username: string, slug: string) {
           },
         },
       },
-      cuisine: true,
+      cuisines: {
+        include: {
+          cuisine: true,
+        },
+      },
       ingredients: {
         orderBy: {
           displayOrder: 'asc',

@@ -8,7 +8,7 @@ import { useState } from "react";
 interface BrowseRecipeCardProps {
   recipe: {
     id: string;
-    slug: string;
+    slug: string | null;
     title: string;
     description: string | null;
     image: string;
@@ -39,9 +39,11 @@ export default function BrowseRecipeCard({
   isFavorited = false 
 }: BrowseRecipeCardProps) {
   const [localFavorited, setLocalFavorited] = useState(isFavorited);
-  const recipeUrl = recipe.author.username 
+  const recipeUrl = recipe.slug && recipe.author.username 
     ? `/recipes/${encodeURIComponent(recipe.author.username)}/${recipe.slug}`
-    : `/recipes/${recipe.slug}`;
+    : recipe.slug 
+    ? `/recipes/${recipe.slug}`
+    : `/recipes/${recipe.id}`;
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
