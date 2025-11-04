@@ -323,7 +323,7 @@ export async function POST(request: Request) {
       // Link pre-uploaded media to the recipe
       if (mediaIds && Array.isArray(mediaIds) && mediaIds.length > 0) {
         // Verify media belongs to current user and update recipeId
-        await tx.media.updateMany({
+        const updateResult = await tx.media.updateMany({
           where: {
             id: { in: mediaIds },
             userId: currentUser.userId,
@@ -334,17 +334,37 @@ export async function POST(request: Request) {
           },
         });
         
-        // Set the first media as primary if no primary is set
-        const firstMediaId = mediaIds[0];
-        await tx.media.updateMany({
-          where: {
-            id: firstMediaId,
-            recipeId: newRecipe.id,
-          },
-          data: {
-            isPrimary: true,
-          },
-        });
+        // Log warning if not all media items were linked
+        if (updateResult.count !== mediaIds.length) {
+          log.warn(
+            {
+              userId: currentUser.userId,
+              recipeId: newRecipe.id,
+              expectedCount: mediaIds.length,
+              actualCount: updateResult.count,
+            },
+            "Not all media items were linked to recipe"
+          );
+        }
+        
+        // Set the first media as primary if at least one was linked
+        if (updateResult.count > 0) {
+          const firstMediaId = mediaIds[0];
+          // Use update instead of updateMany to ensure single record
+          const firstMedia = await tx.media.findFirst({
+            where: {
+              id: firstMediaId,
+              recipeId: newRecipe.id,
+            },
+          });
+          
+          if (firstMedia) {
+            await tx.media.update({
+              where: { id: firstMedia.id },
+              data: { isPrimary: true },
+            });
+          }
+        }
       }
 
       return newRecipe;
