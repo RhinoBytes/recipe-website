@@ -4,8 +4,11 @@ import React, { useEffect, useState } from "react";
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
-import { validateAuthForm, getPasswordErrors } from "@/utils/validation";
-import { useAuth } from "@/context/AuthContext"; 
+import { getPasswordErrors, isRequirementMet } from '@/lib/validation/password';
+import { useAuth } from "@/context/AuthContext";
+
+// Assuming validateAuthForm is defined elsewhere, e.g., in the password validation file
+import { validateAuthForm } from '@/lib/validation/password';
 
 type Mode = "login" | "register";
 
@@ -64,14 +67,14 @@ export default function AuthForm() {
     setLoading(true);
     try {
       // Determine API endpoint based on mode
-      const endpoint = mode === "login" 
-        ? "/api/auth/login" 
+      const endpoint = mode === "login"
+        ? "/api/auth/login"
         : "/api/auth/register";
-      
-      const requestBody = mode === "register" 
+
+      const requestBody = mode === "register"
         ? { email, password, username }
         : { email, password };
-      
+
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,7 +82,7 @@ export default function AuthForm() {
       });
 
       const data = await res.json();
-      
+
       if (res.ok) {
         // Refresh user state immediately
         await refreshUser();
@@ -93,6 +96,9 @@ export default function AuthForm() {
       setLoading(false);
     }
   }
+
+  // Get the base password requirements to display
+  const passwordRequirements = getPasswordErrors('');
 
   return (
     <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">
@@ -210,9 +216,9 @@ export default function AuthForm() {
               <div className="text-xs text-text-muted mt-1">
                 <p className="mb-1">Password must include:</p>
                 <ul className="list-disc list-inside space-y-0.5">
-                  {getPasswordErrors(password).map((error, index) => (
-                    <li key={index} className={password.length > 0 && !error.toLowerCase().includes(error.split(' ')[0].toLowerCase()) ? "line-through opacity-50" : ""}>
-                      {error}
+                  {passwordRequirements.map((requirement, index) => (
+                    <li key={index} className={isRequirementMet(requirement, password) ? "line-through opacity-50" : ""}>
+                      {requirement}
                     </li>
                   ))}
                 </ul>
@@ -232,9 +238,9 @@ export default function AuthForm() {
             {mode === "login" ? (
               <>
                 Don&apos;t have an account?{" "}
-                <button 
-                  type="button" 
-                  className="text-accent font-medium underline hover:text-accent-hover" 
+                <button
+                  type="button"
+                  className="text-accent font-medium underline hover:text-accent-hover"
                   onClick={() => {
                     setMode("register");
                     setFormError(null);
@@ -247,9 +253,9 @@ export default function AuthForm() {
             ) : (
               <>
                 Already have an account?{" "}
-                <button 
-                  type="button" 
-                  className="text-accent font-medium underline hover:text-accent-hover" 
+                <button
+                  type="button"
+                  className="text-accent font-medium underline hover:text-accent-hover"
                   onClick={() => {
                     setMode("login");
                     setFormError(null);
