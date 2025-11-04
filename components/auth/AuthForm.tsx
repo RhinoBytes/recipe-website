@@ -206,12 +206,14 @@ export default function AuthForm() {
               </div>
             </div>
             {fieldErrors.password && <p className="text-xs text-error mt-1">{fieldErrors.password}</p>}
-            {mode === "register" && !fieldErrors.password && password.length > 0 && (
+            {mode === "register" && !fieldErrors.password && (
               <div className="text-xs text-text-muted mt-1">
                 <p className="mb-1">Password must include:</p>
                 <ul className="list-disc list-inside space-y-0.5">
                   {getPasswordErrors(password).map((error, index) => (
-                    <li key={index}>{error}</li>
+                    <li key={index} className={password.length > 0 && !error.toLowerCase().includes(error.split(' ')[0].toLowerCase()) ? "line-through opacity-50" : ""}>
+                      {error}
+                    </li>
                   ))}
                 </ul>
               </div>

@@ -119,6 +119,40 @@ export function isValidUsername(username: string): boolean {
 }
 
 /**
+ * Get detailed username validation errors
+ * @param username - Username to validate
+ * @returns Array of error messages
+ */
+export function getUsernameErrors(username: string): string[] {
+  const errors: string[] = [];
+  
+  if (!username) {
+    errors.push("Username is required");
+    return errors;
+  }
+  
+  const trimmed = username.trim();
+  
+  if (trimmed.length < 3) {
+    errors.push("Username must be at least 3 characters");
+  } else if (trimmed.length > 30) {
+    errors.push("Username must be 30 characters or less");
+  }
+  
+  if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
+    errors.push("Username can only contain letters, numbers, underscores, and hyphens");
+  }
+  
+  if (trimmed.length >= 3 && trimmed.length <= 30) {
+    if (!/^[a-zA-Z0-9]/.test(trimmed) || !/[a-zA-Z0-9]$/.test(trimmed)) {
+      errors.push("Username must start and end with a letter or number");
+    }
+  }
+  
+  return errors;
+}
+
+/**
  * Validate email, password, and optionally username
  * @param email - Email address to validate
  * @param password - Password to validate
@@ -153,20 +187,12 @@ export function validateAuthForm(
 
   // Username validation (only for registration)
   if (isRegistration && username !== undefined) {
-    if (!username) {
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername) {
       errors.username = "Username is required.";
-    } else if (!isValidUsername(username)) {
-      if (username.length < 3) {
-        errors.username = "Username must be at least 3 characters.";
-      } else if (username.length > 30) {
-        errors.username = "Username must be 30 characters or less.";
-      } else if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-        errors.username = "Username can only contain letters, numbers, underscores, and hyphens.";
-      } else if (!/^[a-zA-Z0-9]/.test(username) || !/[a-zA-Z0-9]$/.test(username)) {
-        errors.username = "Username must start and end with a letter or number.";
-      } else {
-        errors.username = "Username is invalid.";
-      }
+    } else if (!isValidUsername(trimmedUsername)) {
+      const usernameErrors = getUsernameErrors(trimmedUsername);
+      errors.username = usernameErrors.join(" ");
     }
   }
 
