@@ -11,7 +11,7 @@ import { log } from "@/lib/logger";
 export async function GET() {
   try {
     const currentUser = await getCurrentUser();
-    
+
     if (!currentUser) {
       return NextResponse.json(
         { error: "Authentication required" },
@@ -30,10 +30,7 @@ export async function GET() {
                 secureUrl: true,
                 isPrimary: true,
               },
-              orderBy: [
-                { isPrimary: "desc" },
-                { createdAt: "asc" },
-              ],
+              orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }],
             },
             author: {
               select: {
@@ -83,11 +80,14 @@ export async function GET() {
           ? Math.round(totalRating / recipe.reviews.length)
           : 0;
 
-      const primaryMedia = recipe.media.find(m => m.isPrimary) || recipe.media[0];
-      const imageUrl = primaryMedia?.secureUrl || primaryMedia?.url || DEFAULT_RECIPE_IMAGE;
+      const primaryMedia =
+        recipe.media.find((m) => m.isPrimary) || recipe.media[0];
+      const imageUrl =
+        primaryMedia?.secureUrl || primaryMedia?.url || DEFAULT_RECIPE_IMAGE;
 
       const avatarMedia = recipe.author.media[0];
-      const avatar = avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
+      const avatar =
+        avatarMedia?.secureUrl || avatarMedia?.url || DEFAULT_USER_AVATAR;
 
       return {
         id: recipe.id,
@@ -102,7 +102,7 @@ export async function GET() {
         reviewCount: recipe.reviews.length,
         author: {
           id: recipe.author.id,
-          name: recipe.author.username,
+          username: recipe.author.username,
           avatar,
         },
         tags: recipe.tags.map((rt) => rt.tag.name),
@@ -115,7 +115,12 @@ export async function GET() {
     });
   } catch (error) {
     log.error(
-      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      {
+        error:
+          error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : String(error),
+      },
       "Error fetching favorites"
     );
     return NextResponse.json(
@@ -132,7 +137,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const currentUser = await getCurrentUser();
-    
+
     if (!currentUser) {
       log.warn({}, "Unauthorized favorite add attempt");
       return NextResponse.json(
@@ -157,10 +162,7 @@ export async function POST(request: Request) {
     });
 
     if (!recipe) {
-      return NextResponse.json(
-        { error: "Recipe not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
     }
 
     // Check if already favorited
@@ -188,12 +190,20 @@ export async function POST(request: Request) {
       },
     });
 
-    log.info({ userId: currentUser.userId, recipeId }, "Recipe added to favorites");
+    log.info(
+      { userId: currentUser.userId, recipeId },
+      "Recipe added to favorites"
+    );
 
     return NextResponse.json(favorite, { status: 201 });
   } catch (error) {
     log.error(
-      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      {
+        error:
+          error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : String(error),
+      },
       "Error adding favorite"
     );
     return NextResponse.json(
@@ -210,7 +220,7 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const currentUser = await getCurrentUser();
-    
+
     if (!currentUser) {
       log.warn({}, "Unauthorized favorite delete attempt");
       return NextResponse.json(
@@ -256,14 +266,22 @@ export async function DELETE(request: Request) {
       },
     });
 
-    log.info({ userId: currentUser.userId, recipeId }, "Recipe removed from favorites");
+    log.info(
+      { userId: currentUser.userId, recipeId },
+      "Recipe removed from favorites"
+    );
 
     return NextResponse.json({
       message: "Favorite removed successfully",
     });
   } catch (error) {
     log.error(
-      { error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) },
+      {
+        error:
+          error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : String(error),
+      },
       "Error removing favorite"
     );
     return NextResponse.json(

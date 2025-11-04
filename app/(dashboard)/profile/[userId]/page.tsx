@@ -428,7 +428,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                           </div>
                           <div className="flex gap-2">
                             <Button
-                              onClick={() => router.push(`/recipes/${recipe.author?.username || profileUser.username}/${recipe.slug}`)}
+                              onClick={() => router.push(`/recipes/${encodeURIComponent(recipe.author?.username || profileUser.username)}/${recipe.slug}`)}
                               variant="secondary"
                               className="flex-1"
                             >

@@ -27,8 +27,8 @@ export default function Footer() {
           <div>
             <h4 className="text-xl font-bold font-heading text-accent mb-4">Community</h4>
             <nav className="flex flex-col space-y-2">
-              <a href="#" className="text-text-secondary hover:text-accent transition-colors">Join CookBook</a>
-              <a href="#" className="text-text-secondary hover:text-accent transition-colors">Share Your Recipe</a>
+              <Link href="/auth" className="text-text-secondary hover:text-accent transition-colors">Join CookBook</Link>
+              <Link href="/recipes/new" className="text-text-secondary hover:text-accent transition-colors">Share Your Recipe</Link>
             </nav>
           </div>
           {/* Support */}

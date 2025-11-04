@@ -40,7 +40,7 @@ export default function BrowseRecipeCard({
 }: BrowseRecipeCardProps) {
   const [localFavorited, setLocalFavorited] = useState(isFavorited);
   const recipeUrl = recipe.author.username 
-    ? `/recipes/${recipe.author.username}/${recipe.slug}`
+    ? `/recipes/${encodeURIComponent(recipe.author.username)}/${recipe.slug}`
     : `/recipes/${recipe.slug}`;
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
