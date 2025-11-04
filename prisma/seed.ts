@@ -205,7 +205,7 @@ async function clearExistingData() {
 
 async function seedStaticData() {
   console.log("Creating static data...");
-  
+
   // Create new tags
   const tagNames = [
     "Quick & Easy",
@@ -227,14 +227,18 @@ async function seedStaticData() {
 
   // Create hierarchical cuisines
   console.log("Creating hierarchical cuisines...");
-  
+
   // Parent cuisines
   const african = await prisma.cuisine.create({ data: { name: "African" } });
   const american = await prisma.cuisine.create({ data: { name: "American" } });
   const asian = await prisma.cuisine.create({ data: { name: "Asian" } });
   const european = await prisma.cuisine.create({ data: { name: "European" } });
-  const middleEastern = await prisma.cuisine.create({ data: { name: "Middle Eastern" } });
-  const oceanian = await prisma.cuisine.create({ data: { name: "Oceanian / Pacific" } });
+  const middleEastern = await prisma.cuisine.create({
+    data: { name: "Middle Eastern" },
+  });
+  const oceanian = await prisma.cuisine.create({
+    data: { name: "Oceanian / Pacific" },
+  });
 
   // African children
   await prisma.cuisine.createMany({
@@ -248,9 +252,15 @@ async function seedStaticData() {
   // American children
   await prisma.cuisine.createMany({
     data: [
-      { name: "North American (American, Mexican, Canadian)", parentId: american.id },
+      {
+        name: "North American (American, Mexican, Canadian)",
+        parentId: american.id,
+      },
       { name: "Caribbean (Jamaican, Cuban)", parentId: american.id },
-      { name: "South American (Peruvian, Brazilian, Argentinian)", parentId: american.id },
+      {
+        name: "South American (Peruvian, Brazilian, Argentinian)",
+        parentId: american.id,
+      },
     ],
   });
 
@@ -258,7 +268,10 @@ async function seedStaticData() {
   await prisma.cuisine.createMany({
     data: [
       { name: "East Asian (Chinese, Japanese, Korean)", parentId: asian.id },
-      { name: "Southeast Asian (Thai, Vietnamese, Malaysian, Filipino)", parentId: asian.id },
+      {
+        name: "Southeast Asian (Thai, Vietnamese, Malaysian, Filipino)",
+        parentId: asian.id,
+      },
       { name: "South Asian (Indian, Pakistani)", parentId: asian.id },
     ],
   });
@@ -266,9 +279,18 @@ async function seedStaticData() {
   // European children
   await prisma.cuisine.createMany({
     data: [
-      { name: "Southern European (Italian, Spanish, Greek, Portuguese)", parentId: european.id },
-      { name: "Western European (French, German, British)", parentId: european.id },
-      { name: "Eastern European (Polish, Russian, Hungarian)", parentId: european.id },
+      {
+        name: "Southern European (Italian, Spanish, Greek, Portuguese)",
+        parentId: european.id,
+      },
+      {
+        name: "Western European (French, German, British)",
+        parentId: european.id,
+      },
+      {
+        name: "Eastern European (Polish, Russian, Hungarian)",
+        parentId: european.id,
+      },
     ],
   });
 
@@ -288,14 +310,16 @@ async function seedStaticData() {
       { name: "New Zealander", parentId: oceanian.id },
     ],
   });
-  
+
   console.log("Created hierarchical cuisines");
 
   // Create hierarchical categories
   console.log("Creating hierarchical categories...");
-  
+
   // By Meal Type
-  const byMealType = await prisma.category.create({ data: { name: "By Meal Type" } });
+  const byMealType = await prisma.category.create({
+    data: { name: "By Meal Type" },
+  });
   await prisma.category.createMany({
     data: [
       { name: "Breakfast & Brunch", parentId: byMealType.id },
@@ -309,9 +333,11 @@ async function seedStaticData() {
       { name: "Beverages", parentId: byMealType.id },
     ],
   });
-  
+
   // Desserts with children
-  const desserts = await prisma.category.create({ data: { name: "Desserts", parentId: byMealType.id } });
+  const desserts = await prisma.category.create({
+    data: { name: "Desserts", parentId: byMealType.id },
+  });
   await prisma.category.createMany({
     data: [
       { name: "Cakes & Cupcakes", parentId: desserts.id },
@@ -323,7 +349,9 @@ async function seedStaticData() {
   });
 
   // By Main Ingredient
-  const byIngredient = await prisma.category.create({ data: { name: "By Main Ingredient" } });
+  const byIngredient = await prisma.category.create({
+    data: { name: "By Main Ingredient" },
+  });
   await prisma.category.createMany({
     data: [
       { name: "Meat (Beef, Pork, Lamb)", parentId: byIngredient.id },
@@ -335,7 +363,9 @@ async function seedStaticData() {
   });
 
   // Breads & Baking
-  const breads = await prisma.category.create({ data: { name: "Breads & Baking" } });
+  const breads = await prisma.category.create({
+    data: { name: "Breads & Baking" },
+  });
   await prisma.category.createMany({
     data: [
       { name: "Artisan Breads", parentId: breads.id },
@@ -346,10 +376,15 @@ async function seedStaticData() {
   });
 
   // Pantry, Sauces, & Condiments
-  const pantry = await prisma.category.create({ data: { name: "Pantry, Sauces, & Condiments" } });
+  const pantry = await prisma.category.create({
+    data: { name: "Pantry, Sauces, & Condiments" },
+  });
   await prisma.category.createMany({
     data: [
-      { name: "Sauces & Gravies (BBQ Sauce, Dipping Sauces)", parentId: pantry.id },
+      {
+        name: "Sauces & Gravies (BBQ Sauce, Dipping Sauces)",
+        parentId: pantry.id,
+      },
       { name: "Spice Blends & Rubs", parentId: pantry.id },
       { name: "Marinades & Dressings", parentId: pantry.id },
       { name: "Dips & Spreads", parentId: pantry.id },
@@ -358,7 +393,9 @@ async function seedStaticData() {
   });
 
   // By Cooking Method
-  const byMethod = await prisma.category.create({ data: { name: "By Cooking Method" } });
+  const byMethod = await prisma.category.create({
+    data: { name: "By Cooking Method" },
+  });
   await prisma.category.createMany({
     data: [
       { name: "Baking", parentId: byMethod.id },
@@ -372,7 +409,9 @@ async function seedStaticData() {
   });
 
   // By Diet & Health
-  const byDiet = await prisma.category.create({ data: { name: "By Diet & Health" } });
+  const byDiet = await prisma.category.create({
+    data: { name: "By Diet & Health" },
+  });
   await prisma.category.createMany({
     data: [
       { name: "Vegetarian", parentId: byDiet.id },
@@ -383,7 +422,9 @@ async function seedStaticData() {
   });
 
   // By Occasion
-  const byOccasion = await prisma.category.create({ data: { name: "By Occasion" } });
+  const byOccasion = await prisma.category.create({
+    data: { name: "By Occasion" },
+  });
   await prisma.category.createMany({
     data: [
       { name: "Weeknight Dinners", parentId: byOccasion.id },
@@ -412,7 +453,7 @@ async function seedStaticData() {
 
 async function createUsers(): Promise<User[]> {
   console.log("Creating seed users...");
-  
+
   const userDataArray = [
     {
       username: "HomeBaker",
@@ -430,7 +471,7 @@ async function createUsers(): Promise<User[]> {
       bio: "Adventurous cook exploring bold flavors and spices from around the world. Life's too short for bland food!",
     },
   ];
-  
+
   const users: User[] = [];
   for (const userData of userDataArray) {
     const user = await prisma.user.create({
@@ -472,9 +513,9 @@ async function importRecipes(users: User[]) {
       } else {
         console.log(`  Author: ${author.username}`);
       }
-      
+
       // Remove single cuisine handling - will use many-to-many below
-      
+
       let media: Media | null = null;
       const imagePath = path.join(folderPath, "image.jpg");
       if (fs.existsSync(imagePath)) {
@@ -539,7 +580,7 @@ async function importRecipes(users: User[]) {
           },
         });
       }
-      
+
       // Handle cuisine many-to-many relationship
       if (data.cuisine) {
         const cuisine = await prisma.cuisine.findUnique({
@@ -551,7 +592,7 @@ async function importRecipes(users: User[]) {
           });
         }
       }
-      
+
       if (data.tags?.length) {
         for (const tagName of data.tags) {
           const tag = await prisma.tag.upsert({
@@ -588,9 +629,9 @@ async function importRecipes(users: User[]) {
           }
         }
       }
-      
+
       // Create 2 reviews from other users with relevant comments
-      const otherUsers = users.filter(u => u.id !== author.id);
+      const otherUsers = users.filter((u) => u.id !== author.id);
       const reviewComments = [
         "This was absolutely delicious! The flavors were perfectly balanced and my family loved it.",
         "Great recipe! I made this for dinner last night and everyone asked for seconds.",
@@ -601,7 +642,7 @@ async function importRecipes(users: User[]) {
         "My new favorite recipe! The texture and taste were exactly what I was hoping for.",
         "Outstanding results! Even my picky eaters enjoyed this one.",
       ];
-      
+
       for (let i = 0; i < 2 && i < otherUsers.length; i++) {
         const reviewer = otherUsers[i];
         const comment = faker.helpers.arrayElement(reviewComments);
@@ -614,7 +655,7 @@ async function importRecipes(users: User[]) {
           },
         });
       }
-      
+
       console.log(`  ✓ Successfully imported: ${data.title}`);
     } catch (err) {
       console.error(`  ✗ Failed to import recipe ${data.title}:`, err);

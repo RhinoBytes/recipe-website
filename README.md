@@ -34,3 +34,15 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Reset Database
+
+To reset the database, run the following commands in your terminal:
+
+```bash
+# Make sure the seed database URL is loaded
+DATABASE_URL=$DATABASE_URL_SEED
+
+# Reset the database
+npx prisma migrate reset
+```
