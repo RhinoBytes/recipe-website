@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { log } from "@/lib/logger";
+import { RecipeSchema } from "@/lib/schemas/recipe";
 
 /**
  * GET /api/recipes/[slug]
@@ -149,6 +150,26 @@ export async function PATCH(
     }
 
     const body = await request.json();
+    
+    // Validate with Zod schema for security
+    const validation = RecipeSchema.safeParse(body);
+    if (!validation.success) {
+      log.warn(
+        { userId: currentUser.userId, slug, errors: validation.error.issues },
+        "Recipe update validation failed"
+      );
+      return NextResponse.json(
+        { 
+          error: "Invalid recipe data",
+          details: validation.error.issues.map(issue => ({
+            path: issue.path.join('.'),
+            message: issue.message,
+          }))
+        },
+        { status: 400 }
+      );
+    }
+    
     const {
       title,
       description,
@@ -170,7 +191,7 @@ export async function PATCH(
       categories,
       allergens,
       status,
-    } = body;
+    } = validation.data;
 
     // Generate new slug if title changed
     let newSlug = existingRecipe.slug;

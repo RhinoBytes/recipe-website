@@ -13,6 +13,7 @@ import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/
 import { RecipeFormData } from "@/types/recipe";
 import type { Media } from "@/types/index";
 import { detectAndNormalizeUrl } from "@/utils/urlDetection";
+import { RecipeSchema } from "@/lib/schemas/recipe";
 
 interface RecipeStep {
   stepNumber: number;
@@ -53,6 +54,9 @@ export default function EditRecipePage() {
   // State for textarea inputs
   const [ingredientsText, setIngredientsText] = useState("");
   const [stepsText, setStepsText] = useState("");
+  
+  // Validation error state
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
   const [formData, setFormData] = useState<RecipeFormData>({
     title: "",
@@ -247,6 +251,7 @@ export default function EditRecipePage() {
     
     setLoading(true);
     setError(null);
+    setValidationErrors({});
     
     try {
       if (!slug) throw new Error("Missing slug");
@@ -255,18 +260,10 @@ export default function EditRecipePage() {
       const parsedIngredients = parseIngredients(ingredientsText);
       const parsedSteps = parseSteps(stepsText);
 
-      // Validate at least one ingredient and step
-      if (parsedIngredients.length === 0) {
-        throw new Error("Please add at least one ingredient");
-      }
-      if (parsedSteps.length === 0) {
-        throw new Error("Please add at least one instruction step");
-      }
-
       // Detect if source is a URL using shared utility function
       const { isUrl, normalizedUrl } = detectAndNormalizeUrl(formData.source);
 
-      // Parsed ingredients already have dual measurements from parseIngredients()
+      // Prepare submission data
       const submissionData = {
         ...formData,
         ingredients: parsedIngredients,
@@ -276,7 +273,23 @@ export default function EditRecipePage() {
       };
 
       // Remove the 'source' field as it's been split into sourceUrl/sourceText
-      const { source: _, ...dataToSubmit } = submissionData;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { source: _unused, ...dataToSubmit } = submissionData;
+
+      // Validate with Zod before submitting
+      const validation = RecipeSchema.safeParse(dataToSubmit);
+      if (!validation.success) {
+        // Convert Zod errors to user-friendly format
+        const fieldErrors: Record<string, string> = {};
+        validation.error.issues.forEach((issue) => {
+          const path = issue.path.join(".");
+          fieldErrors[path] = issue.message;
+        });
+        setValidationErrors(fieldErrors);
+        setError("Please fix the validation errors below");
+        setLoading(false);
+        return;
+      }
 
       const response = await fetch(`/api/recipes/${encodeURIComponent(slug)}`, {
         method: "PATCH",
@@ -286,14 +299,25 @@ export default function EditRecipePage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-        throw new Error(errorData.error || "Failed to update recipe");
+        // Handle backend validation errors
+        if (errorData.details && Array.isArray(errorData.details)) {
+          const fieldErrors: Record<string, string> = {};
+          errorData.details.forEach((detail: { path: string; message: string }) => {
+            fieldErrors[detail.path] = detail.message;
+          });
+          setValidationErrors(fieldErrors);
+          setError("Server validation failed. Please fix the errors below.");
+        } else {
+          throw new Error(errorData.error || "Failed to update recipe");
+        }
+        setLoading(false);
+        return;
       }
 
       const recipe = await response.json();
       router.push(`/recipes/${recipe.username}/${recipe.slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update recipe");
-    } finally {
       setLoading(false);
     }
   };
@@ -384,6 +408,21 @@ export default function EditRecipePage() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
               {error}
+              {Object.keys(validationErrors).length > 0 && (
+                <div className="mt-2 text-sm">
+                  <p className="font-medium mb-1">Validation errors:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {Object.entries(validationErrors).slice(0, 5).map(([field, message]) => (
+                      <li key={field}>
+                        <span className="font-medium">{field}:</span> {message}
+                      </li>
+                    ))}
+                    {Object.keys(validationErrors).length > 5 && (
+                      <li>... and {Object.keys(validationErrors).length - 5} more errors</li>
+                    )}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
