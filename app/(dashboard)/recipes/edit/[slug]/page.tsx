@@ -7,6 +7,7 @@ import ProtectedPage from '@/components/auth/ProtectedPage';
 import { Loader2 } from "lucide-react";
 import Button from '@/components/ui/Button';
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
+import MultiSelect from '@/components/ui/MultiSelect';
 import MediaUploader from "@/components/MediaUploader";
 import { Difficulty, RecipeStatus } from "@prisma/client";
 import { parseIngredients, parseSteps, ingredientsToText, stepsToText } from "@/lib/recipeParser";
@@ -69,6 +70,7 @@ export default function EditRecipePage() {
     source: "",
     chefNotes: "",
     cuisineName: "",
+    cuisines: [],
     ingredients: [],
     tags: [],
     categories: [],
@@ -80,6 +82,7 @@ export default function EditRecipePage() {
     carbsG: undefined,
   });
   const [categories, setCategories] = useState<Category[]>([]);
+  const [cuisines, setCuisines] = useState<Category[]>([]); // Reuse Category interface
   const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(false);
@@ -100,9 +103,10 @@ export default function EditRecipePage() {
       }
 
       try {
-        const [recipeRes, categoriesRes, allergensRes, tagsRes] = await Promise.all([
+        const [recipeRes, categoriesRes, cuisinesRes, allergensRes, tagsRes] = await Promise.all([
           fetch(`/api/recipes/${encodeURIComponent(slug)}`),
           fetch("/api/categories"),
+          fetch("/api/cuisines"),
           fetch("/api/allergens"),
           fetch("/api/tags"),
         ]);
@@ -193,7 +197,8 @@ export default function EditRecipePage() {
           difficulty: difficultyEnum,
           source: combinedSource,
           chefNotes: recipe.chefNotes ?? "",
-          cuisineName: recipe.cuisine?.name ?? "",
+          cuisineName: recipe.cuisine?.name ?? (recipe.cuisines?.[0]?.name ?? ""), // Backward compatibility
+          cuisines: toNameArray(recipe.cuisines), // New array support
           ingredients: normalizedIngredients, // Store full format with measurements
           tags: toNameArray(recipe.tags),
           categories: toNameArray(recipe.categories),
@@ -208,6 +213,11 @@ export default function EditRecipePage() {
         if (categoriesRes.ok) {
           const categoriesData = await categoriesRes.json();
           setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+        }
+        
+        if (cuisinesRes.ok) {
+          const cuisinesData = await cuisinesRes.json();
+          setCuisines(Array.isArray(cuisinesData) ? cuisinesData : []);
         }
         
         if (allergensRes.ok) {
@@ -533,19 +543,13 @@ export default function EditRecipePage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Cuisine
-                      <span className="ml-2 text-xs text-gray-500">Optional - e.g., Italian, Mexican, Thai</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.cuisineName}
-                      onChange={(e) => setFormData({ ...formData, cuisineName: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                      placeholder="e.g., Italian, Mexican, Thai"
-                    />
-                  </div>
+                  <MultiSelect
+                    options={cuisines.map(c => ({ id: c.id, name: c.name, parentId: undefined }))}
+                    selected={formData.cuisines || []}
+                    onChange={(selected) => setFormData({ ...formData, cuisines: selected })}
+                    placeholder="Select cuisines..."
+                    label="Cuisines"
+                  />
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
