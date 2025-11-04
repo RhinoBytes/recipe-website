@@ -5,8 +5,6 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, X, Loader2, AlertCircle } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { supabase } from "@/lib/supabase/client";
-// Import the shared Media type
 import type { Media } from "@/types/index";
 
 interface MediaUploaderProps {
@@ -32,6 +30,10 @@ export default function MediaUploader({
   const [uploadProgress, setUploadProgress] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
@@ -50,13 +52,31 @@ export default function MediaUploader({
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         setUploadProgress(`Uploading ${i + 1} of ${files.length}...`);
-        await uploadFile(file);
+        
+        try {
+          await uploadFile(file);
+        } catch (fileErr) {
+          // Log individual file error but continue with other files
+          const errorMessage = fileErr instanceof Error ? fileErr.message : "Unknown error";
+          console.error(`Failed to upload ${file.name}:`, errorMessage);
+          log.error({ 
+            error: fileErr instanceof Error ? { message: fileErr.message, stack: fileErr.stack } : String(fileErr),
+            fileName: file.name 
+          }, "Single file upload error");
+          
+          // Set error but don't throw - let other files continue
+          setError(`Failed to upload ${file.name}: ${errorMessage}`);
+        }
       }
 
       setUploadProgress("");
     } catch (err) {
-      log.error({ error: err instanceof Error ? { message: err.message, stack: err.stack } : String(err) }, "Upload error");
-      setError(err instanceof Error ? err.message : "Upload failed");
+      const errorMessage = err instanceof Error ? err.message : "Upload failed";
+      console.error("Upload error:", err);
+      log.error({ 
+        error: err instanceof Error ? { message: err.message, stack: err.stack } : String(err) 
+      }, "Upload error");
+      setError(errorMessage);
     } finally {
       setUploading(false);
       // Reset file input
@@ -67,54 +87,47 @@ export default function MediaUploader({
   };
 
   const uploadFile = async (file: File) => {
-    // Generate unique file path
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = recipeId 
-      ? `recipes/${recipeId}/${fileName}`
-      : `uploads/${fileName}`;
-
-    // Step 1: Upload to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("recipe-builder")
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      throw new Error(uploadError.message || "Upload failed");
+    console.log("Starting upload for:", file.name, "Size:", file.size, "Type:", file.type);
+    
+    // Validate file type
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      throw new Error(`Invalid file type: ${file.type}`);
     }
 
-    // Step 2: Get public URL
-    const { data: urlData } = supabase.storage
-      .from("recipe-builder")
-      .getPublicUrl(uploadData.path);
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      throw new Error(`File too large: ${(file.size / 1024 / 1024).toFixed(1)}MB (max 10MB)`);
+    }
 
-    // Step 3: Persist Media record to database
-    const mediaResponse = await fetch("/api/media", {
+    // Upload via API endpoint (server-side)
+    const formData = new FormData();
+    formData.append("file", file);
+    if (recipeId) {
+      formData.append("recipeId", recipeId);
+    }
+
+    console.log("Uploading via API endpoint");
+
+    const response = await fetch("/api/media", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        storage_path: uploadData.path,
-        url: urlData.publicUrl,
-        bytes: file.size,
-        format: fileExt,
-        resource_type: file.type.startsWith("video/") ? "video" : "image",
-        original_filename: file.name,
-        recipeId: recipeId || null,
-        altText: null,
-      }),
+      body: formData,
     });
 
-    if (!mediaResponse.ok) {
-      // If database save fails, try to clean up the uploaded file
-      await supabase.storage.from("recipe-builder").remove([uploadData.path]);
-      const errorData = await mediaResponse.json();
-      throw new Error(errorData.error || "Failed to save media record");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      console.error("Upload API error:", errorData);
+      throw new Error(errorData.error || `Upload failed (${response.status})`);
     }
 
-    const { media: newMedia } = await mediaResponse.json();
+    const responseData = await response.json();
+    console.log("Upload successful:", responseData);
+
+    const newMedia = responseData.media;
+
+    if (!newMedia) {
+      throw new Error("No media data returned from API");
+    }
 
     // Update local state
     setMedia((prev) => [...prev, newMedia]);
@@ -123,6 +136,8 @@ export default function MediaUploader({
     if (onMediaUploaded) {
       onMediaUploaded(newMedia);
     }
+
+    console.log("Upload complete for:", file.name);
   };
 
   const handleDelete = async (mediaId: string) => {
@@ -148,7 +163,10 @@ export default function MediaUploader({
         onMediaDeleted(mediaId);
       }
     } catch (err) {
-      log.error({ error: err instanceof Error ? { message: err.message, stack: err.stack } : String(err) }, "Delete error");
+      console.error("Delete error:", err);
+      log.error({ 
+        error: err instanceof Error ? { message: err.message, stack: err.stack } : String(err) 
+      }, "Delete error");
       setError(err instanceof Error ? err.message : "Delete failed");
     }
   };
@@ -173,26 +191,23 @@ export default function MediaUploader({
           className="hidden"
           id="media-upload-input"
         />
-        <label htmlFor="media-upload-input">
-          <Button
-            as="button"
-            type="button"
-            disabled={uploading || media.length >= maxFiles}
-            className="cursor-pointer"
-          >
-            {uploading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {uploadProgress}
-              </>
-            ) : (
-              <>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Image{maxFiles > 1 ? "s" : ""}
-              </>
-            )}
-          </Button>
-        </label>
+        <Button
+          type="button"
+          onClick={handleButtonClick}
+          disabled={uploading || media.length >= maxFiles}
+        >
+          {uploading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              {uploadProgress}
+            </>
+          ) : (
+            <>
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Image{maxFiles > 1 ? "s" : ""}
+            </>
+          )}
+        </Button>
         <p className="text-sm text-text-secondary mt-2">
           {media.length} / {maxFiles} images uploaded
         </p>
@@ -200,9 +215,17 @@ export default function MediaUploader({
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-error/10 border border-error/20 rounded-md text-error">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span className="text-sm">{error}</span>
+        <div className="flex items-start gap-2 p-3 bg-error/10 border border-error/20 rounded-md text-error">
+          <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="text-sm block">{error}</span>
+            <button
+              onClick={() => setError(null)}
+              className="text-xs underline mt-1 hover:no-underline"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 

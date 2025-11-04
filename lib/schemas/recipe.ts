@@ -111,13 +111,26 @@ export const RecipeSchema = z.object({
   ingredients: z
     .array(RecipeIngredientSchema)
     .min(1, "At least one ingredient is required"),
-  tags: z.array(z.string().max(50, "Tag name is too long")).optional().default([]),
-  categories: z.array(z.string().max(50, "Category name is too long")).optional().default([]),
-  allergens: z.array(z.string().max(50, "Allergen name is too long")).optional().default([]),
+  tags: z
+    .array(z.string().max(50, "Tag name is too long"))
+    .optional()
+    .default([]),
+  categories: z
+    .array(z.string().max(50, "Category name is too long"))
+    .optional()
+    .default([]),
+  allergens: z
+    .array(z.string().max(50, "Allergen name is too long"))
+    .optional()
+    .default([]),
   cuisineName: z.string().optional(),
-  sourceUrl: z.string().url("Invalid URL format").optional(),
+  sourceUrl: z
+    .union([z.literal(""), z.string().url("Invalid URL format")])
+    .optional(),
   sourceText: z.string().optional(),
-  imageUrl: z.string().url("Invalid URL format").optional(),
+  imageUrl: z
+    .union([z.literal(""), z.string().url("Invalid URL format")])
+    .optional(),
   chefNotes: z.string().optional(),
   status: z.nativeEnum(RecipeStatus).optional(),
 });

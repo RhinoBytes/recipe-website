@@ -28,7 +28,7 @@ const openai = process.env.OPENAI_API_KEY
  */
 export async function POST(request: Request) {
   const startTime = Date.now();
-  
+
   try {
     // Authentication
     const currentUser = await getCurrentUser();
@@ -72,15 +72,24 @@ export async function POST(request: Request) {
     }
 
     const duration = Date.now() - startTime;
-    log.info({ duration, hasRecipe: !!formattedRecipe }, "AI parsing completed");
+    log.info(
+      { duration, hasRecipe: !!formattedRecipe },
+      "AI parsing completed"
+    );
 
     return NextResponse.json({ recipe: formattedRecipe, source: "ai" });
   } catch (error) {
     const duration = Date.now() - startTime;
-    log.error({ 
-      duration,
-      error: error instanceof Error ? { message: error.message, stack: error.stack } : String(error) 
-    }, "Recipe formatting error");
+    log.error(
+      {
+        duration,
+        error:
+          error instanceof Error
+            ? { message: error.message, stack: error.stack }
+            : String(error),
+      },
+      "Recipe formatting error"
+    );
     return NextResponse.json(
       {
         error: "Failed to format recipe",
@@ -104,48 +113,27 @@ function parseJSONSafe(text: string) {
 async function parseRecipeWithOpenAI(text: string): Promise<AIRecipeOutput> {
   if (!openai) throw new Error("OpenAI client not initialized");
 
-  const prompt = `Parse this recipe into JSON with these fields:
+  const prompt = `Parse this recipe into JSON format:
+{
+  "title": "string",
+  "description": "string",
+  "servings": number,
+  "prepTimeMinutes": number,
+  "cookTimeMinutes": number,
+  "difficulty": "EASY|MEDIUM|HARD",
+  "calories": number,
+  "proteinG": number,
+  "chefNotes": "string",
+  "fatG": number,
+  "carbsG": number,
+  "ingredients": [{"name": "string", "amount": "string|null", "unit": "string|null", "size": "string|null", "preparation": "string|null", "notes": "string|null"],
+  "steps": [{"stepNumber": number, "instruction": "string"}]
+}
 
-STRUCTURE:
-- title, description, servings, prepTimeMinutes, cookTimeMinutes
-- calories, proteinG, fatG, carbsG, cuisineName
-- difficulty: EASY, MEDIUM, or HARD
-- steps: array with stepNumber (number), instruction (string), groupName (string or null), isOptional (boolean)
-- ingredients: array with name (string), amount (string or null), unit (string or null), size (string or null), preparation (string or null), notes (string or null), groupName (string or null), displayOrder (number)
-
-IMPORTANT - TYPE REQUIREMENTS:
-- Use actual numbers (not strings) for: servings, prepTimeMinutes, cookTimeMinutes, calories, proteinG, fatG, carbsG, stepNumber, displayOrder
-- Use actual booleans (not strings) for: isOptional
-- Use strings or null for: amount, unit, size, preparation, notes, groupName
-
-INGREDIENT FORMAT:
-Each ingredient should have:
-- name: ingredient name (e.g., "flour", "eggs")
-- amount: numeric quantity as string (e.g., "1", "1/2", "2.5") or null if not applicable
-- unit: measurement unit (e.g., "cup", "tbsp", "g", "oz", "pieces") or null if not applicable
-- size: descriptor (large, medium, small) or null
-- preparation: physical state (diced, melted, sifted) or null
-- notes: substitutions/alternatives or null
-
-For counted items (eggs, apples): include amount and unit (e.g., amount: "2", unit: "eggs")
-For measured items: include amount and unit in their ORIGINAL measurement system
-
-NUTRITION (REQUIRED):
-You MUST estimate nutritional values per serving. Calculate approximate values based on the ingredients:
-- calories: total calories per serving (required - estimate if not explicitly stated)
-- proteinG: grams of protein per serving (required - estimate if not explicitly stated)
-- fatG: grams of fat per serving (required - estimate if not explicitly stated)
-- carbsG: grams of carbohydrates per serving (required - estimate if not explicitly stated)
-
-Use your knowledge of common ingredient nutritional values to provide reasonable estimates.
-
-Extract ALL steps from the recipe. NO tags/categories/allergens.
-
-Recipe:
-${text}`;
+Recipe: ${text}`;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-3.5-turbo",
     messages: [
       {
         role: "system",
@@ -167,7 +155,9 @@ ${text}`;
 }
 
 /** Complete partial recipe data - returns raw AI output */
-async function completeRecipeWithAI(data: Record<string, unknown>): Promise<AIRecipeOutput> {
+async function completeRecipeWithAI(
+  data: Record<string, unknown>
+): Promise<AIRecipeOutput> {
   if (!openai) throw new Error("OpenAI client not initialized");
 
   const prompt = `Complete this recipe with missing fields:

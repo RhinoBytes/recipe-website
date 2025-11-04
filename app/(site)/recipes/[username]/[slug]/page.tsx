@@ -95,6 +95,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
   // Extract media URLs
   const primaryMedia = recipe.media.find(m => m.isPrimary) || recipe.media[0];
+  
+
   const recipeImageUrl = primaryMedia?.secureUrl || primaryMedia?.url || DEFAULT_RECIPE_IMAGE;
 
   const avatarMedia = recipe.author.media[0];
