@@ -38,24 +38,133 @@ export function isValidEmail(email: string): boolean {
 }
 
 /**
- * Password validation utility
+ * Password validation utility with enhanced security requirements
  * @param password - Password to validate
  * @param minLength - Minimum password length (default: 8)
  * @returns true if password is valid, false otherwise
  */
 export function isValidPassword(password: string, minLength = 8): boolean {
-  return password.length >= minLength;
+  if (!password || typeof password !== 'string') return false;
+  
+  // Check minimum length
+  if (password.length < minLength) return false;
+  
+  // Check for at least one uppercase letter
+  if (!/[A-Z]/.test(password)) return false;
+  
+  // Check for at least one lowercase letter
+  if (!/[a-z]/.test(password)) return false;
+  
+  // Check for at least one number
+  if (!/[0-9]/.test(password)) return false;
+  
+  return true;
 }
 
 /**
- * Validate email and password
+ * Get detailed password validation errors
+ * @param password - Password to validate
+ * @returns Array of error messages
+ */
+export function getPasswordErrors(password: string): string[] {
+  const errors: string[] = [];
+  
+  if (!password) {
+    errors.push("Password is required");
+    return errors;
+  }
+  
+  if (password.length < 8) {
+    errors.push("At least 8 characters");
+  }
+  
+  if (!/[A-Z]/.test(password)) {
+    errors.push("One uppercase letter");
+  }
+  
+  if (!/[a-z]/.test(password)) {
+    errors.push("One lowercase letter");
+  }
+  
+  if (!/[0-9]/.test(password)) {
+    errors.push("One number");
+  }
+  
+  return errors;
+}
+
+/**
+ * Username validation utility
+ * @param username - Username to validate
+ * @returns true if username is valid, false otherwise
+ */
+export function isValidUsername(username: string): boolean {
+  if (!username || typeof username !== 'string') return false;
+  
+  const trimmed = username.trim();
+  
+  // Length between 3 and 30 characters
+  if (trimmed.length < 3 || trimmed.length > 30) return false;
+  
+  // Only alphanumeric characters, underscores, and hyphens
+  if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) return false;
+  
+  // Must start with a letter or number (not underscore or hyphen)
+  if (!/^[a-zA-Z0-9]/.test(trimmed)) return false;
+  
+  // Must end with a letter or number (not underscore or hyphen)
+  if (!/[a-zA-Z0-9]$/.test(trimmed)) return false;
+  
+  return true;
+}
+
+/**
+ * Get detailed username validation errors
+ * @param username - Username to validate
+ * @returns Array of error messages
+ */
+export function getUsernameErrors(username: string): string[] {
+  const errors: string[] = [];
+  
+  if (!username) {
+    errors.push("Username is required");
+    return errors;
+  }
+  
+  const trimmed = username.trim();
+  
+  if (trimmed.length < 3) {
+    errors.push("Username must be at least 3 characters");
+  } else if (trimmed.length > 30) {
+    errors.push("Username must be 30 characters or less");
+  }
+  
+  if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
+    errors.push("Username can only contain letters, numbers, underscores, and hyphens");
+  }
+  
+  if (trimmed.length >= 3 && trimmed.length <= 30) {
+    if (!/^[a-zA-Z0-9]/.test(trimmed) || !/[a-zA-Z0-9]$/.test(trimmed)) {
+      errors.push("Username must start and end with a letter or number");
+    }
+  }
+  
+  return errors;
+}
+
+/**
+ * Validate email, password, and optionally username
  * @param email - Email address to validate
  * @param password - Password to validate
+ * @param username - Username to validate (optional, for registration)
+ * @param isRegistration - Whether this is a registration form
  * @returns Object with validation errors
  */
 export function validateAuthForm(
   email: string,
-  password: string
+  password: string,
+  username?: string,
+  isRegistration?: boolean
 ): Record<string, string> {
   const errors: Record<string, string> = {};
 
@@ -69,8 +178,22 @@ export function validateAuthForm(
   // Password validation
   if (!password) {
     errors.password = "Password is required.";
-  } else if (!isValidPassword(password)) {
+  } else if (isRegistration && !isValidPassword(password)) {
+    const passwordErrors = getPasswordErrors(password);
+    errors.password = `Password must include: ${passwordErrors.join(", ")}.`;
+  } else if (!isRegistration && password.length < 8) {
     errors.password = "Password must be at least 8 characters.";
+  }
+
+  // Username validation (only for registration)
+  if (isRegistration && username !== undefined) {
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername) {
+      errors.username = "Username is required.";
+    } else if (!isValidUsername(trimmedUsername)) {
+      const usernameErrors = getUsernameErrors(trimmedUsername);
+      errors.username = usernameErrors.join(" ");
+    }
   }
 
   return errors;

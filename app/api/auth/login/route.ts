@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPassword, createToken, setAuthCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sanitizeInput } from "@/utils/validation";
+import { sanitizeInput, isValidEmail } from "@/utils/validation";
 import { log } from "@/lib/logger";
 
 /**
  * POST /api/auth/login
  * Authenticate user and create session
  * 
- * @param request - NextRequest containing email and password in body
+ * @param request - NextRequest containing email/username and password in body
  * @returns NextResponse with user data or error
  * 
  * @example
  * POST /api/auth/login
  * {
  *   "email": "user@example.com",
- *   "password": "securepassword123"
+ *   "password": "SecurePass123"
  * }
  */
 export async function POST(request: NextRequest) {
@@ -23,25 +23,27 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     let { email, password } = body;
 
-    // Sanitize email input
+    // Sanitize email input (could be username or email)
     email = sanitizeInput(email || "");
     password = password || "";
 
     // Validate input
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email and password are required" },
+        { error: "Email/username and password are required" },
         { status: 400 }
       );
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // Find user by email or username
+    const user = await prisma.user.findFirst({
+      where: isValidEmail(email)
+        ? { email }
+        : { username: email },
     });
 
     if (!user) {
-      log.warn({ email }, "Failed login attempt - user not found");
+      log.warn({ emailOrUsername: email }, "Failed login attempt - user not found");
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }

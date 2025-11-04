@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
-import { validateAuthForm } from "@/utils/validation";
+import { validateAuthForm, getPasswordErrors } from "@/utils/validation";
 import { useAuth } from "@/context/AuthContext"; 
 
 type Mode = "login" | "register";
@@ -16,6 +16,7 @@ export default function AuthForm() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -49,7 +50,7 @@ export default function AuthForm() {
   }, [router]);
 
   function validate() {
-    const errors = validateAuthForm(email, password);
+    const errors = validateAuthForm(email, password, username, mode === "register");
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   }
@@ -67,13 +68,14 @@ export default function AuthForm() {
         ? "/api/auth/login" 
         : "/api/auth/register";
       
+      const requestBody = mode === "register" 
+        ? { email, password, username }
+        : { email, password };
+      
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await res.json();
@@ -113,6 +115,7 @@ export default function AuthForm() {
               setMode("login");
               setFormError(null);
               setFieldErrors({});
+              setUsername("");
             }}
             className={`flex-1 py-2 text-sm font-medium rounded-xl transition-colors ${mode === "login" ? "bg-bg-secondary shadow-md text-text" : "text-text-secondary"}`}
             aria-pressed={mode === "login"}
@@ -133,6 +136,30 @@ export default function AuthForm() {
         </div>
 
         <form onSubmit={onSubmit} noValidate>
+          {mode === "register" && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2 text-text">Username</label>
+              <div className="relative">
+                <input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  type="text"
+                  className={`w-full h-11 px-4 pr-12 border-2 rounded-2xl bg-bg focus:outline-none focus:ring-2 focus:ring-accent ${fieldErrors.username ? "border-error" : "border-border"}`}
+                  placeholder="johndoe"
+                  autoComplete="username"
+                  aria-invalid={!!fieldErrors.username}
+                />
+                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                  <User className="w-4 h-4 text-text-muted" />
+                </div>
+              </div>
+              {fieldErrors.username && <p className="text-xs text-error mt-1">{fieldErrors.username}</p>}
+              {!fieldErrors.username && (
+                <p className="text-xs text-text-muted mt-1">3-30 characters: letters, numbers, underscores, hyphens</p>
+              )}
+            </div>
+          )}
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2 text-text">Email Address</label>
             <div className="relative">
@@ -180,7 +207,16 @@ export default function AuthForm() {
             </div>
             {fieldErrors.password && <p className="text-xs text-error mt-1">{fieldErrors.password}</p>}
             {mode === "register" && !fieldErrors.password && (
-              <p className="text-xs text-text-muted mt-1">Password must be at least 8 characters.</p>
+              <div className="text-xs text-text-muted mt-1">
+                <p className="mb-1">Password must include:</p>
+                <ul className="list-disc list-inside space-y-0.5">
+                  {getPasswordErrors(password).map((error, index) => (
+                    <li key={index} className={password.length > 0 && !error.toLowerCase().includes(error.split(' ')[0].toLowerCase()) ? "line-through opacity-50" : ""}>
+                      {error}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 
@@ -196,14 +232,31 @@ export default function AuthForm() {
             {mode === "login" ? (
               <>
                 Don&apos;t have an account?{" "}
-                <button type="button" className="text-accent font-medium underline hover:text-accent-hover" onClick={() => setMode("register")}>
+                <button 
+                  type="button" 
+                  className="text-accent font-medium underline hover:text-accent-hover" 
+                  onClick={() => {
+                    setMode("register");
+                    setFormError(null);
+                    setFieldErrors({});
+                  }}
+                >
                   Sign up
                 </button>
               </>
             ) : (
               <>
                 Already have an account?{" "}
-                <button type="button" className="text-accent font-medium underline hover:text-accent-hover" onClick={() => setMode("login")}>
+                <button 
+                  type="button" 
+                  className="text-accent font-medium underline hover:text-accent-hover" 
+                  onClick={() => {
+                    setMode("login");
+                    setFormError(null);
+                    setFieldErrors({});
+                    setUsername("");
+                  }}
+                >
                   Sign in
                 </button>
               </>
