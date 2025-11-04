@@ -116,7 +116,7 @@ function CategoryItem({
       </div>
       {hasChildren && isExpanded && (
         <div>
-          {category.children!.map((child) => (
+          {category.children?.map((child) => (
             <CategoryItem
               key={child.id}
               category={child}

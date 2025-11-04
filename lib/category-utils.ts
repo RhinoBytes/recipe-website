@@ -2,6 +2,14 @@ import { PrismaClient } from "@prisma/client";
 
 /**
  * Recursively finds all descendant category IDs for a given parent category
+ * 
+ * NOTE: This implementation makes N+1 database queries for deep hierarchies.
+ * For production use with deep category trees, consider optimizing with:
+ * - Recursive Common Table Expression (CTE) in a single query
+ * - Materialized path model (storing full path as string)
+ * - Nested set model (storing left/right boundaries)
+ * - Caching the category hierarchy in memory/Redis
+ * 
  * @param parentId - The ID of the parent category
  * @param prisma - The Prisma client instance
  * @returns Array of all descendant category IDs including the parent ID

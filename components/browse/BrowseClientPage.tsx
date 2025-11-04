@@ -272,9 +272,10 @@ export default function BrowseClientPage({
             >
               Search
             </button>
+            {/* TODO: Implement mobile filter modal - Issue #TBD */}
             <button
               type="button"
-              onClick={() => alert("Mobile filters - To be implemented")}
+              onClick={() => alert("Mobile filters coming soon")}
               className="lg:hidden px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition flex items-center gap-2"
             >
               <Filter size={20} />
