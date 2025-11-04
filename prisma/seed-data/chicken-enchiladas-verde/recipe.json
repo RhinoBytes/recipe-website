@@ -156,7 +156,9 @@
     "Family-Friendly"
   ],
   "categories": [
-    "Dinner"
+    "Main Course",
+    "Poultry (Chicken, Turkey)",
+    "Weeknight Dinners"
   ],
   "allergens": [],
   "imageUrl": "image.jpg"

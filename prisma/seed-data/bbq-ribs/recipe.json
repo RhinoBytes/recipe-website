@@ -149,7 +149,11 @@
     "Comfort Food"
   ],
   "categories": [
-    "Dinner"
+    "Main Course",
+    "Meat (Beef, Pork, Lamb)",
+    "Grilling & BBQ",
+    "Slow Cooking",
+    "Parties & Potlucks"
   ],
   "allergens": [],
   "imageUrl": "image.jpg"

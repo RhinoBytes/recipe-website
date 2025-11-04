@@ -147,8 +147,10 @@
     "Comfort Food"
   ],
   "categories": [
-    "Dinner",
-    "Side Dish"
+    "Main Course",
+    "Side Dishes",
+    "Pasta & Noodles",
+    "Weeknight Dinners"
   ],
   "allergens": [
     "Vegetarian"

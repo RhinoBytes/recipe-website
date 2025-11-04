@@ -107,7 +107,9 @@
     "Comfort Food"
   ],
   "categories": [
-    "Bread / Baking"
+    "Breads & Baking",
+    "Artisan Breads",
+    "Baking"
   ],
   "allergens": [],
   "imageUrl": "image.jpg"

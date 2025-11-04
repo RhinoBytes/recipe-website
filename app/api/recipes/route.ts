@@ -420,7 +420,7 @@ export async function POST(request: Request) {
         proteinG: fullRecipe.proteinG,
         fatG: fullRecipe.fatG,
         carbsG: fullRecipe.carbsG,
-        cuisines: fullRecipe.cuisines?.map((rc) => rc.cuisine.name) || [],
+        cuisine: fullRecipe.cuisines && fullRecipe.cuisines.length > 0 ? fullRecipe.cuisines[0].cuisine.name : null,
         ingredients: fullRecipe.ingredients.map((ing) => ({
           name: ing.name,
           amount: ing.amount,
