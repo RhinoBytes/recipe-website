@@ -130,6 +130,7 @@ export async function POST(request: Request) {
       categories,
       allergens,
       status,
+      mediaIds,
     } = validation.data;
 
     // Generate slug from title
@@ -314,6 +315,53 @@ export async function POST(request: Request) {
                 recipeId: newRecipe.id,
                 allergenId: allergen.id,
               },
+            });
+          }
+        }
+      }
+
+      // Link pre-uploaded media to the recipe
+      if (mediaIds && Array.isArray(mediaIds) && mediaIds.length > 0) {
+        // Verify media belongs to current user and update recipeId
+        const updateResult = await tx.media.updateMany({
+          where: {
+            id: { in: mediaIds },
+            userId: currentUser.userId,
+            recipeId: null, // Only update media not yet associated with a recipe
+          },
+          data: {
+            recipeId: newRecipe.id,
+          },
+        });
+        
+        // Log warning if not all media items were linked
+        if (updateResult.count !== mediaIds.length) {
+          log.warn(
+            {
+              userId: currentUser.userId,
+              recipeId: newRecipe.id,
+              expectedCount: mediaIds.length,
+              actualCount: updateResult.count,
+            },
+            "Not all media items were linked to recipe"
+          );
+        }
+        
+        // Set the first media as primary if at least one was linked
+        if (updateResult.count > 0) {
+          const firstMediaId = mediaIds[0];
+          // Use update instead of updateMany to ensure single record
+          const firstMedia = await tx.media.findFirst({
+            where: {
+              id: firstMediaId,
+              recipeId: newRecipe.id,
+            },
+          });
+          
+          if (firstMedia) {
+            await tx.media.update({
+              where: { id: firstMedia.id },
+              data: { isPrimary: true },
             });
           }
         }

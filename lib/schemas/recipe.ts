@@ -131,6 +131,7 @@ export const RecipeSchema = z.object({
   imageUrl: z
     .union([z.literal(""), z.string().url("Invalid URL format")])
     .optional(),
+  mediaIds: z.array(z.string().uuid()).optional().default([]),
   chefNotes: z.string().optional(),
   status: z.nativeEnum(RecipeStatus).optional(),
 });

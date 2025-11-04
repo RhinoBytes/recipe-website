@@ -243,6 +243,7 @@ export default function NewRecipePage() {
         steps: parsedSteps,
         sourceUrl: isUrl ? normalizedUrl : "",
         sourceText: isUrl ? "" : formData.source,
+        mediaIds: uploadedMedia.map(m => m.id), // Include uploaded media IDs
       };
 
       // Remove the 'source' field as it's been split into sourceUrl/sourceText
