@@ -130,6 +130,7 @@ export async function POST(request: Request) {
       categories,
       allergens,
       status,
+      mediaIds,
     } = validation.data;
 
     // Generate slug from title
@@ -317,6 +318,33 @@ export async function POST(request: Request) {
             });
           }
         }
+      }
+
+      // Link pre-uploaded media to the recipe
+      if (mediaIds && Array.isArray(mediaIds) && mediaIds.length > 0) {
+        // Verify media belongs to current user and update recipeId
+        await tx.media.updateMany({
+          where: {
+            id: { in: mediaIds },
+            userId: currentUser.userId,
+            recipeId: null, // Only update media not yet associated with a recipe
+          },
+          data: {
+            recipeId: newRecipe.id,
+          },
+        });
+        
+        // Set the first media as primary if no primary is set
+        const firstMediaId = mediaIds[0];
+        await tx.media.updateMany({
+          where: {
+            id: firstMediaId,
+            recipeId: newRecipe.id,
+          },
+          data: {
+            isPrimary: true,
+          },
+        });
       }
 
       return newRecipe;
