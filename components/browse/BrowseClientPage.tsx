@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import BrowseRecipeCard from "@/components/browse/BrowseRecipeCard";
 import BrowseSidebarFiltersNew from "@/components/browse/BrowseSidebarFiltersNew";
 import BrowseEmptyState from "@/components/browse/BrowseEmptyState";
 import BrowseMobileFilters from "@/components/browse/BrowseMobileFilters";
+import BrowseLoadingSkeleton from "@/components/browse/BrowseLoadingSkeleton";
 
 interface CategoryNode {
   id: string;
@@ -72,7 +73,7 @@ interface BrowseClientPageProps {
 
 export default function BrowseClientPage({
   initialRecipes,
-  pagination,
+  pagination: initialPagination,
   categoryTree,
   tags,
   cuisines,
@@ -83,28 +84,71 @@ export default function BrowseClientPage({
   const searchParams = useSearchParams();
   
   const [searchInput, setSearchInput] = useState(initialFilters.query);
+  const [recipes, setRecipes] = useState(initialRecipes);
+  const [pagination, setPagination] = useState(initialPagination);
+  const [isLoading, setIsLoading] = useState(false);
   const [favoritedRecipes, setFavoritedRecipes] = useState<Set<string>>(new Set());
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Build URL with current filters
-  const buildURL = (params: Record<string, string | string[]>) => {
-    const urlParams = new URLSearchParams();
+  // Current active filters from URL
+  const [currentFilters, setCurrentFilters] = useState(initialFilters);
+
+  // Fetch recipes from API with current filters
+  const fetchRecipes = useCallback(async (filters: typeof initialFilters, page: number) => {
+    setIsLoading(true);
     
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) {
-        if (Array.isArray(value) && value.length > 0) {
-          urlParams.set(key, value.join(","));
-        } else if (typeof value === "string" && value) {
-          urlParams.set(key, value);
-        }
-      }
-    });
+    try {
+      const params = new URLSearchParams();
+      if (filters.query) params.set("q", filters.query);
+      if (filters.categoryIds.length > 0) params.set("category", filters.categoryIds.join(","));
+      if (filters.tags.length > 0) params.set("tags", filters.tags.join(","));
+      if (filters.cuisineIds.length > 0) params.set("cuisines", filters.cuisineIds.join(","));
+      if (filters.allergens.length > 0) params.set("allergens", filters.allergens.join(","));
+      if (filters.difficulty) params.set("difficulty", filters.difficulty);
+      params.set("sort", filters.sort);
+      params.set("page", page.toString());
+      params.set("perPage", "12");
 
-    return `/browse${urlParams.toString() ? `?${urlParams.toString()}` : ""}`;
-  };
+      const response = await fetch(`/api/recipes/search?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to fetch recipes");
+      
+      const data = await response.json();
+      setRecipes(data.recipes);
+      setPagination(data.pagination);
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+      // Keep showing current recipes on error
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  // Generic toggle handler for filters
-  const handleToggleFilter = (filterKey: string, id: string) => {
+  // Update URL without page reload
+  const updateURL = useCallback((filters: typeof initialFilters, page: number) => {
+    const params = new URLSearchParams();
+    
+    if (filters.query) params.set("q", filters.query);
+    if (filters.categoryIds.length > 0) params.set("category", filters.categoryIds.join(","));
+    if (filters.tags.length > 0) params.set("tags", filters.tags.join(","));
+    if (filters.cuisineIds.length > 0) params.set("cuisines", filters.cuisineIds.join(","));
+    if (filters.allergens.length > 0) params.set("allergens", filters.allergens.join(","));
+    if (filters.difficulty) params.set("difficulty", filters.difficulty);
+    if (filters.sort !== "newest") params.set("sort", filters.sort);
+    if (page > 1) params.set("page", page.toString());
+
+    const url = `/browse${params.toString() ? `?${params.toString()}` : ""}`;
+    router.replace(url, { scroll: false });
+  }, [router]);
+
+  // Apply filter changes - fetch data and update URL
+  const applyFilters = useCallback(async (newFilters: typeof initialFilters, newPage: number = 1) => {
+    setCurrentFilters(newFilters);
+    updateURL(newFilters, newPage);
+    await fetchRecipes(newFilters, newPage);
+  }, [updateURL, fetchRecipes]);
+
+  // Generic toggle handler for filters - now with client-side fetching
+  const handleToggleFilter = async (filterKey: string, id: string) => {
     const currentParams = new URLSearchParams(Array.from(searchParams.entries()));
     const existing = currentParams.get(filterKey) || '';
     const values = existing ? existing.split(',').filter(Boolean) : [];
@@ -116,32 +160,25 @@ export default function BrowseClientPage({
       values.splice(index, 1);
     }
     
-    if (values.length === 0) {
-      currentParams.delete(filterKey);
-    } else {
-      currentParams.set(filterKey, values.join(','));
+    // Update the appropriate filter array
+    const newFilters = { ...currentFilters };
+    if (filterKey === 'category') {
+      newFilters.categoryIds = values;
+    } else if (filterKey === 'tags') {
+      newFilters.tags = values;
+    } else if (filterKey === 'cuisines') {
+      newFilters.cuisineIds = values;
+    } else if (filterKey === 'allergens') {
+      newFilters.allergens = values;
     }
     
-    // Reset to page 1 when filters change
-    currentParams.delete('page');
-    
-    // Use replace to avoid history pollution
-    router.replace(`/browse?${currentParams.toString()}`);
+    await applyFilters(newFilters, 1);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    const url = buildURL({
-      q: searchInput,
-      category: initialFilters.categoryIds,
-      tags: initialFilters.tags,
-      cuisines: initialFilters.cuisineIds,
-      allergens: initialFilters.allergens,
-      difficulty: initialFilters.difficulty,
-      sort: initialFilters.sort,
-      page: "1",
-    });
-    router.push(url);
+    const newFilters = { ...currentFilters, query: searchInput };
+    await applyFilters(newFilters, 1);
   };
 
   const handleCategoryToggle = (categoryId: string) => {
@@ -160,50 +197,32 @@ export default function BrowseClientPage({
     handleToggleFilter('allergens', allergenId);
   };
 
-  const handleDifficultyChange = (difficulty: string) => {
-    const url = buildURL({
-      q: initialFilters.query,
-      category: initialFilters.categoryIds,
-      tags: initialFilters.tags,
-      cuisines: initialFilters.cuisineIds,
-      allergens: initialFilters.allergens,
-      difficulty,
-      sort: initialFilters.sort,
-      page: "1",
-    });
-    router.replace(url);
+  const handleDifficultyChange = async (difficulty: string) => {
+    const newFilters = { ...currentFilters, difficulty };
+    await applyFilters(newFilters, 1);
   };
 
-  const handleSortChange = (sort: string) => {
-    const url = buildURL({
-      q: initialFilters.query,
-      category: initialFilters.categoryIds,
-      tags: initialFilters.tags,
-      cuisines: initialFilters.cuisineIds,
-      allergens: initialFilters.allergens,
-      difficulty: initialFilters.difficulty,
-      sort,
-      page: pagination.page.toString(),
-    });
-    router.replace(url);
+  const handleSortChange = async (sort: string) => {
+    const newFilters = { ...currentFilters, sort };
+    await applyFilters(newFilters, pagination.page);
   };
 
-  const clearAllFilters = () => {
-    router.push("/browse");
+  const clearAllFilters = async () => {
+    const emptyFilters = {
+      query: "",
+      categoryIds: [],
+      tags: [],
+      cuisineIds: [],
+      allergens: [],
+      difficulty: "",
+      sort: "newest",
+    };
+    setSearchInput("");
+    await applyFilters(emptyFilters, 1);
   };
 
-  const handlePageChange = (newPage: number) => {
-    const url = buildURL({
-      q: initialFilters.query,
-      category: initialFilters.categoryIds,
-      tags: initialFilters.tags,
-      cuisines: initialFilters.cuisineIds,
-      allergens: initialFilters.allergens,
-      difficulty: initialFilters.difficulty,
-      sort: initialFilters.sort,
-      page: newPage.toString(),
-    });
-    router.replace(url);
+  const handlePageChange = async (newPage: number) => {
+    await applyFilters(currentFilters, newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -224,12 +243,12 @@ export default function BrowseClientPage({
   };
 
   const hasActiveFilters =
-    !!initialFilters.query ||
-    initialFilters.categoryIds.length > 0 ||
-    initialFilters.tags.length > 0 ||
-    initialFilters.cuisineIds.length > 0 ||
-    initialFilters.allergens.length > 0 ||
-    !!initialFilters.difficulty;
+    !!currentFilters.query ||
+    currentFilters.categoryIds.length > 0 ||
+    currentFilters.tags.length > 0 ||
+    currentFilters.cuisineIds.length > 0 ||
+    currentFilters.allergens.length > 0 ||
+    !!currentFilters.difficulty;
 
   return (
     <div className="min-h-screen bg-bg dark:bg-gray-900">
@@ -259,9 +278,10 @@ export default function BrowseClientPage({
             </div>
             <button
               type="submit"
-              className="hidden lg:flex px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-semibold"
+              disabled={isLoading}
+              className="hidden lg:flex px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Search
+              {isLoading ? "Searching..." : "Search"}
             </button>
             <button
               type="button"
@@ -273,12 +293,13 @@ export default function BrowseClientPage({
           </form>
         </div>
 
-        {/* Active Filters - Simplified for now */}
+        {/* Active Filters */}
         {hasActiveFilters && (
           <div className="mb-6">
             <button
               onClick={clearAllFilters}
-              className="text-sm text-accent hover:text-accent-hover font-medium"
+              disabled={isLoading}
+              className="text-sm text-accent hover:text-accent-hover font-medium disabled:opacity-50"
             >
               Clear all filters
             </button>
@@ -294,12 +315,12 @@ export default function BrowseClientPage({
               tags={tags}
               cuisines={cuisines}
               allergens={allergens}
-              selectedCategoryIds={initialFilters.categoryIds}
-              selectedTags={initialFilters.tags}
-              selectedCuisineIds={initialFilters.cuisineIds}
-              selectedAllergens={initialFilters.allergens}
-              selectedDifficulty={initialFilters.difficulty}
-              sortOption={initialFilters.sort}
+              selectedCategoryIds={currentFilters.categoryIds}
+              selectedTags={currentFilters.tags}
+              selectedCuisineIds={currentFilters.cuisineIds}
+              selectedAllergens={currentFilters.allergens}
+              selectedDifficulty={currentFilters.difficulty}
+              sortOption={currentFilters.sort}
               onCategoryToggle={handleCategoryToggle}
               onTagToggle={handleTagToggle}
               onCuisineToggle={handleCuisineToggle}
@@ -318,12 +339,12 @@ export default function BrowseClientPage({
             tags={tags}
             cuisines={cuisines}
             allergens={allergens}
-            selectedCategoryIds={initialFilters.categoryIds}
-            selectedTags={initialFilters.tags}
-            selectedCuisineIds={initialFilters.cuisineIds}
-            selectedAllergens={initialFilters.allergens}
-            selectedDifficulty={initialFilters.difficulty}
-            sortOption={initialFilters.sort}
+            selectedCategoryIds={currentFilters.categoryIds}
+            selectedTags={currentFilters.tags}
+            selectedCuisineIds={currentFilters.cuisineIds}
+            selectedAllergens={currentFilters.allergens}
+            selectedDifficulty={currentFilters.difficulty}
+            sortOption={currentFilters.sort}
             onCategoryToggle={handleCategoryToggle}
             onTagToggle={handleTagToggle}
             onCuisineToggle={handleCuisineToggle}
@@ -338,15 +359,16 @@ export default function BrowseClientPage({
             {/* Results Count */}
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm text-text-secondary dark:text-text-muted">
-                Showing {initialRecipes.length} of {pagination.totalCount} recipes
+                {isLoading ? "Loading..." : `Showing ${recipes.length} of ${pagination.totalCount} recipes`}
               </p>
               
               {/* Mobile Sort */}
               <div className="lg:hidden">
                 <select
-                  value={initialFilters.sort}
+                  value={currentFilters.sort}
                   onChange={(e) => handleSortChange(e.target.value)}
-                  className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-bg-secondary dark:bg-gray-800 text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  disabled={isLoading}
+                  className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-bg-secondary dark:bg-gray-800 text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-50"
                 >
                   <option value="newest">Newest</option>
                   <option value="oldest">Oldest</option>
@@ -355,27 +377,32 @@ export default function BrowseClientPage({
               </div>
             </div>
 
-            {/* Recipe Grid / Empty State */}
-            {initialRecipes.length === 0 ? (
-              <BrowseEmptyState 
-                hasFilters={hasActiveFilters} 
-                onClearFilters={hasActiveFilters ? clearAllFilters : undefined}
-              />
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {initialRecipes.map((recipe) => (
-                    <BrowseRecipeCard
-                      key={recipe.id}
-                      recipe={recipe}
-                      onFavoriteToggle={handleFavoriteToggle}
-                      isFavorited={favoritedRecipes.has(recipe.id)}
-                    />
-                  ))}
-                </div>
+            {/* Loading State */}
+            {isLoading && <BrowseLoadingSkeleton />}
 
-                {/* Pagination */}
-                {pagination.totalPages > 1 && (
+            {/* Recipe Grid / Empty State */}
+            {!isLoading && (
+              <>
+                {recipes.length === 0 ? (
+                  <BrowseEmptyState 
+                    hasFilters={hasActiveFilters} 
+                    onClearFilters={hasActiveFilters ? clearAllFilters : undefined}
+                  />
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                      {recipes.map((recipe) => (
+                        <BrowseRecipeCard
+                          key={recipe.id}
+                          recipe={recipe}
+                          onFavoriteToggle={handleFavoriteToggle}
+                          isFavorited={favoritedRecipes.has(recipe.id)}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {pagination.totalPages > 1 && (
                   <div className="flex justify-center items-center gap-2">
                     <button
                       onClick={() => handlePageChange(pagination.page - 1)}
@@ -449,6 +476,8 @@ export default function BrowseClientPage({
                       <ChevronRight size={20} />
                     </button>
                   </div>
+                )}
+                  </>
                 )}
               </>
             )}
