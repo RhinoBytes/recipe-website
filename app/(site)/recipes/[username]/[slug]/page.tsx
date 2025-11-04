@@ -58,7 +58,11 @@ export default async function RecipePage({ params }: RecipePageProps) {
           },
         },
       },
-      cuisine: true,
+      cuisines: {
+        include: {
+          cuisine: true,
+        },
+      },
       ingredients: {
         orderBy: {
           displayOrder: 'asc',
@@ -468,14 +472,18 @@ export default async function RecipePage({ params }: RecipePageProps) {
             <ChefNotes notes={recipe.chefNotes} />
 
             {/* Cuisine & Source */}
-            {(recipe.cuisine || recipe.sourceUrl || recipe.sourceText) && (
+            {(recipe.cuisines.length > 0 || recipe.sourceUrl || recipe.sourceText) && (
               <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-sm">
-                {recipe.cuisine && (
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="font-semibold text-text">Cuisine:</span>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg font-medium">
-                      {recipe.cuisine.name}
-                    </span>
+                {recipe.cuisines.length > 0 && (
+                  <div className="flex items-start gap-2 mb-2">
+                    <span className="font-semibold text-text">Cuisine{recipe.cuisines.length > 1 ? 's' : ''}:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {recipe.cuisines.map((rc) => (
+                        <span key={rc.cuisine.id} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-lg font-medium">
+                          {rc.cuisine.name}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
                 {recipe.sourceUrl && (
