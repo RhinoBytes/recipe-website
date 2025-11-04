@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { Difficulty, RecipeStatus } from "@prisma/client";
+import { RecipeStatus } from "@prisma/client";
 import { saveRecipeToFile } from "@/lib/recipeStorage";
 import { searchRecipes } from "@/lib/queries/recipes";
 import { log } from "@/lib/logger";
+import { RecipeSchema } from "@/lib/schemas/recipe";
 
 export async function GET(request: Request) {
   try {
@@ -88,6 +89,26 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+    
+    // Validate with Zod schema for security
+    const validation = RecipeSchema.safeParse(body);
+    if (!validation.success) {
+      log.warn(
+        { userId: currentUser.userId, errors: validation.error.issues },
+        "Recipe validation failed"
+      );
+      return NextResponse.json(
+        { 
+          error: "Invalid recipe data",
+          details: validation.error.issues.map(issue => ({
+            path: issue.path.join('.'),
+            message: issue.message,
+          }))
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       title,
       description,
@@ -109,29 +130,7 @@ export async function POST(request: Request) {
       categories,
       allergens,
       status,
-    } = body;
-
-    // Validate required fields
-    if (!title) {
-      log.warn({ userId: currentUser.userId }, "Recipe creation attempt without title");
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
-    }
-
-    // Validate difficulty if provided
-    if (difficulty && !Object.values(Difficulty).includes(difficulty)) {
-      return NextResponse.json(
-        { error: "Invalid difficulty value. Must be EASY, MEDIUM, or HARD" },
-        { status: 400 }
-      );
-    }
-
-    // Validate status if provided
-    if (status && !Object.values(RecipeStatus).includes(status)) {
-      return NextResponse.json(
-        { error: "Invalid status value. Must be DRAFT or PUBLISHED" },
-        { status: 400 }
-      );
-    }
+    } = validation.data;
 
     // Generate slug from title
     const slug = generateSlug(title);
