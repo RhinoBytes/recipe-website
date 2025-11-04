@@ -14,6 +14,12 @@ interface SearchParams {
   page?: string;
 }
 
+// Enable ISR with 60 second revalidation for better performance
+export const revalidate = 60;
+
+// Enable dynamic rendering for search params
+export const dynamic = 'force-dynamic';
+
 export default async function BrowsePage({
   searchParams,
 }: {
@@ -30,7 +36,53 @@ export default async function BrowsePage({
   const page = parseInt(searchParams.page || "1");
   const perPage = 12;
 
-  // Handle hierarchical category filtering (supports multiple categories)
+  // Parallel fetch: Get all filter metadata in parallel (categories, tags, cuisines, allergens)
+  // These are independent queries that can be executed simultaneously
+  const [allCategories, allTags, allCuisines, allAllergens] = await Promise.all([
+    prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        parentId: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    }),
+    prisma.tag.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    }),
+    prisma.cuisine.findMany({
+      select: {
+        id: true,
+        name: true,
+        parentId: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    }),
+    prisma.allergen.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    }),
+  ]);
+
+  // Build hierarchical category tree (in-memory, no DB calls)
+  const categoryTree = buildCategoryTree(allCategories);
+
+  // Handle hierarchical category filtering (optimized with parallel queries)
   let categoryIdsToFilter: string[] = [];
   let selectedCategoryNames: string[] = [];
 
@@ -70,55 +122,6 @@ export default async function BrowsePage({
     sort,
     page,
     perPage,
-  });
-
-  // Fetch all categories for the filter sidebar
-  const allCategories = await prisma.category.findMany({
-    select: {
-      id: true,
-      name: true,
-      parentId: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-
-  // Build hierarchical category tree
-  const categoryTree = buildCategoryTree(allCategories);
-
-  // Fetch all tags
-  const allTags = await prisma.tag.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-
-  // Fetch all cuisines
-  const allCuisines = await prisma.cuisine.findMany({
-    select: {
-      id: true,
-      name: true,
-      parentId: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-
-  // Fetch all allergens
-  const allAllergens = await prisma.allergen.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
   });
 
   // Pass data to client component

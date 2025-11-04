@@ -394,6 +394,7 @@ export async function getRelatedRecipes(recipeId: string, categoryIds: string[],
 
 /**
  * Search and filter recipes with pagination
+ * Optimized with parallel queries for count and data fetching
  */
 export async function searchRecipes({
   query = "",
@@ -500,9 +501,6 @@ export async function searchRecipes({
     if (maxCookTime !== null) where.cookTimeMinutes.lte = maxCookTime;
   }
 
-  // Get total count
-  const totalCount = await prisma.recipe.count({ where });
-
   // Determine sort order
   let orderBy: Prisma.RecipeOrderByWithRelationInput = { createdAt: "desc" };
   if (sort === "oldest") {
@@ -514,61 +512,64 @@ export async function searchRecipes({
     ] as Prisma.RecipeOrderByWithRelationInput;
   }
 
-  // Get recipes
-  const recipes = await prisma.recipe.findMany({
-    where,
-    include: {
-      author: {
-        select: {
-          id: true,
-          username: true,
-          media: {
-            where: { isProfileAvatar: true },
-            select: {
-              url: true,
-              secureUrl: true,
-              isProfileAvatar: true,
+  // Parallel query: Get total count and recipes simultaneously
+  const [totalCount, recipes] = await Promise.all([
+    prisma.recipe.count({ where }),
+    prisma.recipe.findMany({
+      where,
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            media: {
+              where: { isProfileAvatar: true },
+              select: {
+                url: true,
+                secureUrl: true,
+                isProfileAvatar: true,
+              },
+              take: 1,
             },
-            take: 1,
+          },
+        },
+        media: {
+          select: {
+            url: true,
+            secureUrl: true,
+            isPrimary: true,
+          },
+          orderBy: [
+            { isPrimary: "desc" },
+            { createdAt: "asc" },
+          ],
+        },
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+        categories: {
+          include: {
+            category: true,
+          },
+        },
+        cuisines: {
+          include: {
+            cuisine: true,
+          },
+        },
+        allergens: {
+          include: {
+            allergen: true,
           },
         },
       },
-      media: {
-        select: {
-          url: true,
-          secureUrl: true,
-          isPrimary: true,
-        },
-        orderBy: [
-          { isPrimary: "desc" },
-          { createdAt: "asc" },
-        ],
-      },
-      tags: {
-        include: {
-          tag: true,
-        },
-      },
-      categories: {
-        include: {
-          category: true,
-        },
-      },
-      cuisines: {
-        include: {
-          cuisine: true,
-        },
-      },
-      allergens: {
-        include: {
-          allergen: true,
-        },
-      },
-    },
-    orderBy,
-    skip,
-    take: perPage,
-  });
+      orderBy,
+      skip,
+      take: perPage,
+    }),
+  ]);
 
   // Format recipes
   const formattedRecipes = recipes.map((recipe) => ({

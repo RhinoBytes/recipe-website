@@ -86,6 +86,7 @@ export function buildCategoryTree(
 
 /**
  * Get all descendant category IDs for multiple parent categories
+ * Optimized version: Fetches all categories once, then computes descendants in memory
  * @param parentIds - Array of parent category IDs
  * @param prisma - The Prisma client instance
  * @returns Array of unique descendant category IDs (including parents)
@@ -94,11 +95,27 @@ export async function getDescendantCategoryIdsForMultiple(
   parentIds: string[],
   prisma: PrismaClient
 ): Promise<string[]> {
+  // Fetch all categories once (single DB query)
+  const allCategories = await prisma.category.findMany({
+    select: {
+      id: true,
+      name: true,
+      parentId: true,
+    },
+  });
+
+  // Build category tree in memory
+  const categoryTree = buildCategoryTree(allCategories);
+
+  // Build a map for quick lookups
+  const categoryMap = new Map<string, { id: string; name: string; parentId: string | null }>();
+  allCategories.forEach(cat => categoryMap.set(cat.id, cat));
+
   const allDescendantIds = new Set<string>();
 
-  // Get descendants for each parent category
+  // Get descendants for each parent category using in-memory tree
   for (const parentId of parentIds) {
-    const descendants = await getDescendantCategoryIds(parentId, prisma);
+    const descendants = getDescendantIdsFromTree(parentId, categoryTree);
     descendants.forEach(id => allDescendantIds.add(id));
   }
 
