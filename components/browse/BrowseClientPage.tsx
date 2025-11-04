@@ -211,6 +211,23 @@ export default function BrowseClientPage({
     await applyFilters(newFilters, 1);
   };
 
+  // Mobile filter handlers - same as desktop
+  const handleCategoryToggle = (categoryId: string) => {
+    handleToggleFilter('category', categoryId);
+  };
+
+  const handleTagToggle = (tagId: string) => {
+    handleToggleFilter('tags', tagId);
+  };
+
+  const handleCuisineToggle = (cuisineId: string) => {
+    handleToggleFilter('cuisines', cuisineId);
+  };
+
+  const handleAllergenToggle = (allergenId: string) => {
+    handleToggleFilter('allergens', allergenId);
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -242,22 +259,6 @@ export default function BrowseClientPage({
       applyFilters(newFilters, 1);
     }, 500);
     */
-  };
-
-  const handleCategoryToggle = (categoryId: string) => {
-    handleToggleFilter('category', categoryId);
-  };
-
-  const handleTagToggle = (tagId: string) => {
-    handleToggleFilter('tags', tagId);
-  };
-
-  const handleCuisineToggle = (cuisineId: string) => {
-    handleToggleFilter('cuisines', cuisineId);
-  };
-
-  const handleAllergenToggle = (allergenId: string) => {
-    handleToggleFilter('allergens', allergenId);
   };
 
   const handleDifficultyChange = async (difficulty: string) => {
@@ -415,6 +416,7 @@ export default function BrowseClientPage({
             onDifficultyChange={handleDifficultyChange}
             onSortChange={handleSortChange}
             onClearAll={clearAllFilters}
+            isLoading={isLoading}
           />
 
           {/* Main Content Area */}
