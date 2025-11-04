@@ -8,6 +8,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import Button from '@/components/ui/Button';
 import AIRecipeModal from "@/components/ui/AIRecipeModal";
 import CollapsibleSection from "@/components/ui/CollapsibleSection";
+import MultiSelect from '@/components/ui/MultiSelect';
 import MediaUploader from "@/components/MediaUploader";
 import { FormattedRecipeResponse, RecipeFormData } from "@/types/recipe";
 import { Difficulty, RecipeStatus } from "@prisma/client";
@@ -69,6 +70,7 @@ export default function NewRecipePage() {
     source: "",
     chefNotes: "",
     cuisineName: "",
+    cuisines: [],
     ingredients: [],
     tags: [],
     categories: [],
@@ -80,6 +82,7 @@ export default function NewRecipePage() {
     carbsG: undefined,
   });
   const [categories, setCategories] = useState<Category[]>([]);
+  const [cuisines, setCuisines] = useState<Category[]>([]); // Reuse Category interface
   const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(false);
@@ -89,11 +92,12 @@ export default function NewRecipePage() {
   const [uploadedMedia, setUploadedMedia] = useState<Media[]>([]);
 
   useEffect(() => {
-    // Fetch categories, allergens, and tags
+    // Fetch categories, cuisines, allergens, and tags
     async function fetchData() {
       try {
-        const [categoriesRes, allergensRes, tagsRes] = await Promise.all([
+        const [categoriesRes, cuisinesRes, allergensRes, tagsRes] = await Promise.all([
           fetch("/api/categories"),
+          fetch("/api/cuisines"),
           fetch("/api/allergens"),
           fetch("/api/tags"),
         ]);
@@ -101,6 +105,11 @@ export default function NewRecipePage() {
         if (categoriesRes.ok) {
           const categoriesData = await categoriesRes.json();
           setCategories(categoriesData);
+        }
+        
+        if (cuisinesRes.ok) {
+          const cuisinesData = await cuisinesRes.json();
+          setCuisines(cuisinesData);
         }
         
         if (allergensRes.ok) {
@@ -513,19 +522,13 @@ export default function NewRecipePage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-text-secondary mb-1">
-                      Cuisine
-                      <span className="ml-2 text-xs text-text-muted">Optional - e.g., Italian, Mexican, Thai</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.cuisineName}
-                      onChange={(e) => setFormData({ ...formData, cuisineName: e.target.value })}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-bg text-text focus:ring-2 focus:ring-accent focus:border-transparent"
-                      placeholder="e.g., Italian, Mexican, Thai"
-                    />
-                  </div>
+                  <MultiSelect
+                    options={cuisines.map(c => ({ id: c.id, name: c.name, parentId: undefined }))}
+                    selected={formData.cuisines || []}
+                    onChange={(selected) => setFormData({ ...formData, cuisines: selected })}
+                    placeholder="Select cuisines..."
+                    label="Cuisines"
+                  />
 
                   <div>
                     <label className="block text-sm font-medium text-text-secondary mb-1">
