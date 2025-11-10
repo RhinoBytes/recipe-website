@@ -524,7 +524,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
           </div>
 
           {/* Sidebar Column (Desktop) */}
-          <div className="lg:sticky lg:top-8 lg:self-start print:hidden">
+          <div className="hidden lg:block lg:sticky lg:top-8 lg:self-start print:hidden">
             <RecipeSidebar
               recipeId={recipe.id}
               title={recipe.title}

@@ -1,9 +1,8 @@
 import fs from "fs";
 import { supabaseAdmin } from "./supabase/server.js";
-import { PrismaClient, Media } from "@prisma/client";
-
+import { Media } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { log } from "@/lib/logger";
-const prisma = new PrismaClient();
 
 /**
  * Upload an image file to Supabase Storage and create a Media record
