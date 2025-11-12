@@ -7,8 +7,8 @@
 :root,
 :root[data-theme="terracotta"] {
   /* Primary colors */
-  --accent: #d4735a; /* Warm terracotta */
-  --accent-hover: #b85c42; /* Dark terracotta */
+  --accent: #b85c42; /* Warm terracotta - darkened for WCAG AA compliance with white text */
+  --accent-hover: #a54d32; /* Dark terracotta hover */
   --accent-light: #fef9f7; /* Soft accent background */
 
   /* Secondary colors */
@@ -21,16 +21,16 @@
   --highlight-hover: #d99566; /* Darker peach */
 
   /* Background and text */
-  --bg: #f8f9fa; /* Page background */
+  --bg: #f0f1f3; /* Page background - improved separation from white */
   --bg-secondary: #ffffff;
   --bg-elevated: #fef9f7;
 
   --text: #333; /* Main text */
   --text-secondary: #666; /* Muted text */
-  --text-muted: #999;
+  --text-muted: #707070; /* Improved from #999 for WCAG AA compliance */
 
   /* Border */
-  --border: #f0d5cf; /* Standard border */
+  --border: #e5bfb1; /* Standard border - darkened for better visibility */
   --border-light: #fef9f7;
   --border-dark: #b85c42;
 
@@ -75,15 +75,15 @@
 
   /* Background and text */
   --bg: #1a1410; /* Deep brown-black background */
-  --bg-secondary: #2a1f1a; /* Slightly lighter brown */
+  --bg-secondary: #2d221d; /* Slightly lighter brown - improved separation */
   --bg-elevated: #3a2a25; /* Elevated surfaces */
 
   --text: #f5e6d3; /* Warm cream text */
   --text-secondary: #c9b8a0; /* Muted warm text */
-  --text-muted: #8a7a68;
+  --text-muted: #938576; /* Improved from #8a7a68 for WCAG AA compliance */
 
   /* Border */
-  --border: #3a2a25; /* Dark warm border */
+  --border: #453529; /* Dark warm border - lightened for better visibility */
   --border-light: #4a3a30;
   --border-dark: #2a1f1a;
 
