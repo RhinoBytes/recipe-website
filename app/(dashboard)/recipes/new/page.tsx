@@ -136,7 +136,6 @@ export default function NewRecipePage() {
     // Prefer steps array from AI if available, otherwise fall back to instructions string
     let finalSteps: RecipeStep[];
     if (formatted.steps && formatted.steps.length > 0) {
-      // AI provided structured steps - merge duplicates and clean
       const uniqueSteps = new Map<string, RecipeStep>();
       
       formatted.steps.forEach((step, idx) => {
@@ -179,7 +178,6 @@ export default function NewRecipePage() {
       else difficultyEnum = Difficulty.MEDIUM;
     }
 
-    // AI ingredients already have measurements - use them directly
     const finalIngredients = formatted.ingredients && formatted.ingredients.length > 0
       ? formatted.ingredients
       : [];

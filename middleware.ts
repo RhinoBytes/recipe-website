@@ -1,7 +1,7 @@
 // middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { PROTECTED_ROUTES, AUTH_COOKIE_NAME } from "@/config/constants";
+import { PROTECTED_ROUTES, AUTH_COOKIE_NAME } from "@/lib/constants";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

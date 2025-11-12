@@ -28,20 +28,6 @@ export default function MultiSelect({
   const [searchTerm, setSearchTerm] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Group options by parent
-  const groupedOptions = options.reduce((acc, option) => {
-    if (option.parentId) {
-      if (!acc[option.parentId]) {
-        acc[option.parentId] = [];
-      }
-      acc[option.parentId].push(option);
-    } else {
-      acc['root'] = acc['root'] || [];
-      acc['root'].push(option);
-    }
-    return acc;
-  }, {} as Record<string, MultiSelectOption[]>);
-
   // Flatten for display, showing only leaf nodes (children) for selection
   const selectableOptions = options.filter(opt => {
     // If it has children, it's a parent and shouldn't be directly selectable

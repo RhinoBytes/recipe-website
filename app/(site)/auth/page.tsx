@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AuthForm from '@/components/auth/AuthForm';
-import { AUTH_COOKIE_NAME } from "@/config/constants";
+import { AUTH_COOKIE_NAME } from "@/lib/constants";
 
 export default async function AuthPage() {
   // Server-side check: if cookie exists, redirect to home immediately

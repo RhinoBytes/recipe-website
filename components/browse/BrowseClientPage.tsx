@@ -8,6 +8,7 @@ import BrowseSidebarFiltersNew from "@/components/browse/BrowseSidebarFiltersNew
 import BrowseEmptyState from "@/components/browse/BrowseEmptyState";
 import BrowseMobileFilters from "@/components/browse/BrowseMobileFilters";
 import BrowseLoadingSkeleton from "@/components/browse/BrowseLoadingSkeleton";
+import { log } from "@/lib/logger";
 
 interface CategoryNode {
   id: string;
@@ -142,18 +143,16 @@ export default function BrowseClientPage({
       setRecipes(data.recipes);
       setPagination(data.pagination);
 
-      // Log performance metrics (TODO: Replace with proper logging service in production)
       const duration = performance.now() - startTime;
       if (process.env.NODE_ENV === 'development') {
-        console.log(`[Browse Performance] Fetch completed in ${duration.toFixed(0)}ms`);
+        log.info({ duration }, `Browse fetch completed in ${duration.toFixed(0)}ms`);
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         // Request was cancelled - this is normal, no need to log
         return;
       }
-      console.error("Error fetching recipes:", error);
-      // TODO: Show user-friendly error toast/message in future enhancement
+      log.error({ error }, "Error fetching recipes");
       // Keep showing current recipes on error for better UX
     } finally {
       setIsLoading(false);
