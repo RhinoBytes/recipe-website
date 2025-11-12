@@ -23,7 +23,7 @@ export default function BrowseEmptyState({ hasFilters, onClearFilters }: BrowseE
             {onClearFilters && (
               <button
                 onClick={onClearFilters}
-                className="px-6 py-3 bg-accent text-bg rounded-2xl hover:bg-accent-hover transition font-semibold shadow-md"
+                className="px-6 py-3 bg-accent text-white rounded-2xl hover:bg-accent-hover transition font-semibold shadow-md"
               >
                 Clear All Filters
               </button>

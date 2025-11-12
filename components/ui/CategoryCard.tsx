@@ -23,7 +23,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
           loading="lazy"
         />
       </div>
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-accent/80 to-accent-hover/80 text-bg font-semibold font-heading text-xl">
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-accent/80 to-accent-hover/80 text-white font-semibold font-heading text-xl">
         <span className="drop-shadow">{category.name}</span>
       </div>
     </Link>
