@@ -257,7 +257,7 @@ export default function MediaUploader({
               </div>
               <button
                 onClick={() => handleDelete(item.id)}
-                className="absolute top-2 right-2 p-1.5 bg-error text-bg rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error/90"
+                className="absolute top-2 right-2 p-1.5 bg-error text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error/90"
                 title="Delete image"
               >
                 <X className="w-4 h-4" />

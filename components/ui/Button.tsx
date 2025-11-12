@@ -44,7 +44,7 @@ export default function Button(props: ButtonProps) {
     "inline-flex items-center justify-center gap-2 font-medium rounded-2xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-60 disabled:pointer-events-none";
   const variants = {
     primary:
-      "bg-accent hover:bg-accent-hover text-bg border border-transparent shadow-md",
+      "bg-accent hover:bg-accent-hover text-white dark:text-bg border border-transparent shadow-md",
     secondary:
       "bg-bg-secondary text-text border border-border hover:bg-bg-elevated shadow-sm",
     outline:
