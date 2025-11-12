@@ -114,32 +114,40 @@ export default function AuthForm() {
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex rounded-2xl bg-accent-light/30 p-1 mb-5">
-          <button
-            onClick={() => {
-              setMode("login");
-              setFormError(null);
-              setFieldErrors({});
-              setUsername("");
-            }}
-            className={`flex-1 py-2 text-sm font-medium rounded-xl transition-colors ${mode === "login" ? "bg-bg-secondary shadow-md text-text" : "text-text-secondary"}`}
-            aria-pressed={mode === "login"}
-          >
-            Log in
-          </button>
-          <button
-            onClick={() => {
-              setMode("register");
-              setFormError(null);
-              setFieldErrors({});
-            }}
-            className={`flex-1 py-2 text-sm font-medium rounded-xl transition-colors ${mode === "register" ? "bg-bg-secondary shadow-md text-text" : "text-text-secondary"}`}
-            aria-pressed={mode === "register"}
-          >
-            Register
-          </button>
-        </div>
+       {/* Tabs */}
+<div className="flex rounded-2xl bg-accent-light/50 p-1 mb-5 border border-border">
+  <button
+    onClick={() => {
+      setMode("login");
+      setFormError(null);
+      setFieldErrors({});
+      setUsername("");
+    }}
+    className={`flex-1 py-2 text-sm font-medium rounded-xl transition-colors ${
+      mode === "login" 
+        ? "bg-accent text-white shadow-md" 
+        : "text-text-secondary hover:text-text hover:bg-accent-light/30"
+    }`}
+    aria-pressed={mode === "login"}
+  >
+    Log in
+  </button>
+  <button
+    onClick={() => {
+      setMode("register");
+      setFormError(null);
+      setFieldErrors({});
+    }}
+    className={`flex-1 py-2 text-sm font-medium rounded-xl transition-colors ${
+      mode === "register" 
+        ? "bg-accent text-white shadow-md" 
+        : "text-text-secondary hover:text-text hover:bg-accent-light/30"
+    }`}
+    aria-pressed={mode === "register"}
+  >
+    Register
+  </button>
+</div>
 
         <form onSubmit={onSubmit} noValidate>
           {mode === "register" && (
