@@ -37,10 +37,9 @@ const passwordRequirements = {
 /**
  * Generates a list of password requirement strings for the UI.
  * This is used to display the list of rules to the user.
- * @param _password - The current password input (not used, but keeps signature consistent).
  * @returns An array of all password requirement rule descriptions.
  */
-export function getPasswordErrors(_password: string): string[] {
+export function getPasswordErrors(): string[] {
   return Object.keys(passwordRequirements).map(
     (rule) => rule.charAt(0).toUpperCase() + rule.slice(1)
   );

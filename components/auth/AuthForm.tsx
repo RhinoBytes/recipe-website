@@ -98,7 +98,7 @@ export default function AuthForm() {
   }
 
   // Get the base password requirements to display
-  const passwordRequirements = getPasswordErrors('');
+  const passwordRequirements = getPasswordErrors();
 
   return (
     <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">

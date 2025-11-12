@@ -1,12 +1,9 @@
 
-import Image from "next/image";
 import RecipeCard from "@/components/ui/RecipeCard";
 import CategoryCard from "@/components/ui/CategoryCard";
 import FeaturedRecipe from "@/components/ui/FeaturedRecipe";
 import ChefSpotlight from "@/components/ui/ChefSpotlight";
-import Button from '@/components/ui/Button';
 import Hero from "@/components/ui/Hero";
-import { Flame, Compass } from "lucide-react";
 import Link from "next/link";
 import { getPopularRecipes, getRecentRecipes, getFeaturedRecipe } from "@/lib/queries/recipes";
 import { getSpotlightChef } from "@/lib/queries/users";

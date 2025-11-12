@@ -87,7 +87,7 @@ export default function MediaUploader({
   };
 
   const uploadFile = async (file: File) => {
-    console.log("Starting upload for:", file.name, "Size:", file.size, "Type:", file.type);
+    log.info({ fileName: file.name, size: file.size, type: file.type }, "Starting file upload");
     
     // Validate file type
     if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
@@ -107,7 +107,7 @@ export default function MediaUploader({
       formData.append("recipeId", recipeId);
     }
 
-    console.log("Uploading via API endpoint");
+    log.info("Uploading via API endpoint");
 
     const response = await fetch("/api/media", {
       method: "POST",
@@ -116,12 +116,12 @@ export default function MediaUploader({
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-      console.error("Upload API error:", errorData);
+      log.error({ errorData }, "Upload API error");
       throw new Error(errorData.error || `Upload failed (${response.status})`);
     }
 
     const responseData = await response.json();
-    console.log("Upload successful:", responseData);
+    log.info({ responseData }, "Upload successful");
 
     const newMedia = responseData.media;
 
@@ -137,7 +137,7 @@ export default function MediaUploader({
       onMediaUploaded(newMedia);
     }
 
-    console.log("Upload complete for:", file.name);
+    log.info({ fileName: file.name }, "Upload complete");
   };
 
   const handleDelete = async (mediaId: string) => {
