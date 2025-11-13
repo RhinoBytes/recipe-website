@@ -229,7 +229,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
             {/* Metadata Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {recipe.prepTimeMinutes && (
+              {recipe.prepTimeMinutes != null && (
                 <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
                   <Clock className="mx-auto mb-2 text-accent" size={24} />
                   <div className="text-2xl font-bold text-text">
@@ -239,7 +239,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 </div>
               )}
               
-              {recipe.cookTimeMinutes && (
+              {recipe.cookTimeMinutes != null && (
                 <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
                   <Flame className="mx-auto mb-2 text-accent" size={24} />
                   <div className="text-2xl font-bold text-text">
@@ -249,7 +249,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 </div>
               )}
               
-              {recipe.servings && (
+              {recipe.servings != null && (
                 <div className="bg-bg-secondary rounded-lg shadow-md p-4 text-center">
                   <Users className="mx-auto mb-2 text-secondary" size={24} />
                   <div className="text-2xl font-bold text-text">
